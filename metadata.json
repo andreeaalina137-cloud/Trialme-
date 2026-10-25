@@ -1,0 +1,6 @@
+{
+  "name": "SubCleaner",
+  "description": "High-end British fintech subscription manager. Track recurring expenses, get smart renewal alerts, and cancel unwanted subscriptions with one lifetime purchase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

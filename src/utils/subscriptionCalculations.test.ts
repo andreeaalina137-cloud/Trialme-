@@ -1,0 +1,133 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  convertFrequencyToMonthly,
+  convertFrequencyToAnnual,
+  calculateMonthlyTotal,
+  calculateTotalSavings,
+  getDaysUntilNextPayment,
+  canAddSubscription,
+  formatPrice,
+  filterAndSortSubscriptions,
+} from './subscriptionCalculations.ts';
+import type { Subscription } from '../types/subscription.ts';
+
+const mockSubscriptions: Subscription[] = [
+  {
+    id: 'sub-1',
+    name: 'Netflix UK Standard',
+    price: 10.99,
+    currency: '£',
+    frequency: 'monthly',
+    category: 'Streaming',
+    nextPaymentDate: '2026-10-20',
+    status: 'active',
+    color: '#E50914',
+    reminderDaysBefore: 3,
+    paymentHistory: [],
+    createdAt: '2026-01-01',
+  },
+  {
+    id: 'sub-2',
+    name: 'Spotify Premium UK',
+    price: 11.99,
+    currency: '£',
+    frequency: 'monthly',
+    category: 'Music & Audio',
+    nextPaymentDate: '2026-10-18',
+    status: 'active',
+    color: '#1DB954',
+    reminderDaysBefore: 2,
+    paymentHistory: [],
+    createdAt: '2026-01-01',
+  },
+  {
+    id: 'sub-3',
+    name: 'Amazon Prime Yearly',
+    price: 95.0,
+    currency: '£',
+    frequency: 'yearly',
+    category: 'Streaming',
+    nextPaymentDate: '2026-12-01',
+    status: 'cancelled',
+    color: '#00A8E1',
+    reminderDaysBefore: 7,
+    paymentHistory: [],
+    createdAt: '2026-01-01',
+    monthlySavingsAmount: 95.0 / 12,
+  },
+];
+
+test('convertFrequencyToMonthly calculates correct monthly amounts', () => {
+  assert.equal(convertFrequencyToMonthly(12, 'monthly'), 12);
+  assert.equal(convertFrequencyToMonthly(120, 'yearly'), 10);
+  assert.equal(convertFrequencyToMonthly(10, 'weekly'), (10 * 52) / 12);
+});
+
+test('convertFrequencyToAnnual calculates correct annual amounts', () => {
+  assert.equal(convertFrequencyToAnnual(10, 'monthly'), 120);
+  assert.equal(convertFrequencyToAnnual(100, 'yearly'), 100);
+});
+
+test('calculateMonthlyTotal sums only active and trial subscriptions', () => {
+  const total = calculateMonthlyTotal(mockSubscriptions);
+  // Netflix 10.99 + Spotify 11.99 = 22.98
+  assert.equal(Math.round(total * 100) / 100, 22.98);
+});
+
+test('calculateTotalSavings includes cancelled subscriptions', () => {
+  const savings = calculateTotalSavings(mockSubscriptions);
+  // Amazon Prime Yearly monthly savings = 95 / 12 = 7.91666...
+  assert.equal(Math.round(savings * 100) / 100, 7.92);
+});
+
+test('getDaysUntilNextPayment calculates exact calendar days diff', () => {
+  const diff = getDaysUntilNextPayment('2026-10-20', '2026-10-15');
+  assert.equal(diff, 5);
+  const diffToday = getDaysUntilNextPayment('2026-10-15', '2026-10-15');
+  assert.equal(diffToday, 0);
+  const diffPast = getDaysUntilNextPayment('2026-10-10', '2026-10-15');
+  assert.equal(diffPast, -5);
+});
+
+test('getDaysUntilNextPayment stays on calendar days across UK daylight saving time', () => {
+  assert.equal(getDaysUntilNextPayment('2026-11-19', '2026-10-20'), 30);
+  assert.equal(getDaysUntilNextPayment('2026-11-01', '2026-10-31'), 1);
+});
+
+test('canAddSubscription enforces Free tier max 2 active limit and unlocks on Pro/Standard', () => {
+  // Free plan has max 2 limit: 0, 1 allowed; 2 active means adding a 3rd is blocked
+  assert.equal(canAddSubscription(0, 'free').allowed, true);
+  assert.equal(canAddSubscription(1, 'free').allowed, true);
+  assert.equal(canAddSubscription(2, 'free').allowed, false);
+  assert.equal(canAddSubscription(3, 'free').allowed, false);
+
+  // Standard plan
+  assert.equal(canAddSubscription(2, 'standard').allowed, true);
+  assert.equal(canAddSubscription(10, 'standard').allowed, true);
+
+  // Pro plan
+  assert.equal(canAddSubscription(2, 'pro').allowed, true);
+  assert.equal(canAddSubscription(50, 'pro').allowed, true);
+});
+
+test('formatPrice formats GBP and other currencies accurately', () => {
+  assert.equal(formatPrice(10.99, '£'), '£10.99');
+  assert.equal(formatPrice(45.5, 'lei'), '45.50 lei');
+  assert.equal(formatPrice(0, '$'), '$0.00');
+});
+
+test('filterAndSortSubscriptions filters by status and sorts by renewal', () => {
+  const filtered = filterAndSortSubscriptions(
+    mockSubscriptions,
+    {
+      statusFilter: 'active',
+      sortBy: 'renewal',
+    },
+    '2026-10-15'
+  );
+  assert.equal(filtered.length, 2);
+  // Spotify is due Oct 18 (3 days), Netflix Oct 20 (5 days)
+  assert.equal(filtered[0].name, 'Spotify Premium UK');
+  assert.equal(filtered[1].name, 'Netflix UK Standard');
+});
