@@ -76,9 +76,9 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter">
       <div
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full bg-[#161616] border-t border-white/15 rounded-t-[28px] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-200"
+        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="paywall-title"
@@ -86,7 +86,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
         {/* Native iOS Bottom Sheet Drag Handle */}
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/25 rounded-full mx-auto my-3 shrink-0 cursor-pointer"
+          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150"
         />
 
         {/* Top Hero Banner */}
@@ -94,7 +94,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
           <div className="absolute top-3 right-3 z-20">
             <button
               onClick={onClose}
-              className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-full hover:bg-white/[0.06] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.98] transition-all cursor-pointer"
+              className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-full hover:bg-white/[0.06] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -276,7 +276,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
           <button
             onClick={() => handlePurchase(selectedTier)}
             disabled={isProcessing}
-            className="btn-champagne min-h-[48px] w-full py-4 px-6 rounded-full font-black text-sm text-[#0A0A0A] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="btn-champagne min-h-[48px] w-full py-4 px-6 rounded-full font-black text-sm text-[#0A0A0A] active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isProcessing ? (
               <span>{t('paywall.processing')}</span>

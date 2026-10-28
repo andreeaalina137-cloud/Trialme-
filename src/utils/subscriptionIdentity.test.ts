@@ -93,3 +93,27 @@ test('scanner duplicate names strip configured trailing service suffixes', () =>
     true
   );
 });
+
+test('isDuplicateSubscription normalizes casing, whitespace, and UK suffixes across presets and manual entries', () => {
+  assert.equal(
+    isDuplicateSubscription(
+      { name: '  Netflix  ' },
+      { name: 'Netflix UK', status: 'active' }
+    ),
+    true
+  );
+  assert.equal(
+    isDuplicateSubscription(
+      { name: 'spotify' },
+      { name: 'Spotify Premium UK', status: 'trial', trialEndDate: '2026-12-01' }
+    ),
+    true
+  );
+  assert.equal(
+    isDuplicateSubscription(
+      { name: '   Disney+   ' },
+      { name: 'disney+', status: 'active' }
+    ),
+    true
+  );
+});

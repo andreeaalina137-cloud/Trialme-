@@ -18,6 +18,7 @@ import type { Subscription, SubscriptionCategory, SubscriptionFrequency, UserPla
 import { POPULAR_PRESETS, type PopularPreset, type PresetFilterGroup } from '../data/popularPresets';
 import { BrandIcon } from './BrandIcon';
 import { canAddSubscription, formatPrice } from '../utils/subscriptionCalculations';
+import { isDuplicateSubscription } from '../utils/subscriptionIdentity';
 import {
   calculateSmartTrialTiming,
   createGoogleCalendarReminderUrl,
@@ -42,6 +43,7 @@ interface AddSubscriptionModalProps {
   onOpenPaywall: () => void;
   onOpenAiScanner: () => void;
   onTrialTracked: (name: string, days: number, subscriptionId: string) => void;
+  subscriptions?: Subscription[];
 }
 
 const CATEGORIES: SubscriptionCategory[] = [
@@ -91,6 +93,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   onOpenPaywall,
   onOpenAiScanner,
   onTrialTracked,
+  subscriptions = [],
 }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'quick' | 'manual'>('quick');
@@ -380,6 +383,11 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       return;
     }
     setValidationError('');
+
+    if (subscriptions.some((existing) => isDuplicateSubscription({ name: name.trim() }, existing))) {
+      setDuplicateNotice(true);
+      return;
+    }
     checkPlanAndProceed(() => {
       const timing = isTrial ? calculateSmartTrialTiming(manualTrialDays) : null;
       const finalTrialEnd = isTrial ? trialEndDate || timing?.trialEndDate : undefined;
@@ -435,12 +443,12 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter"
     >
       {/* Native Mobile Slide-Up Bottom Sheet */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] rounded-t-[28px] bg-[#161616] border-t border-white/15 shadow-2xl z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] rounded-t-[32px] bg-[#161616] border-t border-white/15 shadow-[0_-12px_40px_rgba(0,0,0,0.8)] z-50 flex flex-col overflow-hidden modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-sub-title"
@@ -448,7 +456,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
         {/* Native iOS Top Drag-Handle Pill */}
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/25 rounded-full mx-auto my-3 shrink-0 cursor-pointer"
+          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150"
         />
 
         {/* Header */}
@@ -681,63 +689,96 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                               handlePresetAffiliateTrial(preset);
                             }
                           }}
-                          className="min-h-[72px] p-3.5 rounded-2xl bg-[#1F1F1F]/60 flex items-center justify-between gap-4 cursor-pointer select-none active:scale-[0.99] transition-transform duration-150 ease-out"
+                          className="min-h-[72px] p-3.5 rounded-2xl bg-[#1F1F1F]/60 flex items-center justify-between gap-3 cursor-pointer select-none active:scale-[0.99] transition-transform duration-150 ease-out"
                         >
-                          {/* Left: 44x44px Icon + Full Service Name & Category/Trial Badge */}
+                          {/* Left: 44x44px Icon + Full Service Name & Price/Category/Trial Badge */}
                           <div className="flex items-center gap-3.5 min-w-0 flex-1">
                             <div className="w-11 h-11 rounded-2xl shrink-0 overflow-hidden flex items-center justify-center">
                               <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-bold text-sm text-[#F5F5F5] leading-snug break-words">
+                              <div className="font-bold text-sm text-[#F5F5F5] leading-snug break-normal">
                                 {preset.name}
                               </div>
                               <div className="flex flex-wrap items-center gap-2 text-xs text-[#A0A0A0] mt-1">
-                                <span>{preset.category}</span>
+                                <span className="font-mono font-bold text-xs text-[#F5F5F5] tabular-nums">
+                                  {formatPrice(preset.price, preset.currency)}/mo
+                                </span>
+                                <span className="text-[#A0A0A0]/40">·</span>
                                 <span className="rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/30 px-2 py-0.5 text-[10px] font-semibold text-[#D4AF7C]">
                                   {defaultDays}-Day Trial
                                 </span>
+                                <span>·</span>
+                                <span className="truncate">{preset.category}</span>
                               </div>
                             </div>
                           </div>
 
-                          {/* Right: Price + Secondary Free Trial button + Gold + Button */}
-                          <div className="shrink-0 flex items-center gap-2.5">
-                            <div className="text-right">
-                              <div className="font-mono font-bold text-xs text-[#F5F5F5] tabular-nums">
-                                {formatPrice(preset.price, preset.currency)}/mo
+                          {/* Right: Secondary Free Trial button + Gold Add Button */}
+                          {(() => {
+                            const isTracked = subscriptions.some((s) => isDuplicateSubscription({ name: preset.name }, s));
+                            return (
+                              <div className="shrink-0 flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  disabled={isTracked}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isTracked) return;
+                                    handlePresetAffiliateTrial(preset);
+                                  }}
+                                  aria-label={isTracked ? `${preset.name} already tracked` : `Start ${preset.name} free trial`}
+                                  className={`min-h-[38px] px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all duration-150 ease-out ${
+                                    isTracked
+                                      ? 'border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 cursor-default opacity-90'
+                                      : isDrawerOpen
+                                      ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/20 border-transparent cursor-pointer active:scale-[0.97]'
+                                      : 'border border-[#D4AF7C]/40 text-[#D4AF7C] hover:border-[#D4AF7C] bg-[#1F1F1F] shadow-sm cursor-pointer active:scale-[0.97]'
+                                  }`}
+                                >
+                                  {isTracked ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 shrink-0" />
+                                      <span>Added ✓</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Gift className="w-3.5 h-3.5 shrink-0" />
+                                      <span>Free Trial</span>
+                                    </>
+                                  )}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  disabled={isTracked}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isTracked) return;
+                                    handleQuickAdd(preset);
+                                  }}
+                                  aria-label={isTracked ? `${preset.name} already added` : `Add ${preset.name}`}
+                                  className={`min-h-[38px] px-3.5 py-2 rounded-full font-bold flex items-center justify-center gap-1 shadow-md transition-all ${
+                                    isTracked
+                                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default opacity-90'
+                                      : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[#D4AF7C]/20 hover:brightness-110 active:scale-[0.97] cursor-pointer'
+                                  }`}
+                                >
+                                  {isTracked ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 stroke-[2.75]" />
+                                      <span>Added ✓</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Plus className="w-3.5 h-3.5 stroke-[2.75]" />
+                                      <span>Add</span>
+                                    </>
+                                  )}
+                                </button>
                               </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePresetAffiliateTrial(preset);
-                              }}
-                              aria-label={`Start ${preset.name} free trial`}
-                              className={`px-3.5 py-2 rounded-full border border-[#D4AF7C]/40 text-[#D4AF7C] text-xs font-semibold flex items-center gap-1.5 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
-                                isDrawerOpen
-                                  ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/20'
-                                  : 'hover:border-[#D4AF7C] bg-[#1F1F1F]/60'
-                              }`}
-                            >
-                              <Gift className="w-3.5 h-3.5 shrink-0" />
-                              <span>Free Trial</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleQuickAdd(preset);
-                              }}
-                              aria-label={`Add ${preset.name}`}
-                              className="w-10 h-10 rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold flex items-center justify-center shadow-md shadow-[#D4AF7C]/20 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer"
-                            >
-                              <Plus className="w-4 h-4 stroke-[2.75]" />
-                            </button>
-                          </div>
+                            );
+                          })()}
                         </div>
 
                         {isDrawerOpen && drawerTiming && (

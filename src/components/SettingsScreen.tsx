@@ -578,8 +578,8 @@ ${subscriptions
 
       {/* Restore Key Modal */}
       {showRestoreKeyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/85 backdrop-blur-sm">
-          <div className="w-full max-w-xs bg-[#161616] border border-white/10 rounded-3xl p-5 space-y-3.5 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/85 backdrop-blur-md modal-backdrop-enter">
+          <div className="w-full max-w-xs bg-[#161616] border border-white/10 rounded-3xl p-5 space-y-3.5 shadow-2xl animate-native-view">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-sm text-[#F5F5F5] flex items-center gap-2">
                 <KeyRound className="w-4 h-4 text-[#D4AF7C]" />
@@ -587,7 +587,8 @@ ${subscriptions
               </h3>
               <button
                 onClick={() => setShowRestoreKeyModal(false)}
-                className="text-[#A0A0A0] hover:text-[#F5F5F5] cursor-pointer"
+                className="text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all cursor-pointer"
+                aria-label="Close"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -604,7 +605,7 @@ ${subscriptions
             />
             <button
               onClick={handleRestorePurchases}
-              className="btn-champagne w-full py-3 px-4 rounded-full font-extrabold text-[#0A0A0A] cursor-pointer shadow-[0_4px_20px_rgba(212,175,124,0.28)]"
+              className="btn-champagne w-full py-3 px-4 rounded-full font-extrabold text-[#0A0A0A] active:scale-[0.97] transition-all cursor-pointer shadow-[0_4px_20px_rgba(212,175,124,0.28)]"
             >
               Verify & Restore Access
             </button>
@@ -614,8 +615,8 @@ ${subscriptions
 
       {/* Rating Modal */}
       {showRatingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/85 backdrop-blur-sm">
-          <div className="w-full max-w-xs bg-[#161616] border border-white/10 rounded-3xl p-5 text-center space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/85 backdrop-blur-md modal-backdrop-enter">
+          <div className="w-full max-w-xs bg-[#161616] border border-white/10 rounded-3xl p-5 text-center space-y-4 shadow-2xl animate-native-view">
             <div className="w-12 h-12 rounded-full bg-[#D4AF7C]/20 text-[#D4AF7C] flex items-center justify-center mx-auto">
               <Star className="w-6 h-6 fill-[#D4AF7C]" />
             </div>
@@ -630,7 +631,7 @@ ${subscriptions
                 <button
                   key={star}
                   onClick={() => setUserStars(star)}
-                  className="p-1 cursor-pointer transition-transform hover:scale-125"
+                  className="p-1 cursor-pointer transition-transform hover:scale-125 active:scale-95"
                   aria-label={`${star} stars`}
                 >
                   <Star
@@ -646,13 +647,13 @@ ${subscriptions
                 setShowRatingModal(false);
                 showToast('Thank you for your rating!');
               }}
-              className="btn-champagne w-full py-3 px-4 rounded-full font-extrabold text-[#0A0A0A] cursor-pointer shadow-[0_4px_20px_rgba(212,175,124,0.28)]"
+              className="btn-champagne w-full py-3 px-4 rounded-full font-extrabold text-[#0A0A0A] active:scale-[0.97] transition-all cursor-pointer shadow-[0_4px_20px_rgba(212,175,124,0.28)]"
             >
               Submit Rating ({userStars} stars)
             </button>
             <button
               onClick={() => setShowRatingModal(false)}
-              className="text-xs text-[#A0A0A0] hover:text-[#F5F5F5] block w-full cursor-pointer"
+              className="text-xs text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.97] transition-all block w-full cursor-pointer"
             >
               Maybe later
             </button>
@@ -662,15 +663,16 @@ ${subscriptions
 
       {/* Legal & Terms Modal */}
       {showLegalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/85 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-[#161616] border border-white/10 rounded-3xl max-h-[80vh] flex flex-col p-5 shadow-2xl space-y-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/85 backdrop-blur-md modal-backdrop-enter">
+          <div className="w-full max-w-sm bg-[#161616] border border-white/10 rounded-3xl max-h-[80vh] flex flex-col p-5 shadow-2xl space-y-3 animate-native-view">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <h3 className="font-bold text-sm text-[#F5F5F5]">
                 {showLegalModal === 'privacy' ? 'UK Privacy & Data Governance' : 'Lifetime Terms & Conditions'}
               </h3>
               <button
                 onClick={() => setShowLegalModal(null)}
-                className="p-1 text-[#A0A0A0] hover:text-[#F5F5F5] cursor-pointer"
+                className="p-1 text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all cursor-pointer"
+                aria-label="Close"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -698,7 +700,7 @@ ${subscriptions
             </div>
             <button
               onClick={() => setShowLegalModal(null)}
-              className="btn-secondary-luxury w-full py-3 rounded-full font-bold cursor-pointer"
+              className="btn-secondary-luxury w-full py-3 rounded-full font-bold active:scale-[0.97] transition-all cursor-pointer"
             >
               Got it
             </button>

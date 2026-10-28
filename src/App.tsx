@@ -2,9 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import type { AppCurrency, AppNotification, Subscription, UserPlan } from './types/subscription';
 import {
   CURRENCIES,
+  canAddSubscription,
   convertFrequencyToMonthly,
   formatLocalDateKey,
   getDaysUntilNextPayment,
+  normalizeRenewalDates,
+  rollForwardPaymentDate,
   roundCurrency,
 } from './utils/subscriptionCalculations';
 import {
@@ -53,7 +56,7 @@ function AppContent() {
   });
 
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(() => {
-    return loadPersistedSubscriptions(INITIAL_DEMO_SUBSCRIPTIONS);
+    return normalizeRenewalDates(loadPersistedSubscriptions(INITIAL_DEMO_SUBSCRIPTIONS));
   });
   const subscriptionsRef = useRef<Subscription[]>(subscriptions);
   subscriptionsRef.current = subscriptions;
@@ -109,6 +112,14 @@ function AppContent() {
   }, [onboardingDone]);
 
   useEffect(() => {
+    // Auto-roll any past-due active renewal dates forward to the next valid billing cycle
+    // (covers restored backups, manual edits to past dates, reactivations and day changes).
+    const normalized = normalizeRenewalDates(subscriptions);
+    if (normalized !== subscriptions) {
+      subscriptionsRef.current = normalized;
+      setSubscriptions(normalized);
+      return;
+    }
     const serialized = JSON.stringify(subscriptions);
     safeStorageSet('subcleaner_subscriptions_v2', serialized);
     safeStorageSet('subcleaner_subscriptions', serialized);
@@ -243,17 +254,35 @@ function AppContent() {
     subData: Omit<Subscription, 'id' | 'createdAt' | 'paymentHistory'>
   ): string | false => {
     const trimmedName = (subData.name || '').trim();
-    if (!trimmedName || !Number.isFinite(subData.price) || subData.price <= 0) {
+    if (!trimmedName || !Number.isFinite(subData.price) || subData.price <= 0 || subData.price > 99999.99) {
       return false;
     }
+
+    if (!canAddSubscription(activeSubscriptionsCount, userPlan).allowed) {
+      setIsPaywallOpen(true);
+      return false;
+    }
+
+    const nextPayment = subData.status === 'active' && subData.nextPaymentDate
+      ? rollForwardPaymentDate(subData.nextPaymentDate, subData.frequency)
+      : subData.nextPaymentDate;
 
     const sanitizedSubData = {
       ...subData,
       name: trimmedName,
       price: roundCurrency(subData.price),
+      nextPaymentDate: nextPayment,
     };
 
     if (subscriptionsRef.current.some((existing) => isDuplicateSubscription(sanitizedSubData, existing))) {
+      setActiveNotification({
+        id: `duplicate-${Date.now()}`,
+        title: t('add.duplicateTitle') || 'Already Tracked',
+        message: t('add.duplicateNotice') || 'This service is already being tracked in your list.',
+        date: new Date().toISOString(),
+        read: false,
+        type: 'system',
+      });
       return false;
     }
 
@@ -366,6 +395,7 @@ function AppContent() {
     const existingAndImported = [...deduplicatedSubscriptions];
     const formatted: Subscription[] = [];
     let duplicateCount = 0;
+    let hitLimit = false;
 
     newSubs.forEach((subData, index) => {
       if (existingAndImported.some((existing) => isDuplicateScannedSubscription(subData, existing))) {
@@ -373,8 +403,20 @@ function AppContent() {
         return;
       }
 
+      if (userPlan === 'free') {
+        const currentActive = existingAndImported.filter(
+          (s) => s.status === 'active' || s.status === 'trial'
+        ).length;
+        if (!canAddSubscription(currentActive, userPlan).allowed) {
+          hitLimit = true;
+          return;
+        }
+      }
+
+      const rolledNextDate = rollForwardPaymentDate(subData.nextPaymentDate, subData.frequency);
       const imported: Subscription = {
         ...subData,
+        nextPaymentDate: rolledNextDate,
         id: `sub-ai-${Date.now()}-${index}`,
         createdAt: new Date().toISOString().split('T')[0],
         paymentHistory: [],
@@ -385,6 +427,9 @@ function AppContent() {
 
     setSubscriptions([...formatted, ...deduplicatedSubscriptions]);
     if (formatted.length > 0) playSubtlePop();
+    if (hitLimit) {
+      setIsPaywallOpen(true);
+    }
     if (duplicateCount > 0) {
       setActiveNotification({
         id: `duplicate-import-${Date.now()}`,
@@ -725,6 +770,7 @@ function AppContent() {
                 userPlan={userPlan}
                 currencySymbol={currencySymbol}
                 onOpenPaywall={() => setIsPaywallOpen(true)}
+                existingSubscriptions={subscriptions}
               />
             )}
 
@@ -740,6 +786,7 @@ function AppContent() {
                   onOpenPaywall={() => setIsPaywallOpen(true)}
                   onOpenAiScanner={() => setCurrentTab('scan')}
                   onTrialTracked={handleTrialTracked}
+                  subscriptions={subscriptions}
                 />
               </div>
             )}
@@ -800,6 +847,7 @@ function AppContent() {
             onOpenPaywall={() => setIsPaywallOpen(true)}
             onOpenAiScanner={() => setIsAiScannerOpen(true)}
             onTrialTracked={handleTrialTracked}
+            subscriptions={subscriptions}
           />
 
           <SubscriptionDetailModal
@@ -813,6 +861,9 @@ function AppContent() {
               setSelectedCancelSub(sub);
             }}
             currencySymbol={currencySymbol}
+            userPlan={userPlan}
+            activeSubscriptionsCount={activeSubscriptionsCount}
+            onOpenPaywall={() => setIsPaywallOpen(true)}
           />
 
           {selectedCancelSub && (
@@ -841,6 +892,7 @@ function AppContent() {
             userPlan={userPlan}
             currencySymbol={currencySymbol}
             onOpenPaywall={() => setIsPaywallOpen(true)}
+            existingSubscriptions={subscriptions}
           />
         </div>
       )}

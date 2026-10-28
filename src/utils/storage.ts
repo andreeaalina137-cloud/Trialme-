@@ -79,7 +79,7 @@ export function sanitizeCurrency(raw: unknown): AppCurrency {
   return 'GBP';
 }
 
-const VALID_FREQUENCIES = new Set<SubscriptionFrequency>(['monthly', 'yearly', 'weekly']);
+const VALID_FREQUENCIES = new Set<SubscriptionFrequency>(['monthly', 'yearly', 'weekly', 'quarterly']);
 const VALID_STATUSES = new Set<SubscriptionStatus>(['active', 'trial', 'cancelled']);
 const VALID_CATEGORIES = new Set<SubscriptionCategory>([
   'Streaming',
@@ -93,6 +93,20 @@ const VALID_CATEGORIES = new Set<SubscriptionCategory>([
   'Utilities',
   'Other',
 ]);
+
+/**
+ * Strict YYYY-MM-DD validation that also rejects impossible calendar dates (e.g. 2026-02-31).
+ */
+export function isValidDateKey(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
+  );
+}
 
 export function sanitizeSubscriptionItem(raw: unknown, index = 0): Subscription | null {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
@@ -116,9 +130,15 @@ export function sanitizeSubscriptionItem(raw: unknown, index = 0): Subscription 
     : 'Other';
 
   const rawNextDate = typeof item.nextPaymentDate === 'string' ? item.nextPaymentDate.slice(0, 10) : '';
-  const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(rawNextDate) && !Number.isNaN(new Date(`${rawNextDate}T00:00:00Z`).getTime());
-  const fallbackDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const isValidDate = isValidDateKey(rawNextDate);
+  const fallbackBase = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  const fallbackDate = [
+    fallbackBase.getFullYear(),
+    String(fallbackBase.getMonth() + 1).padStart(2, '0'),
+    String(fallbackBase.getDate()).padStart(2, '0'),
+  ].join('-');
   const nextPaymentDate = isValidDate ? rawNextDate : fallbackDate;
+  const rawTrialEnd = typeof item.trialEndDate === 'string' ? item.trialEndDate.slice(0, 10) : '';
 
   const id = typeof item.id === 'string' && item.id.trim()
     ? item.id.trim()
@@ -138,7 +158,7 @@ export function sanitizeSubscriptionItem(raw: unknown, index = 0): Subscription 
     category,
     nextPaymentDate,
     status,
-    trialEndDate: typeof item.trialEndDate === 'string' ? item.trialEndDate.slice(0, 10) : undefined,
+    trialEndDate: isValidDateKey(rawTrialEnd) ? rawTrialEnd : undefined,
     trialStartAt: typeof item.trialStartAt === 'string' ? item.trialStartAt : undefined,
     trialExpiresAt: typeof item.trialExpiresAt === 'string' ? item.trialExpiresAt : undefined,
     trialDurationDays: typeof item.trialDurationDays === 'number' && Number.isFinite(item.trialDurationDays)
@@ -165,11 +185,22 @@ export function sanitizeSubscriptionItem(raw: unknown, index = 0): Subscription 
 export function sanitizeSubscriptionsList(raw: unknown): Subscription[] {
   if (!Array.isArray(raw)) return [];
   const seenIds = new Set<string>();
+  const seenActiveNames = new Set<string>();
   const result: Subscription[] = [];
 
   raw.forEach((entry, index) => {
     const clean = sanitizeSubscriptionItem(entry, index);
     if (!clean) return;
+
+    // Deduplicate active and trial entries with identical names
+    if (clean.status === 'active' || clean.status === 'trial') {
+      const norm = clean.name.toLowerCase().trim();
+      if (seenActiveNames.has(norm)) {
+        return;
+      }
+      seenActiveNames.add(norm);
+    }
+
     let uniqueId = clean.id;
     if (seenIds.has(uniqueId)) {
       uniqueId = `${clean.id}-${index}`;

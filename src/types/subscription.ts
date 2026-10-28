@@ -1,4 +1,4 @@
-export type SubscriptionFrequency = 'monthly' | 'yearly' | 'weekly';
+export type SubscriptionFrequency = 'monthly' | 'yearly' | 'weekly' | 'quarterly';
 
 export type SubscriptionStatus = 'active' | 'trial' | 'cancelled';
 

@@ -37,57 +37,89 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
         {notification && (
           <motion.div
             key={notification.id}
-            initial={{ opacity: 0, y: -18, scale: 0.96 }}
+            initial={{ opacity: 0, y: -24, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.96, transition: { duration: 0.2, ease: 'easeOut' } }}
-            transition={{ duration: 0.28, ease: [0.2, 0.75, 0.25, 1] }}
-            className="pointer-events-auto w-full max-w-[398px] rounded-3xl border border-[#D4AF7C]/30 bg-[#161616]/95 p-4 text-[#F5F5F5] shadow-2xl shadow-black/85 backdrop-blur-xl"
+            exit={{ opacity: 0, y: -28, scale: 0.92, transition: { duration: 0.18, ease: 'easeIn' } }}
+            transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            drag="y"
+            dragDirectionLock
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0.8, bottom: 0.15 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y < -25 || info.velocity.y < -150) {
+                onDismiss();
+              }
+            }}
+            onClick={() => {
+              if (onAction) onAction(notification);
+              else onDismiss();
+            }}
+            className="pointer-events-auto w-full max-w-[400px] rounded-[22px] border border-white/[0.1] bg-[#161616]/95 p-3.5 text-[#F5F5F5] shadow-2xl shadow-black/80 backdrop-blur-2xl cursor-pointer select-none active:scale-[0.98] transition-transform duration-150"
             role="alert"
             aria-live="polite"
           >
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#1F1F1F]">
-                <GoldBellIcon size="sm" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-extrabold text-[#F5F5F5]">TrialMe</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-[#A0A0A0]">{t('notifications.now')}</span>
-                    <button
-                      type="button"
-                      onClick={onDismiss}
-                      className="rounded-full p-0.5 text-[#A0A0A0] transition-colors hover:bg-white/10 hover:text-[#F5F5F5]"
-                      aria-label={t('notifications.dismiss')}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-                <div className="mt-0.5 text-xs font-bold text-[#D4AF7C]">{notification.title}</div>
-                <p className="mt-0.5 text-xs leading-snug text-[#F5F5F5]/90">{notification.message}</p>
+            {/* Subtle Top Swipe Pill Indicator */}
+            <div className="w-8 h-1 rounded-full bg-white/20 mx-auto -mt-1 mb-2.5 opacity-60 pointer-events-none" />
 
-                <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="flex items-start gap-2.5">
+              {/* App Glyph Icon */}
+              <div className="w-7 h-7 rounded-lg bg-[#D4AF7C]/15 border border-[#D4AF7C]/30 flex items-center justify-center shrink-0 mt-0.5">
+                <GoldBellIcon size="xs" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                {/* Header Row: App Name + Timestamp + Close */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">TrialMe</span>
+                    <span className="text-[10px] text-[#A0A0A0]/50">·</span>
+                    <span className="text-[11px] text-[#A0A0A0]">{t('notifications.now')}</span>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDismiss();
+                    }}
+                    className="rounded-full p-1 text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-white/10 active:scale-[0.95] transition-all cursor-pointer"
+                    aria-label={t('notifications.dismiss')}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Clean, Non-Noisy Notification Copy */}
+                <div className="mt-1 text-xs font-bold text-[#F5F5F5] leading-snug">
+                  {notification.title}
+                </div>
+                <p className="mt-0.5 text-xs text-[#A0A0A0] leading-snug line-clamp-2">
+                  {notification.message}
+                </p>
+
+                {/* Compact Native Action Pills */}
+                <div className="mt-2.5 flex items-center justify-end gap-2 pt-1 border-t border-white/[0.06]">
+                  {onCancelTrial && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCancelTrial(notification);
+                      }}
+                      className="btn-cancel-soft py-1 px-3 text-[11px] font-semibold rounded-full active:scale-[0.97] transition-all cursor-pointer"
+                    >
+                      Cancel Trial
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (onAction) onAction(notification);
                       else onDismiss();
                     }}
-                    className="rounded-full border border-white/10 bg-[#1F1F1F] py-1.5 px-3 text-xs font-bold text-[#F5F5F5] hover:border-[#D4AF7C] transition-colors cursor-pointer"
+                    className="btn-secondary-luxury py-1 px-3.5 text-[11px] font-bold text-[#D4AF7C] rounded-full active:scale-[0.97] transition-all cursor-pointer"
                   >
                     View
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (onCancelTrial) onCancelTrial(notification);
-                      else if (onAction) onAction(notification);
-                      else onDismiss();
-                    }}
-                    className="rounded-full border border-rose-500/35 bg-rose-950/60 py-1.5 px-3 text-xs font-bold text-rose-200 hover:bg-rose-900/70 transition-colors cursor-pointer"
-                  >
-                    Cancel Trial
                   </button>
                 </div>
               </div>

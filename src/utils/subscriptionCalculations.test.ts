@@ -5,6 +5,9 @@ import {
   convertFrequencyToAnnual,
   calculateMonthlyTotal,
   calculateTotalSavings,
+  calculateAnnualSavings,
+  calculateRenewalForecast,
+  rollForwardPaymentDate,
   getDaysUntilNextPayment,
   canAddSubscription,
   formatPrice,
@@ -61,24 +64,60 @@ const mockSubscriptions: Subscription[] = [
 test('convertFrequencyToMonthly calculates correct monthly amounts', () => {
   assert.equal(convertFrequencyToMonthly(12, 'monthly'), 12);
   assert.equal(convertFrequencyToMonthly(120, 'yearly'), 10);
+  assert.equal(convertFrequencyToMonthly(30, 'quarterly'), 10);
   assert.equal(convertFrequencyToMonthly(10, 'weekly'), (10 * 52) / 12);
 });
 
 test('convertFrequencyToAnnual calculates correct annual amounts', () => {
   assert.equal(convertFrequencyToAnnual(10, 'monthly'), 120);
   assert.equal(convertFrequencyToAnnual(100, 'yearly'), 100);
+  assert.equal(convertFrequencyToAnnual(25, 'quarterly'), 100);
+  assert.equal(convertFrequencyToAnnual(5, 'weekly'), 260);
 });
 
-test('calculateMonthlyTotal sums only active and trial subscriptions', () => {
+test('calculateMonthlyTotal sums only active and trial subscriptions with strict 2-decimal precision', () => {
   const total = calculateMonthlyTotal(mockSubscriptions);
-  // Netflix 10.99 + Spotify 11.99 = 22.98
-  assert.equal(Math.round(total * 100) / 100, 22.98);
+  // Netflix 10.99 + Spotify 11.99 = 22.98 exactly
+  assert.equal(total, 22.98);
+
+  // Test float precision with 19.99 + 10.99 (avoids 30.980000000000004)
+  const precisionSubs: Subscription[] = [
+    { ...mockSubscriptions[0], price: 19.99 },
+    { ...mockSubscriptions[1], price: 10.99 },
+  ];
+  assert.equal(calculateMonthlyTotal(precisionSubs), 30.98);
 });
 
-test('calculateTotalSavings includes cancelled subscriptions', () => {
+test('calculateTotalSavings and calculateAnnualSavings include cancelled subscriptions and exclude active', () => {
   const savings = calculateTotalSavings(mockSubscriptions);
-  // Amazon Prime Yearly monthly savings = 95 / 12 = 7.91666...
-  assert.equal(Math.round(savings * 100) / 100, 7.92);
+  assert.equal(savings, 7.92);
+
+  const annualSavings = calculateAnnualSavings(mockSubscriptions);
+  assert.equal(annualSavings, 95);
+});
+
+test('calculateRenewalForecast projects exact 6-month cash flow in pence', () => {
+  const today = new Date(2026, 9, 25); // 25 Oct 2026
+  const forecast = calculateRenewalForecast(mockSubscriptions, 6, today);
+  assert.equal(forecast.length, 6);
+  assert.equal(forecast[0].isCurrent, true);
+  for (const month of forecast) {
+    assert.ok(Number.isFinite(month.total));
+    assert.equal(month.total, Math.round(month.total * 100) / 100);
+  }
+});
+
+test('rollForwardPaymentDate safely advances overdue dates to next billing cycle without month-end drift', () => {
+  const pastDate = '2026-08-31';
+  const refDate = new Date(2026, 9, 25); // 25 Oct 2026
+  const rolled = rollForwardPaymentDate(pastDate, 'monthly', refDate);
+  assert.equal(rolled, '2026-10-31');
+
+  // Leap year roll forward: 2028-02-29 yearly to 2029
+  const leapOverdue = '2028-02-29';
+  const postLeap = new Date(2028, 5, 1);
+  const rolledLeap = rollForwardPaymentDate(leapOverdue, 'yearly', postLeap);
+  assert.equal(rolledLeap, '2029-02-28');
 });
 
 test('getDaysUntilNextPayment calculates exact calendar days diff', () => {

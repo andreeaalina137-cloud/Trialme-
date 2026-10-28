@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Bell, ChevronLeft, ChevronRight, CalendarDays, Download, ExternalLink } from 'lucide-react';
 import type { Subscription } from '../types/subscription';
 import { BrandIcon } from './BrandIcon';
-import { formatPrice } from '../utils/subscriptionCalculations';
+import { formatPrice, getChargeDatesInRange } from '../utils/subscriptionCalculations';
 import {
   createGoogleCalendarReminderUrl,
   downloadSubscriptionReminderIcs,
@@ -73,11 +73,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }
     for (let day = 1; day <= daysInMonth; day += 1) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const cellDate = new Date(year, month, day);
       const matching = activeSubs.filter((s) => {
-        if (s.nextPaymentDate === dateStr || s.trialEndDate === dateStr) return true;
-        // Also match recurring monthly day-of-month if in another month
-        const subDay = Number(s.nextPaymentDate.split('-')[2]);
-        return subDay === day;
+        if (s.status === 'trial') {
+          const trialEnd = s.trialEndDate || s.nextPaymentDate;
+          return trialEnd === dateStr;
+        }
+        const charges = getChargeDatesInRange(s, cellDate, cellDate);
+        return charges.length > 0;
       });
       cells.push({ day, dateStr, subs: matching });
     }
@@ -99,7 +102,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <button
             type="button"
             onClick={() => setViewMonth(new Date(year, month - 1, 1))}
-            className="h-8 w-8 rounded-full border border-white/10 bg-[#1F1F1F] flex items-center justify-center text-[#A0A0A0] hover:text-[#F5F5F5] hover:border-[#D4AF7C]/50 active:scale-[0.97] transition-all cursor-pointer"
+            className="h-8 w-8 rounded-full border border-white/10 bg-[#1F1F1F] flex items-center justify-center text-[#A0A0A0] hover:text-[#F5F5F5] hover:border-[#D4AF7C]/50 active:scale-[0.92] transition-all cursor-pointer"
             aria-label="Previous month"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -107,7 +110,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <button
             type="button"
             onClick={() => setViewMonth(new Date(year, month + 1, 1))}
-            className="h-8 w-8 rounded-full border border-white/10 bg-[#1F1F1F] flex items-center justify-center text-[#A0A0A0] hover:text-[#F5F5F5] hover:border-[#D4AF7C]/50 active:scale-[0.97] transition-all cursor-pointer"
+            className="h-8 w-8 rounded-full border border-white/10 bg-[#1F1F1F] flex items-center justify-center text-[#A0A0A0] hover:text-[#F5F5F5] hover:border-[#D4AF7C]/50 active:scale-[0.92] transition-all cursor-pointer"
             aria-label="Next month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -147,7 +150,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   setSelectedSubId(primarySub.id);
                 }
               }}
-              className={`h-9 rounded-full text-xs font-bold flex flex-col items-center justify-center transition-all relative ${
+              className={`h-9 rounded-full text-xs font-bold flex flex-col items-center justify-center transition-all relative active:scale-[0.95] ${
                 hasSubs
                   ? isGoldHighlight
                     ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-black shadow-md shadow-[#D4AF7C]/25 cursor-pointer scale-105'
@@ -177,7 +180,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 onSelectSubscription?.(selectedSub);
               }
             }}
-            className="flex items-center justify-between gap-3 rounded-2xl bg-[#1F1F1F] border border-white/[0.06] p-3 hover:border-[#D4AF7C]/50 transition-all cursor-pointer"
+            className="flex items-center justify-between gap-3 rounded-2xl bg-[#1F1F1F] border border-white/[0.06] p-3 hover:border-[#D4AF7C]/50 active:scale-[0.98] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3 min-w-0">
               <BrandIcon

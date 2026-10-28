@@ -71,13 +71,13 @@
   padding-top: max(0.5rem, env(safe-area-inset-top));
 }
 
-/* Luxury Card & Elevated Surfaces (#161616 with subtle border & shadow) */
+/* Luxury Card & Elevated Surfaces (#161616 with subtle border & softer layered shadow) */
 .glass-card {
   background: #161616;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .luxury-panel {
@@ -85,13 +85,14 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .ios-grouped-list {
   background: #161616;
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 1.5rem;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.45);
 }
 
 /* Primary Champagne Gold CTA Button Gradient (Mandatory Spec: from #E5C391 to #B79B6B) */
@@ -101,8 +102,8 @@
   color: #0A0A0A;
   font-weight: 700;
   border-radius: 9999px;
-  box-shadow: 0 4px 20px rgba(212, 175, 124, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.35);
-  transition: all 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(212, 175, 124, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-gold-cta:hover,
@@ -112,16 +113,16 @@
 
 .btn-gold-cta:active,
 .btn-champagne:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .btn-secondary-luxury {
   background-color: #1F1F1F;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 9999px;
+  border-radius: 9999px !important;
   color: #F5F5F5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-secondary-luxury:hover {
@@ -130,7 +131,27 @@
 }
 
 .btn-secondary-luxury:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+/* Softer, friendly red cancellation button (high border-radius, non-aggressive crimson glass) */
+.btn-cancel-soft {
+  background-image: linear-gradient(135deg, rgba(153, 27, 27, 0.65) 0%, rgba(190, 18, 60, 0.55) 100%);
+  color: #FFE4E6;
+  border: 1px solid rgba(244, 63, 94, 0.32);
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-cancel-soft:hover {
+  background-image: linear-gradient(135deg, rgba(153, 27, 27, 0.8) 0%, rgba(190, 18, 60, 0.7) 100%);
+  border-color: rgba(244, 63, 94, 0.5);
+  color: #FFFFFF;
+}
+
+.btn-cancel-soft:active {
+  transform: scale(0.97);
 }
 
 .input-luxury {
@@ -138,7 +159,7 @@
   border: 1px solid rgba(255, 255, 255, 0.09);
   color: #F5F5F5;
   border-radius: 9999px;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .input-luxury::placeholder {
@@ -264,14 +285,67 @@
 .subscription-card-glass {
   background: #161616;
   border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease-out;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.4);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease;
 }
 
 .subscription-card-glass:hover {
   background: #1F1F1F;
   border-color: rgba(212, 175, 124, 0.35);
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.5);
 }
 
 .subscription-card-glass:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+/* Modal Bottom Sheet & Backdrop Animations (Revolut / iOS native physics) */
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSheetSlideIn {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-backdrop-enter {
+  animation: modalBackdropFadeIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity;
+}
+
+.modal-sheet-enter {
+  animation: modalSheetSlideIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(212, 175, 124, 0.1) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-sweep 2s infinite ease-in-out;
 }

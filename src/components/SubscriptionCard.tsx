@@ -69,7 +69,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
       exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className={`w-full text-left rounded-2xl bg-[#161616] border border-white/[0.07] p-3.5 min-h-[68px] cursor-pointer group relative overflow-hidden select-none active:scale-[0.97] transition-all duration-150 ease-out hover:border-[#D4AF7C]/35 ${
+      className={`w-full text-left rounded-2xl bg-[#161616] border border-white/[0.07] p-3.5 min-h-[68px] cursor-pointer group relative overflow-hidden select-none active:scale-[0.97] transition-all duration-180 ease-out hover:bg-[#1A1A1A] hover:border-[#D4AF7C]/35 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.45)] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.6)] ${
         isCancelled ? 'opacity-65 hover:opacity-95' : ''
       }`}
       aria-label={`Details for subscription ${subscription.name}`}

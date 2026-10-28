@@ -109,11 +109,24 @@ export function isDuplicateSubscription(
 
   const candidateName = normalizedName(candidate.name);
   const existingName = normalizedName(existing.name);
-  if (!candidateName || candidateName !== existingName) return false;
+  if (!candidateName || !existingName) return false;
 
   const candidateProvider = providerHost(candidate.cancelUrl);
   const existingProvider = providerHost(existing.cancelUrl);
-  return !candidateProvider || !existingProvider || candidateProvider === existingProvider;
+  const providersCompatible = !candidateProvider || !existingProvider || candidateProvider === existingProvider;
+
+  if (candidateName === existingName) {
+    return providersCompatible;
+  }
+
+  // Also check OCR / suffix-normalized names (e.g. "Netflix" vs "Netflix UK", "Spotify" vs "Spotify Ltd")
+  const normCandScanned = normalizeScannedSubscriptionName(candidate.name);
+  const normExistScanned = normalizeScannedSubscriptionName(existing.name);
+  if (normCandScanned && normExistScanned && normCandScanned === normExistScanned) {
+    return providersCompatible;
+  }
+
+  return false;
 }
 
 export function isDuplicateScannedSubscription(

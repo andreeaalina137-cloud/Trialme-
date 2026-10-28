@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Edit3, Trash2, ShieldAlert, RotateCcw, CalendarDays, Download, Lightbulb, ExternalLink, TrendingUp, CheckCircle2 } from 'lucide-react';
-import type { Subscription } from '../types/subscription';
+import type { Subscription, UserPlan } from '../types/subscription';
 import { BrandIcon } from './BrandIcon';
 import {
   addYearsClamped,
@@ -8,6 +8,7 @@ import {
   formatLocalDateKey,
   formatPrice,
   getDaysUntilNextPayment,
+  rollForwardPaymentDate,
   roundCurrency,
 } from '../utils/subscriptionCalculations';
 import {
@@ -27,6 +28,9 @@ interface SubscriptionDetailModalProps {
   onDeleteSubscription: (id: string) => void;
   onOpenCancelAssistant: (sub: Subscription) => void;
   currencySymbol: string;
+  userPlan?: UserPlan;
+  activeSubscriptionsCount?: number;
+  onOpenPaywall?: () => void;
 }
 
 export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = ({
@@ -37,6 +41,9 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   onDeleteSubscription,
   onOpenCancelAssistant,
   currencySymbol,
+  userPlan,
+  activeSubscriptionsCount,
+  onOpenPaywall,
 }) => {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
@@ -111,11 +118,14 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
     e.preventDefault();
     const parsedPrice = parseFloat(price);
     if (!name.trim() || !Number.isFinite(parsedPrice) || parsedPrice <= 0 || parsedPrice > 99999.99) return;
+    const finalDate = subscription.status === 'active'
+      ? rollForwardPaymentDate(nextPaymentDate, subscription.frequency)
+      : nextPaymentDate;
     onUpdateSubscription({
       ...subscription,
       name: name.trim(),
       price: roundCurrency(parsedPrice),
-      nextPaymentDate,
+      nextPaymentDate: finalDate,
       reminderDaysBefore: reminderDays,
       notes: notes.trim(),
     });
@@ -123,9 +133,17 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   };
 
   const handleReactivate = () => {
+    if (userPlan === 'free' && typeof activeSubscriptionsCount === 'number' && activeSubscriptionsCount >= 2) {
+      if (onOpenPaywall) {
+        onOpenPaywall();
+      }
+      return;
+    }
+    const rolledDate = rollForwardPaymentDate(subscription.nextPaymentDate, subscription.frequency);
     onUpdateSubscription({
       ...subscription,
       status: 'active',
+      nextPaymentDate: rolledDate,
       cancelledAt: undefined,
       monthlySavingsAmount: undefined,
     });
@@ -145,9 +163,9 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter">
       <div
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full bg-[#161616] border-t border-white/15 rounded-t-[28px] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-200"
+        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="detail-modal-title"
@@ -155,7 +173,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
         {/* Native iOS Bottom Sheet Drag Handle */}
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/25 rounded-full mx-auto my-3 shrink-0 cursor-pointer"
+          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150"
         />
 
         {/* Header with real brand icon */}
@@ -180,14 +198,14 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
           <div className="flex items-center gap-1">
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="p-2 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
+              className="p-2 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
               aria-label={isEditing ? 'Cancel Edit' : 'Edit Subscription'}
             >
               <Edit3 className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
+              className="p-2 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -497,15 +515,15 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 onClose();
                 onOpenCancelAssistant(subscription);
               }}
-              className="w-full py-4 px-4 rounded-full font-bold text-sm bg-gradient-to-r from-rose-700 to-red-700 hover:from-rose-600 hover:to-red-600 text-white shadow-lg shadow-rose-950/40 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="btn-cancel-soft w-full py-4 px-6 rounded-full font-bold text-sm active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <ShieldAlert className="w-4 h-4" />
+              <ShieldAlert className="w-4 h-4 text-rose-300" />
               <span>{t('detail.cancelThis')}</span>
             </button>
           ) : (
             <button
               onClick={handleReactivate}
-              className="btn-secondary-luxury w-full py-4 px-4 rounded-full font-bold text-sm active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="btn-secondary-luxury w-full py-4 px-4 rounded-full font-bold text-sm active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
             >
               <RotateCcw className="w-4 h-4 text-[#D4AF7C]" />
               <span>{t('detail.reactivate')}</span>

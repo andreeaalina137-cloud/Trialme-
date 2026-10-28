@@ -75,9 +75,9 @@ ${accountName || '[Your Full Name]'}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter">
       <div
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full bg-[#161616] border-t border-white/15 rounded-t-[28px] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-200"
+        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="cancel-modal-title"
@@ -85,7 +85,7 @@ ${accountName || '[Your Full Name]'}`;
         {/* Native iOS Bottom Sheet Drag Handle */}
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/25 rounded-full mx-auto my-3 shrink-0 cursor-pointer"
+          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150"
         />
 
         {/* Header */}
@@ -107,7 +107,7 @@ ${accountName || '[Your Full Name]'}`;
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -291,7 +291,7 @@ ${accountName || '[Your Full Name]'}`;
         <div className="p-4 border-t border-white/[0.08] shrink-0 bg-[#161616]/95 space-y-2">
           <button
             onClick={handleConfirm}
-            className="w-full py-4 px-5 rounded-full font-black text-sm bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-4 px-5 rounded-full font-black text-sm bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
           >
             <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
             <span>{t('cancel.confirmCancellation')} (Add to Savings)</span>

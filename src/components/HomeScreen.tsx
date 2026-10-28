@@ -18,6 +18,7 @@ import {
   BellRing,
   ChevronRight,
   SlidersHorizontal,
+  Check,
 } from 'lucide-react';
 import type { Subscription, UserPlan } from '../types/subscription';
 import { SubscriptionCard } from './SubscriptionCard';
@@ -27,10 +28,15 @@ import {
   calculateMonthlyTotal,
   calculateAnnualTotal,
   calculateTotalSavings,
+  calculateAnnualSavings,
+  calculateRenewalForecast,
+  convertFrequencyToMonthly,
   formatPrice,
   filterAndSortSubscriptions,
   getDaysUntilNextPayment,
+  roundCurrency,
 } from '../utils/subscriptionCalculations';
+import { isDuplicateSubscription } from '../utils/subscriptionIdentity';
 import { CURATED_UK_TRIALS, type CuratedUkTrial } from '../utils/retentionAndTrust';
 import { POPULAR_PRESETS, type PopularPreset } from '../data/popularPresets';
 import { BrandIcon } from './BrandIcon';
@@ -84,10 +90,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const monthlyTotal = calculateMonthlyTotal(subscriptions);
   const annualTotal = calculateAnnualTotal(subscriptions);
   const totalSavings = calculateTotalSavings(subscriptions);
+  const annualSavings = calculateAnnualSavings(subscriptions);
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const thisMonthSavings = subscriptions
-    .filter((subscription) => subscription.status === 'cancelled' && subscription.cancelledAt?.slice(0, 7) === currentMonth)
-    .reduce((sum, subscription) => sum + (subscription.monthlySavingsAmount ?? 0), 0);
+  const thisMonthSavings = roundCurrency(
+    subscriptions
+      .filter((subscription) => subscription.status === 'cancelled' && subscription.cancelledAt?.slice(0, 7) === currentMonth)
+      .reduce((sum, subscription) => {
+        const amt = subscription.monthlySavingsAmount ?? convertFrequencyToMonthly(subscription.price, subscription.frequency);
+        return sum + (Number.isFinite(amt) ? amt : 0);
+      }, 0)
+  );
 
   const activeSubs = subscriptions
     .filter((s) => s.status === 'active' || s.status === 'trial')
@@ -151,9 +163,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     activeSubs[0] ??
     null;
 
-  const nearestDaysLeft = nearestSub ? Math.max(0, getDaysUntilNextPayment(nearestSub.nextPaymentDate)) : 3;
+  const nearestDueDate = nearestSub
+    ? (nearestSub.status === 'trial' && nearestSub.trialEndDate ? nearestSub.trialEndDate : nearestSub.nextPaymentDate)
+    : null;
+  const nearestDaysLeft = nearestDueDate ? Math.max(0, getDaysUntilNextPayment(nearestDueDate)) : 0;
+  const nearestDuration = nearestSub?.trialDurationDays || 30;
   const nearestProgressPercent = nearestSub
-    ? Math.min(92, Math.max(22, Math.round(((30 - Math.min(30, nearestDaysLeft)) / 30) * 100)))
+    ? Math.min(92, Math.max(12, Math.round(((nearestDuration - Math.min(nearestDuration, nearestDaysLeft)) / nearestDuration) * 100)))
     : 38;
 
   const formatRenewalDate = (dateStr?: string) => {
@@ -184,14 +200,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       }).slice(0, 6)
     : [];
 
-  const monthlyChartBars = [
-    { label: 'Nov', height: '55%' },
-    { label: 'Dec', height: '70%' },
-    { label: 'Jan', height: '45%' },
-    { label: 'Feb', height: '85%', active: true },
-    { label: 'Mar', height: '65%' },
-    { label: 'Apr', height: '78%' },
-  ];
+  const renewalForecast = React.useMemo(
+    () => calculateRenewalForecast(subscriptions, 6),
+    [subscriptions]
+  );
+  const maxForecastTotal = React.useMemo(
+    () => Math.max(...renewalForecast.map((m) => m.total), 1),
+    [renewalForecast]
+  );
+  const monthlyChartBars = React.useMemo(
+    () =>
+      renewalForecast.map((item) => {
+        const heightPercent =
+          item.total > 0
+            ? Math.max(18, Math.min(100, Math.round((item.total / maxForecastTotal) * 100)))
+            : 10;
+        return {
+          label: item.label,
+          total: item.total,
+          height: `${heightPercent}%`,
+          active: item.isCurrent,
+        };
+      }),
+    [renewalForecast, maxForecastTotal]
+  );
 
   return (
     <div className="min-h-full bg-[#0A0A0A]">
@@ -312,7 +344,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       onOpenSubscriptionDetail(nearestSub);
                     }
                   }}
-                  className="flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99] transition-transform duration-150 pt-0.5"
+                  className="flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.98] transition-all duration-150 ease-out pt-0.5"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <BrandIcon
@@ -534,59 +566,93 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <span className="text-[10px] text-[#A0A0A0]">1-Tap Setup</span>
               </div>
               <div className="space-y-2">
-                {matchingPresets.map((preset) => (
-                  <div
-                    key={preset.id}
-                    className="min-h-[68px] py-3 px-4 rounded-2xl bg-[#161616] border border-white/[0.07] flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-sm text-[#F5F5F5] leading-snug">
-                          {preset.name}
-                        </div>
-                        <div className="text-[11px] text-[#A0A0A0] mt-0.5">
-                          {formatPrice(preset.price, preset.currency)}/
-                          {preset.frequency === 'yearly' ? 'yr' : 'mo'} · {preset.category}
+                {matchingPresets.map((preset) => {
+                  const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: preset.name }, s));
+                  return (
+                    <div
+                      key={preset.id}
+                      className="min-h-[68px] py-3 px-4 rounded-2xl bg-[#161616] border border-white/[0.07] flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold text-sm text-[#F5F5F5] leading-snug">
+                            {preset.name}
+                          </div>
+                          <div className="text-[11px] text-[#A0A0A0] mt-0.5">
+                            {formatPrice(preset.price, preset.currency)}/
+                            {preset.frequency === 'yearly' ? 'yr' : 'mo'} · {preset.category}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {preset.defaultTrialDays && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        {preset.defaultTrialDays && (
+                          <button
+                            type="button"
+                            disabled={isTracked}
+                            onClick={() => {
+                              if (isTracked) return;
+                              if (onQuickAddPreset) {
+                                onQuickAddPreset(preset, true);
+                                setSearchQuery('');
+                              } else {
+                                onOpenAddModal();
+                              }
+                            }}
+                            className={`min-h-[38px] rounded-full px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 transition-all duration-150 ease-out ${
+                              isTracked
+                                ? 'border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 cursor-default opacity-90'
+                                : 'btn-secondary-luxury text-[#D4AF7C] active:scale-[0.97] cursor-pointer'
+                            }`}
+                          >
+                            {isTracked ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 shrink-0" />
+                                <span>Added ✓</span>
+                              </>
+                            ) : (
+                              <>
+                                <Gift className="w-3.5 h-3.5 shrink-0" />
+                                <span>Free Trial</span>
+                              </>
+                            )}
+                          </button>
+                        )}
                         <button
                           type="button"
+                          disabled={isTracked}
                           onClick={() => {
+                            if (isTracked) return;
                             if (onQuickAddPreset) {
-                              onQuickAddPreset(preset, true);
+                              onQuickAddPreset(preset, false);
                               setSearchQuery('');
                             } else {
                               onOpenAddModal();
                             }
                           }}
-                          className="btn-secondary-luxury min-h-[40px] rounded-full px-3 py-1.5 text-xs font-bold text-[#D4AF7C] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer flex items-center gap-1"
+                          className={`min-h-[38px] px-3.5 py-2 rounded-full font-bold flex items-center justify-center gap-1 shadow-md transition-all duration-150 ease-out ${
+                            isTracked
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default opacity-90'
+                              : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[#D4AF7C]/20 active:scale-[0.97] cursor-pointer'
+                          }`}
+                          aria-label={isTracked ? `${preset.name} already added` : `Add ${preset.name}`}
                         >
-                          <Gift className="w-3.5 h-3.5 shrink-0" />
-                          <span>Free Trial</span>
+                          {isTracked ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 stroke-[2.75]" />
+                              <span>Added ✓</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5 stroke-[2.75]" />
+                              <span>Add</span>
+                            </>
+                          )}
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (onQuickAddPreset) {
-                            onQuickAddPreset(preset, false);
-                            setSearchQuery('');
-                          } else {
-                            onOpenAddModal();
-                          }
-                        }}
-                        className="w-10 h-10 rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold flex items-center justify-center shadow-md shadow-[#D4AF7C]/20 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
-                        aria-label={`Add ${preset.name}`}
-                      >
-                        <Plus className="w-4 h-4 stroke-[2.75]" />
-                      </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -704,37 +770,55 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {showTrialRadar && (
             <div className="mt-3.5 space-y-2.5 pt-3.5 border-t border-white/[0.07]">
-              {CURATED_UK_TRIALS.map((deal) => (
-                <div
-                  key={deal.id}
-                  className="rounded-2xl border border-white/[0.07] bg-[#1F1F1F] p-3.5 flex flex-col justify-between gap-3"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-1.5">
-                      <span className="font-bold text-xs text-[#F5F5F5]">{deal.name}</span>
-                      <span className="shrink-0 rounded-full bg-[#D4AF7C]/20 border border-[#D4AF7C]/35 px-2 py-0.5 text-[9px] font-extrabold text-[#D4AF7C]">
-                        {deal.badge}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[#A0A0A0] mt-1 leading-snug">{deal.highlight}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      window.open(deal.trialUrl, '_blank', 'noopener,noreferrer');
-                      if (onStartRadarTrial) {
-                        onStartRadarTrial(deal);
-                      } else {
-                        onOpenAddModal();
-                      }
-                    }}
-                    className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-lg shadow-[#D4AF7C]/20 min-h-[44px] w-full px-3 py-2 text-xs flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+              {CURATED_UK_TRIALS.map((deal) => {
+                const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: deal.name }, s));
+                return (
+                  <div
+                    key={deal.id}
+                    className="rounded-2xl border border-white/[0.07] bg-[#1F1F1F] p-3.5 flex flex-col justify-between gap-3"
                   >
-                    <BellRing className="w-3.5 h-3.5 shrink-0" />
-                    <span>Start Trial + 3-Day Alarm</span>
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="font-bold text-xs text-[#F5F5F5]">{deal.name}</span>
+                        <span className="shrink-0 rounded-full bg-[#D4AF7C]/20 border border-[#D4AF7C]/35 px-2 py-0.5 text-[9px] font-extrabold text-[#D4AF7C]">
+                          {deal.badge}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#A0A0A0] mt-1 leading-snug">{deal.highlight}</p>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isTracked}
+                      onClick={() => {
+                        if (isTracked) return;
+                        window.open(deal.trialUrl, '_blank', 'noopener,noreferrer');
+                        if (onStartRadarTrial) {
+                          onStartRadarTrial(deal);
+                        } else {
+                          onOpenAddModal();
+                        }
+                      }}
+                      className={`rounded-full font-bold shadow-lg min-h-[44px] w-full px-3 py-2 text-xs flex items-center justify-center gap-1.5 transition-all duration-150 ease-out ${
+                        isTracked
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default opacity-90'
+                          : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[#D4AF7C]/20 active:scale-[0.97] cursor-pointer'
+                      }`}
+                    >
+                      {isTracked ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 shrink-0" />
+                          <span>Tracked ✓</span>
+                        </>
+                      ) : (
+                        <>
+                          <BellRing className="w-3.5 h-3.5 shrink-0" />
+                          <span>Start Trial + 3-Day Alarm</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </section>
@@ -799,7 +883,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 {t('home.annualizedSavings')}:
               </span>
               <span className="font-bold text-[#D4AF7C] font-mono tabular-nums">
-                +{formatPrice(totalSavings * 12, currencySymbol)} {t('home.savedAnnualEst')}
+                +{formatPrice(annualSavings, currencySymbol)} {t('home.savedAnnualEst')}
               </span>
             </div>
           )}
@@ -861,51 +945,66 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </span>
             </div>
 
-            {activeSubs.slice(0, 2).map((sub, idx) => {
-              const days = Math.max(1, getDaysUntilNextPayment(sub.nextPaymentDate));
-              return (
-                <div
-                  key={sub.id}
-                  className="rounded-2xl border border-white/[0.07] bg-[#1F1F1F] p-3.5 space-y-2.5"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-full bg-[#161616] border border-white/10 flex items-center justify-center shrink-0">
-                      <GoldBellIcon size="xs" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold text-[#F5F5F5]">TrialMe</span>
-                        <span className="text-[10px] text-[#A0A0A0]">{idx === 0 ? '3d ago' : '1d ago'}</span>
+            <div className="space-y-2.5">
+              {activeSubs.slice(0, 2).map((sub, idx) => {
+                const days = Math.max(1, getDaysUntilNextPayment(sub.nextPaymentDate));
+                const displayName = sub.name.replace(' UK Standard', '').replace(' Premium UK', '').replace(' UK', '');
+
+                return (
+                  <div
+                    key={sub.id}
+                    onClick={() => onOpenSubscriptionDetail(sub)}
+                    className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F]/80 p-3.5 space-y-2 cursor-pointer hover:border-[#D4AF7C]/30 active:scale-[0.99] transition-all duration-150 select-none shadow-sm"
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <div className="h-6 w-6 rounded-md bg-[#D4AF7C]/15 border border-[#D4AF7C]/25 flex items-center justify-center shrink-0 mt-0.5">
+                        <GoldBellIcon size="xs" />
                       </div>
-                      <p className="text-xs text-[#F5F5F5]/90 mt-0.5 leading-snug">
-                        {idx === 0
-                          ? `Your ${sub.name.replace(' UK Standard', '')} trial ends in ${days} days (${formatPrice(sub.price, sub.currency || currencySymbol)}/month).`
-                          : `Tomorrow: ${sub.name.replace(' UK', '')} trial ends (${formatPrice(sub.price, sub.currency || currencySymbol)}/month). Tap to cancel safely.`}
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">TrialMe</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
+                            {days}d left
+                          </span>
+                        </div>
+                        <p className="text-xs text-[#F5F5F5] mt-1 font-semibold leading-snug">
+                          {idx === 0
+                            ? `${displayName} trial ends in ${days} days`
+                            : `Upcoming: ${displayName} renewal`}
+                        </p>
+                        <p className="text-[11px] text-[#A0A0A0] mt-0.5 leading-snug">
+                          {formatPrice(sub.price, sub.currency || currencySymbol)}/{sub.frequency === 'yearly' ? 'yr' : 'mo'} · 10:00 AM auto-alert active
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-white/[0.05]">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onOpenCancelSub) onOpenCancelSub(sub);
+                          else onOpenSubscriptionDetail(sub);
+                        }}
+                        className="btn-cancel-soft py-1 px-3 text-[11px] font-semibold rounded-full active:scale-[0.97] transition-all cursor-pointer"
+                      >
+                        Cancel Trial
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenSubscriptionDetail(sub);
+                        }}
+                        className="btn-secondary-luxury py-1 px-3 text-[11px] font-bold text-[#D4AF7C] rounded-full active:scale-[0.97] transition-all cursor-pointer"
+                      >
+                        View
+                      </button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onOpenSubscriptionDetail(sub)}
-                      className="min-h-[40px] rounded-full border border-white/10 bg-[#161616] py-1.5 text-xs font-bold text-[#F5F5F5] hover:border-[#D4AF7C] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
-                    >
-                      View
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (onOpenCancelSub) onOpenCancelSub(sub);
-                        else onOpenSubscriptionDetail(sub);
-                      }}
-                      className="min-h-[40px] rounded-full border border-rose-500/35 bg-rose-950/50 py-1.5 text-xs font-bold text-rose-200 hover:bg-rose-900/60 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
-                    >
-                      Cancel Trial
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

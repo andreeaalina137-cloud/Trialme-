@@ -50,12 +50,15 @@ export function formatLocalDateKey(date: Date): string {
 
 /**
  * Normalises price to a monthly equivalent.
+ * Weekly: price × 52 / 12 · Quarterly: price / 3 · Yearly: price / 12.
  */
 export function convertFrequencyToMonthly(price: number, frequency: SubscriptionFrequency): number {
   if (!Number.isFinite(price) || price <= 0) return 0;
   switch (frequency) {
     case 'weekly':
       return (price * 52) / 12;
+    case 'quarterly':
+      return price / 3;
     case 'yearly':
       return price / 12;
     case 'monthly':
@@ -74,6 +77,8 @@ export function convertFrequencyToAnnual(price: number, frequency: SubscriptionF
       return price * 52;
     case 'monthly':
       return price * 12;
+    case 'quarterly':
+      return price * 4;
     case 'yearly':
     default:
       return price;
@@ -81,38 +86,206 @@ export function convertFrequencyToAnnual(price: number, frequency: SubscriptionF
 }
 
 /**
+ * Converts a currency amount to integer pence/cents so totals can be summed without
+ * floating-point drift (e.g. 0.1 + 0.2 !== 0.3).
+ */
+export function toMinorUnits(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.round((value + Number.EPSILON) * 100);
+}
+
+function sumInMinorUnits(values: number[]): number {
+  const pence = values.reduce((sum, value) => sum + toMinorUnits(value), 0);
+  return roundCurrency(pence / 100);
+}
+
+/**
  * Calculates total monthly spending for active and trial subscriptions.
  */
 export function calculateMonthlyTotal(subscriptions: Subscription[]): number {
-  const raw = subscriptions
-    .filter((sub) => sub.status === 'active' || sub.status === 'trial')
-    .reduce((sum, sub) => sum + convertFrequencyToMonthly(sub.price, sub.frequency), 0);
-  return roundCurrency(raw);
+  return sumInMinorUnits(
+    subscriptions
+      .filter((sub) => sub.status === 'active' || sub.status === 'trial')
+      .map((sub) => convertFrequencyToMonthly(sub.price, sub.frequency))
+  );
 }
 
 /**
  * Calculates total annual projection for active subscriptions.
  */
 export function calculateAnnualTotal(subscriptions: Subscription[]): number {
-  const raw = subscriptions
-    .filter((sub) => sub.status === 'active' || sub.status === 'trial')
-    .reduce((sum, sub) => sum + convertFrequencyToAnnual(sub.price, sub.frequency), 0);
-  return roundCurrency(raw);
+  return sumInMinorUnits(
+    subscriptions
+      .filter((sub) => sub.status === 'active' || sub.status === 'trial')
+      .map((sub) => convertFrequencyToAnnual(sub.price, sub.frequency))
+  );
 }
 
 /**
  * Calculates accumulated and projected savings from cancelled subscriptions.
  */
 export function calculateTotalSavings(subscriptions: Subscription[]): number {
-  const cancelledSubs = subscriptions.filter((sub) => sub.status === 'cancelled');
-  const raw = cancelledSubs.reduce((sum, sub) => {
-    const monthlyRate =
-      typeof sub.monthlySavingsAmount === 'number' && Number.isFinite(sub.monthlySavingsAmount) && sub.monthlySavingsAmount > 0
-        ? sub.monthlySavingsAmount
-        : convertFrequencyToMonthly(sub.price, sub.frequency);
-    return sum + monthlyRate;
-  }, 0);
-  return roundCurrency(raw);
+  return sumInMinorUnits(
+    subscriptions
+      .filter((sub) => sub.status === 'cancelled')
+      .map((sub) =>
+        typeof sub.monthlySavingsAmount === 'number' && Number.isFinite(sub.monthlySavingsAmount) && sub.monthlySavingsAmount > 0
+          ? sub.monthlySavingsAmount
+          : convertFrequencyToMonthly(sub.price, sub.frequency)
+      )
+  );
+}
+
+/**
+ * Calculates annualized savings from cancelled subscriptions.
+ */
+export function calculateAnnualSavings(subscriptions: Subscription[]): number {
+  return sumInMinorUnits(
+    subscriptions
+      .filter((sub) => sub.status === 'cancelled')
+      .map((sub) =>
+        typeof sub.monthlySavingsAmount === 'number' && Number.isFinite(sub.monthlySavingsAmount) && sub.monthlySavingsAmount > 0
+          ? sub.monthlySavingsAmount * 12
+          : convertFrequencyToAnnual(sub.price, sub.frequency)
+      )
+  );
+}
+
+/**
+ * Parses a strict local YYYY-MM-DD key into a local-midnight Date. Returns null for
+ * malformed or impossible dates (e.g. 2026-02-30).
+ */
+export function parseLocalDateKey(value: string | undefined | null): Date | null {
+  if (!value || typeof value !== 'string') return null;
+  const clean = value.trim().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return null;
+  const [year, month, day] = clean.split('-').map(Number);
+  const parsed = new Date(year, month - 1, day);
+  if (parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day) {
+    return null;
+  }
+  return parsed;
+}
+
+/**
+ * Returns the n-th billing occurrence after an anchor date. Always computed from the
+ * original anchor so month-end days don't drift (Jan 31 → Feb 28 → Mar 31, not Mar 28).
+ */
+export function addBillingCycles(anchor: Date, frequency: SubscriptionFrequency, cycles: number): Date {
+  switch (frequency) {
+    case 'weekly': {
+      const result = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + cycles * 7);
+      return result;
+    }
+    case 'quarterly':
+      return addMonthsClamped(anchor, cycles * 3);
+    case 'yearly':
+      return addYearsClamped(anchor, cycles);
+    case 'monthly':
+    default:
+      return addMonthsClamped(anchor, cycles);
+  }
+}
+
+/**
+ * If a renewal date is in the past, rolls it forward to the next valid billing date
+ * (on or after today). Dates already in the future are returned unchanged.
+ */
+export function rollForwardPaymentDate(
+  dateKey: string,
+  frequency: SubscriptionFrequency,
+  today: Date = new Date()
+): string {
+  const anchor = parseLocalDateKey(dateKey);
+  if (!anchor) return dateKey;
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if (anchor.getTime() >= todayMidnight.getTime()) return dateKey;
+
+  let cycles = 1;
+  let candidate = addBillingCycles(anchor, frequency, cycles);
+  // Bounded loop (max ~50 years of weekly cycles) to guarantee termination.
+  while (candidate.getTime() < todayMidnight.getTime() && cycles < 2600) {
+    cycles += 1;
+    candidate = addBillingCycles(anchor, frequency, cycles);
+  }
+  return formatLocalDateKey(candidate);
+}
+
+/**
+ * Rolls every overdue *active* subscription forward to its next billing date.
+ * Trials and cancelled items are left untouched. Returns the same array reference when
+ * nothing changes, so it is safe to call inside React effects.
+ */
+export function normalizeRenewalDates(subscriptions: Subscription[], today: Date = new Date()): Subscription[] {
+  let changed = false;
+  const next = subscriptions.map((sub) => {
+    if (sub.status !== 'active') return sub;
+    const rolled = rollForwardPaymentDate(sub.nextPaymentDate, sub.frequency, today);
+    if (rolled === sub.nextPaymentDate) return sub;
+    changed = true;
+    return { ...sub, nextPaymentDate: rolled };
+  });
+  return changed ? next : subscriptions;
+}
+
+/**
+ * Lists every charge date (YYYY-MM-DD) for a subscription that falls inside [start, end].
+ * Active subscriptions recur from nextPaymentDate; trials first charge at trial end and
+ * then recur at their billing frequency. Cancelled subscriptions never charge.
+ */
+export function getChargeDatesInRange(sub: Subscription, start: Date, end: Date): string[] {
+  if (sub.status === 'cancelled') return [];
+  const anchorKey = sub.status === 'trial' && sub.trialEndDate ? sub.trialEndDate : sub.nextPaymentDate;
+  const anchor = parseLocalDateKey(anchorKey);
+  if (!anchor) return [];
+
+  const startMs = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const endMs = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+  const dates: string[] = [];
+  for (let cycle = 0; cycle < 2600; cycle += 1) {
+    const occurrence = addBillingCycles(anchor, sub.frequency, cycle);
+    const ms = occurrence.getTime();
+    if (ms > endMs) break;
+    if (ms >= startMs) dates.push(formatLocalDateKey(occurrence));
+  }
+  return dates;
+}
+
+export interface RenewalForecastMonth {
+  key: string; // YYYY-MM
+  label: string; // e.g. "Nov"
+  total: number; // exact 2dp total of charges due that month
+  isCurrent: boolean;
+}
+
+/**
+ * Builds an N-month forward renewal forecast (starting with the current month)
+ * from real billing dates, summed in pence for exact 2-decimal totals.
+ */
+export function calculateRenewalForecast(
+  subscriptions: Subscription[],
+  months = 6,
+  today: Date = new Date()
+): RenewalForecastMonth[] {
+  const result: RenewalForecastMonth[] = [];
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  for (let i = 0; i < months; i += 1) {
+    const monthStart = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+    const rangeStart = i === 0 ? todayMidnight : monthStart;
+    let pence = 0;
+    subscriptions.forEach((sub) => {
+      const charges = getChargeDatesInRange(sub, rangeStart, monthEnd).length;
+      pence += charges * toMinorUnits(sub.price);
+    });
+    result.push({
+      key: `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`,
+      label: monthStart.toLocaleDateString('en-GB', { month: 'short' }),
+      total: pence / 100,
+      isCurrent: i === 0,
+    });
+  }
+  return result;
 }
 
 /**

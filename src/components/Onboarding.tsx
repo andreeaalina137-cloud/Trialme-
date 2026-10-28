@@ -94,7 +94,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onStartTrial
         <button
           type="button"
           onClick={onComplete}
-          className="rounded-full border border-white/10 bg-[#161616]/80 px-3.5 py-1.5 text-xs font-semibold text-[#A0A0A0] transition-colors hover:border-[#D4AF7C]/50 hover:text-[#F5F5F5] cursor-pointer"
+          className="rounded-full border border-white/10 bg-[#161616]/80 px-3.5 py-1.5 text-xs font-semibold text-[#A0A0A0] active:scale-[0.95] transition-all duration-150 hover:border-[#D4AF7C]/50 hover:text-[#F5F5F5] cursor-pointer"
         >
           {t('onboarding.skip')}
         </button>
@@ -140,7 +140,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onStartTrial
         <button
           type="button"
           onClick={handleNext}
-          className="w-full min-h-[52px] rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold text-sm flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer"
+          className="w-full min-h-[52px] rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold text-sm flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.97] transition-all duration-150 cursor-pointer"
         >
           <span>{activeSlide === slides.length - 1 ? 'Get Started' : 'Next'}</span>
           <ArrowRight className="h-4 w-4 stroke-[2.5]" />
@@ -149,7 +149,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onStartTrial
         <button
           type="button"
           onClick={onStartTrial}
-          className="w-full text-center text-xs font-semibold text-[#D4AF7C] hover:text-[#F5F5F5] transition-colors cursor-pointer py-1"
+          className="w-full text-center text-xs font-semibold text-[#D4AF7C] hover:text-[#F5F5F5] active:scale-[0.97] transition-all duration-150 cursor-pointer py-1"
         >
           {t('onboarding.addFirstTrial')}
         </button>

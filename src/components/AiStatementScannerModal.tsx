@@ -17,7 +17,9 @@ import {
 import type { DetectedSubscription, Subscription, UserPlan } from '../types/subscription';
 import { getAiScannerMonthlyQuota, incrementAiScannerMonthlyQuota } from '../utils/retentionAndTrust';
 import { addMonthsClamped, formatLocalDateKey } from '../utils/subscriptionCalculations';
+import { isDuplicateScannedSubscription } from '../utils/subscriptionIdentity';
 import { BrandIcon } from './BrandIcon';
+import { GoldBellIcon } from './GoldBellIcon';
 import { useTranslation } from '../i18n/LanguageContext';
 
 interface AiStatementScannerModalProps {
@@ -28,6 +30,7 @@ interface AiStatementScannerModalProps {
   currencySymbol: string;
   onOpenPaywall: () => void;
   mode?: 'modal' | 'screen';
+  existingSubscriptions?: Subscription[];
 }
 
 const DEFAULT_SHOWCASE_DETECTED: Array<{
@@ -82,21 +85,11 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   currencySymbol,
   onOpenPaywall,
   mode = 'modal',
+  existingSubscriptions = [],
 }) => {
   const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
-  const [detectedItems, setDetectedItems] = useState<DetectedSubscription[]>(() =>
-    DEFAULT_SHOWCASE_DETECTED.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      currency: currencySymbol,
-      frequency: 'monthly',
-      category: item.category,
-      confidence: 0.98,
-      selected: true,
-    }))
-  );
+  const [detectedItems, setDetectedItems] = useState<DetectedSubscription[]>([]);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [showAllDetected, setShowAllDetected] = useState(false);
   const [quota, setQuota] = useState(() => getAiScannerMonthlyQuota());
@@ -107,18 +100,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   const resetScannerState = () => {
     scanRequestIdRef.current += 1;
     setIsScanning(false);
-    setDetectedItems(
-      DEFAULT_SHOWCASE_DETECTED.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        currency: currencySymbol,
-        frequency: 'monthly',
-        category: item.category,
-        confidence: 0.98,
-        selected: true,
-      }))
-    );
+    setDetectedItems([]);
     setAddedIds(new Set());
     setQuotaWarning('');
     setQuota(getAiScannerMonthlyQuota());
@@ -192,6 +174,11 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   };
 
   const handleAddSingleDetected = (item: DetectedSubscription) => {
+    if (existingSubscriptions.some((s) => isDuplicateScannedSubscription({ name: item.name }, s))) {
+      setAddedIds((prev) => new Set(prev).add(item.id));
+      return;
+    }
+
     const nextPaymentDate = addMonthsClamped(new Date(), 1);
     const formattedDate = formatLocalDateKey(nextPaymentDate);
     const matchingColor =
@@ -214,8 +201,17 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     setAddedIds((prev) => new Set(prev).add(item.id));
   };
 
+  const handleDismissItem = (id: string) => {
+    setDetectedItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
   const handleImportSelected = () => {
-    const selectedItems = detectedItems.filter((item) => item.selected && !addedIds.has(item.id));
+    const selectedItems = detectedItems.filter(
+      (item) =>
+        item.selected &&
+        !addedIds.has(item.id) &&
+        !existingSubscriptions.some((s) => isDuplicateScannedSubscription({ name: item.name }, s))
+    );
     if (selectedItems.length === 0) return;
 
     const nextPaymentDate = addMonthsClamped(new Date(), 1);
@@ -241,9 +237,9 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   // Preserve strict Free-tier paywall gating when opened as a modal
   if (mode === 'modal' && userPlan !== 'pro') {
     return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#0A0A0A]/90 p-0 backdrop-blur-md sm:items-center sm:p-4">
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#0A0A0A]/90 p-0 backdrop-blur-md modal-backdrop-enter sm:items-center sm:p-4">
         <div
-          className="relative w-full max-w-md overflow-hidden rounded-t-3xl border border-[#D4AF7C]/35 bg-[#161616] shadow-2xl sm:rounded-3xl"
+          className="relative w-full max-w-md overflow-hidden rounded-t-[32px] border border-[#D4AF7C]/35 bg-[#161616] shadow-2xl sm:rounded-3xl modal-sheet-enter"
           role="dialog"
           aria-modal="true"
           aria-labelledby="scanner-pro-title"
@@ -254,7 +250,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
           />
           <button
             onClick={onClose}
-            className="absolute right-3 top-3 z-10 rounded-full p-2 text-[#A0A0A0] transition-colors hover:bg-white/5 hover:text-[#F5F5F5] cursor-pointer"
+            className="absolute right-3 top-3 z-10 rounded-full p-2 text-[#A0A0A0] transition-colors hover:bg-white/5 hover:text-[#F5F5F5] active:scale-[0.95] cursor-pointer"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -277,7 +273,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                 onClose();
                 onOpenPaywall();
               }}
-              className="btn-champagne mt-5 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-black text-[#0A0A0A] shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              className="btn-champagne mt-5 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-black text-[#0A0A0A] shadow-lg transition-all active:scale-[0.97] cursor-pointer"
             >
               <Sparkles className="h-4 w-4" />
               {t('scanner.unlockPro')}
@@ -322,10 +318,16 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         </div>
       </div>
 
-      {/* 2-Column Split View on Desktop (col-span-5 left, col-span-7 right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column (lg:col-span-5): Upload & Scanner Controls */}
-        <div className="lg:col-span-5 rounded-3xl bg-[#161616] border border-white/[0.08] p-6 text-center shadow-xl space-y-4">
+      {quotaWarning && (
+        <div className="max-w-xl mx-auto rounded-2xl border border-[#D4AF7C]/40 bg-[#161616] px-3.5 py-2.5 text-xs text-[#D4AF7C]">
+          {quotaWarning}
+        </div>
+      )}
+
+      {/* Main Upload / Results Layout */}
+      <div className={detectedItems.length > 0 ? 'grid grid-cols-1 lg:grid-cols-12 gap-8 items-start' : 'max-w-xl mx-auto space-y-5'}>
+        {/* Left Column (lg:col-span-5 when items exist): Upload & Scanner Controls */}
+        <div className={`${detectedItems.length > 0 ? 'lg:col-span-5' : 'w-full'} rounded-3xl bg-[#161616] border border-white/[0.08] p-6 text-center shadow-xl space-y-4`}>
           {/* Central Glowing Document + Gold Magnifying Glass Hero */}
           <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
             <div
@@ -394,7 +396,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
 
           {/* Primary Champagne Gold Upload Button */}
           <div>
-            <label className="btn-champagne min-h-[50px] w-full rounded-full py-3.5 px-6 text-sm font-extrabold text-[#0A0A0A] flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.98] transition-transform">
+            <label className="btn-champagne min-h-[50px] w-full rounded-full py-3.5 px-6 text-sm font-extrabold text-[#0A0A0A] flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.97] transition-all duration-150">
               {isScanning ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin text-[#0A0A0A]" />
@@ -438,124 +440,144 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
             <Lock className="w-3.5 h-3.5 text-[#D4AF7C] shrink-0" />
             <span>100% Private – Processed locally, no Open Banking login required ({quota.remaining}/{quota.limit} scans left)</span>
           </div>
-
-          {/* Quick Demo Statement Triggers */}
-          <div className="space-y-1.5 pt-1">
-            <span className="text-[10px] uppercase tracking-wider text-[#A0A0A0] font-bold block">
-              Quick Test Samples
-            </span>
-            <div className="flex items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => void scanStatement(null, 'image/jpeg', 'barclays')}
-                className="rounded-full border border-white/10 bg-[#1F1F1F] px-3.5 py-1.5 text-[11px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C] transition-colors cursor-pointer"
-              >
-                Try Barclays UK Sample
-              </button>
-              <button
-                type="button"
-                onClick={() => void scanStatement(null, 'image/jpeg', 'revolut')}
-                className="rounded-full border border-white/10 bg-[#1F1F1F] px-3.5 py-1.5 text-[11px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C] transition-colors cursor-pointer"
-              >
-                Try Revolut Sample
-              </button>
-            </div>
-          </div>
         </div>
 
-        {/* Right Column (lg:col-span-7): Detected Subscriptions List */}
-        <div className="lg:col-span-7 space-y-4">
-          {quotaWarning && (
-            <div className="rounded-2xl border border-[#D4AF7C]/40 bg-[#161616] px-3.5 py-2.5 text-xs text-[#D4AF7C]">
-              {quotaWarning}
-            </div>
-          )}
+        {/* Dynamic Empty State (Show Bell / Protection Banner) */}
+        {detectedItems.length === 0 && (
+          <div className="w-full rounded-3xl bg-[#161616] border border-white/[0.08] p-6 text-center shadow-xl flex flex-col items-center relative overflow-hidden">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-12 inset-x-0 h-32 bg-gradient-to-b from-[#D4AF7C]/15 via-transparent to-transparent"
+            />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF7C]/35 bg-[#D4AF7C]/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#D4AF7C]">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF7C]" />
+              Smart Protection
+            </span>
 
-          {/* Detected Subscriptions Card ("AI found 5 subscriptions") */}
-          <div className="luxury-panel rounded-3xl p-5 border border-white/[0.08] space-y-3.5 shadow-xl bg-[#161616]">
-            <div className="flex items-center justify-between px-1">
-              <div>
-                <span className="text-sm font-extrabold text-[#F5F5F5]">
-                  AI found {detectedItems.length} subscriptions
-                </span>
-                <p className="text-[11px] text-[#A0A0A0]">Review detected recurring items</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAllDetected((v) => !v)}
-                className="text-xs font-semibold text-[#D4AF7C] hover:underline cursor-pointer"
-              >
-                {showAllDetected ? 'Show less' : 'See all'}
-              </button>
+            <div className="my-5 relative flex items-center justify-center">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-3 rounded-full bg-[#D4AF7C]/20 blur-2xl"
+              />
+              <GoldBellIcon size="lg" className="relative z-10" />
             </div>
 
-            <div className="space-y-2.5">
-              {visibleDetected.map((item) => {
-                const isAdded = addedIds.has(item.id);
-                const brandColor =
-                  DEFAULT_SHOWCASE_DETECTED.find((d) =>
-                    d.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0])
-                  )?.color || '#D4AF7C';
+            <h4 className="text-base font-extrabold text-[#F5F5F5] tracking-tight">
+              Enjoy the trial. Get reminded before you pay.
+            </h4>
+          </div>
+        )}
 
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between gap-3 rounded-2xl bg-[#1F1F1F] border border-white/[0.08] p-3.5 hover:border-[#D4AF7C]/40 transition-all"
+        {/* Right Column (lg:col-span-7): Detected Subscriptions List (rendered only after a scan) */}
+        {detectedItems.length > 0 && (
+          <div className="lg:col-span-7 space-y-4">
+            {/* Detected Subscriptions Card */}
+            <div className="luxury-panel rounded-3xl p-4 sm:p-5 border border-white/[0.08] space-y-3.5 shadow-xl bg-[#161616]">
+              <div className="flex items-center justify-between px-1">
+                <div>
+                  <span className="text-sm font-extrabold text-[#F5F5F5]">
+                    AI found {detectedItems.length} subscriptions
+                  </span>
+                  <p className="text-[11px] text-[#A0A0A0]">Review detected recurring items</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setDetectedItems([])}
+                    className="text-xs font-semibold text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <BrandIcon name={item.name} category={item.category} color={brandColor} size="preset" />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold text-sm text-[#F5F5F5] truncate">{item.name}</div>
-                        <div className="text-xs text-[#A0A0A0] flex items-center gap-2 mt-0.5">
-                          <span className="font-mono text-[#F5F5F5] font-semibold tabular-nums">
-                            {currencySymbol}{item.price.toFixed(2)}/mo
-                          </span>
-                          <span>·</span>
-                          <span>{item.category}</span>
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAllDetected((v) => !v)}
+                    className="text-xs font-semibold text-[#D4AF7C] hover:underline cursor-pointer"
+                  >
+                    {showAllDetected ? 'Show less' : 'See all'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                {visibleDetected.map((item) => {
+                  const isAdded =
+                    addedIds.has(item.id) ||
+                    existingSubscriptions.some((s) => isDuplicateScannedSubscription({ name: item.name }, s));
+                  const brandColor =
+                    DEFAULT_SHOWCASE_DETECTED.find((d) =>
+                      d.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0])
+                    )?.color || '#D4AF7C';
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between gap-3.5 rounded-2xl bg-[#1F1F1F] border border-white/[0.08] p-3 sm:p-3.5 hover:border-[#D4AF7C]/40 transition-all min-h-[68px]"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <BrandIcon name={item.name} category={item.category} color={brandColor} size="preset" />
+                        <div className="min-w-0 flex-1 pr-1">
+                          <div className="font-bold text-sm text-[#F5F5F5] truncate leading-tight">{item.name}</div>
+                          <div className="text-xs text-[#A0A0A0] flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden">
+                            <span className="font-mono text-[#F5F5F5] font-semibold tabular-nums shrink-0">
+                              {currencySymbol}{item.price.toFixed(2)}/mo
+                            </span>
+                            <span className="shrink-0 text-[#A0A0A0]/50">·</span>
+                            <span className="truncate">{item.category}</span>
+                          </div>
                         </div>
                       </div>
+
+                      <div className="shrink-0 flex items-center gap-1.5 pl-1">
+                        <button
+                          type="button"
+                          disabled={isAdded}
+                          onClick={() => handleAddSingleDetected(item)}
+                          className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 flex items-center gap-1 active:scale-[0.97] transition-all cursor-pointer ${
+                            isAdded
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
+                              : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow hover:brightness-110'
+                          }`}
+                        >
+                          {isAdded ? (
+                            <>
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Added</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <span>Add</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDismissItem(item.id)}
+                          className="h-8 w-8 rounded-full flex items-center justify-center text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-white/5 transition-colors cursor-pointer"
+                          aria-label={`Dismiss ${item.name}`}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
 
-                    <button
-                      type="button"
-                      disabled={isAdded}
-                      onClick={() => handleAddSingleDetected(item)}
-                      className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 flex items-center gap-1 active:scale-[0.97] transition-all cursor-pointer ${
-                        isAdded
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
-                          : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow hover:brightness-110'
-                      }`}
-                    >
-                      {isAdded ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Added</span>
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                          <span>Add</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bottom Import All Detected Bar */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleImportSelected}
-                className="w-full min-h-[48px] rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-black text-xs flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer"
-              >
-                <Plus className="w-4 h-4 stroke-[2.75]" />
-                <span>+ Import All Detected ({detectedItems.length})</span>
-              </button>
+              {/* Bottom Import All Detected Bar */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleImportSelected}
+                  className="w-full min-h-[48px] rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-black text-xs flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.97] transition-all duration-150 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.75]" />
+                  <span>Import All Detected ({detectedItems.length})</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -569,16 +591,16 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter">
       <section
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full flex flex-col overflow-y-auto rounded-t-[28px] border-t border-white/15 bg-[#161616] p-5 pt-3 shadow-2xl"
+        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full flex flex-col overflow-y-auto rounded-t-[32px] border-t border-white/15 bg-[#161616] p-5 pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.8)] modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="scanner-modal-title"
       >
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/25 rounded-full mx-auto my-2 shrink-0 cursor-pointer"
+          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-2 shrink-0 cursor-pointer active:scale-95 transition-all duration-150"
         />
         {scannerBody}
       </section>

@@ -1,0 +1,9 @@
+{
+  "appId": "com.subcleaner.trialme",
+  "appName": "TrialMe SubCleaner",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "backgroundColor": "#0A0A0C"
+}
