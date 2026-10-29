@@ -1,4 +1,6 @@
 import type { SubscriptionCategory, SubscriptionFrequency, Subscription } from '../types/subscription';
+import type { PresetService, TrialType } from '../types/database';
+import { getDatabase, subscribeToDatabaseUpdates } from '../services/databaseService';
 
 export type PresetFilterGroup = 'All' | 'Streaming' | 'Gyms' | 'Tech & AI' | 'Food & Delivery' | 'Finance';
 
@@ -18,44 +20,43 @@ export interface PopularPreset {
   defaultTrialDays: 7 | 14 | 30;
   trialUrl?: string;
   keywords?: string[];
+  // Extended fields from SSOT database
+  hasFreeTrial: boolean;
+  trialType: TrialType;
+  notes: string;
+  monthlyPriceGbp: number;
+  trialDurationDays: number;
 }
 
-export const POPULAR_PRESETS: PopularPreset[] = [
-  // ==================== STREAMING & MEDIA ====================
+const PRESET_METADATA: Record<
+  string,
   {
-    id: 'netflix',
-    name: 'Netflix UK Standard',
-    price: 10.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+    color: string;
+    cancelEmail?: string;
+    trialUrl?: string;
+    keywords: string[];
+    cancelSteps: string[];
+    filterGroup?: Exclude<PresetFilterGroup, 'All'>;
+    frequency?: SubscriptionFrequency;
+  }
+> = {
+  netflix_standard_uk: {
     color: '#E50914',
-    cancelUrl: 'https://www.netflix.com/youraccount',
     cancelEmail: 'support@netflix.com',
-    description: '1080p Full HD films & TV series',
-    defaultTrialDays: 7,
-    keywords: ['streaming', 'tv', 'movies', 'films', 'series', 'video', 'entertainment'],
+    trialUrl: 'https://www.netflix.com/signup',
+    filterGroup: 'Streaming',
+    keywords: ['streaming', 'tv', 'movies', 'films', 'series', 'video', 'entertainment', 'netflix'],
     cancelSteps: [
       'Log into netflix.com/youraccount',
       'In the Membership & Billing section, click Cancel Membership',
       'Click Finish Cancellation to confirm (access remains until period end)',
     ],
   },
-  {
-    id: 'spotify',
-    name: 'Spotify Premium UK',
-    price: 11.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Music & Audio',
-    filterGroup: 'Streaming',
+  spotify_premium_uk: {
     color: '#1DB954',
-    cancelUrl: 'https://www.spotify.com/uk/account/overview/',
     cancelEmail: 'support@spotify.com',
-    description: 'Ad-free high-fidelity music streaming & podcasts',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.spotify.com/uk/premium/',
+    filterGroup: 'Streaming',
     keywords: ['music', 'audio', 'podcasts', 'songs', 'streaming', 'spotify'],
     cancelSteps: [
       'Open spotify.com/uk/account in your web browser',
@@ -64,20 +65,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Retain Spotify Free without losing your saved playlists',
     ],
   },
-  {
-    id: 'disney-plus',
-    name: 'Disney+ UK',
-    price: 7.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  disney_plus_uk: {
     color: '#113CCF',
-    cancelUrl: 'https://www.disneyplus.com/account',
     cancelEmail: 'help@disneyplus.com',
-    description: 'Disney, Pixar, Marvel, Star Wars & Star catalog',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.disneyplus.com/en-gb',
+    filterGroup: 'Streaming',
     keywords: ['streaming', 'tv', 'movies', 'marvel', 'pixar', 'disney', 'family'],
     cancelSteps: [
       'Log into disneyplus.com/account',
@@ -85,20 +77,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Click Cancel Subscription and confirm your reason',
     ],
   },
-  {
-    id: 'amazon-prime',
-    name: 'Amazon Prime UK',
-    price: 8.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  amazon_prime_uk: {
     color: '#FF9900',
-    cancelUrl: 'https://www.amazon.co.uk/mc/manage',
     cancelEmail: 'customer-support@amazon.co.uk',
-    description: 'Next-day UK delivery, Prime Video & Prime Music',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.amazon.co.uk/amazonprime',
+    filterGroup: 'Streaming',
     keywords: ['prime', 'amazon', 'delivery', 'tv', 'video', 'shopping', 'streaming'],
     cancelSteps: [
       'Visit amazon.co.uk -> Your Account -> Prime Membership',
@@ -106,20 +89,10 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Select End Membership and continue through confirmation screens',
     ],
   },
-  {
-    id: 'apple-tv-plus',
-    name: 'Apple TV+ UK',
-    price: 8.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  apple_tv_plus_uk: {
     color: '#A5A5A5',
-    cancelUrl: 'https://support.apple.com/en-gb/118428',
-    cancelEmail: '',
-    description: 'Apple Originals films and series',
-    defaultTrialDays: 7,
     trialUrl: 'https://tv.apple.com/gb',
+    filterGroup: 'Streaming',
     keywords: ['apple', 'tv', 'streaming', 'movies', 'series', 'originals'],
     cancelSteps: [
       'Open Settings and select your Apple Account',
@@ -127,20 +100,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Select Cancel Subscription and confirm',
     ],
   },
-  {
-    id: 'now-tv',
-    name: 'NOW TV (Cinema / Sports)',
-    price: 9.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  now_tv_uk: {
     color: '#00877C',
-    cancelUrl: 'https://www.nowtv.com/gb/account/passes',
     cancelEmail: 'customerservices@nowtv.com',
-    description: 'HBO shows, Sky Cinema & Sky Sports passes',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.nowtv.com/',
+    filterGroup: 'Streaming',
     keywords: ['now', 'tv', 'cinema', 'sports', 'sky', 'hbo', 'streaming'],
     cancelSteps: [
       'Sign into nowtv.com/gb/account/passes',
@@ -148,19 +112,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Click Cancel Membership and decline retention offers until confirmation appears',
     ],
   },
-  {
-    id: 'sky',
-    name: 'Sky Stream & TV',
-    price: 34.0,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  sky_stream_uk: {
     color: '#0072C9',
-    cancelUrl: 'https://www.sky.com/help/articles/cancel-sky-tv',
     cancelEmail: 'mysky@sky.uk',
-    description: 'Sky Stream, Sky Cinema & Sports bundle',
-    defaultTrialDays: 30,
+    trialUrl: 'https://www.sky.com/tv/stream',
+    filterGroup: 'Streaming',
     keywords: ['sky', 'tv', 'stream', 'sports', 'cinema', 'broadband'],
     cancelSteps: [
       'Sign in at sky.com/myaccount',
@@ -169,20 +125,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Speak to web chat or phone 0333 7591 018 to confirm termination',
     ],
   },
-  {
-    id: 'youtube-premium',
-    name: 'YouTube Premium UK',
-    price: 12.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  youtube_premium_uk: {
     color: '#FF0000',
-    cancelUrl: 'https://www.youtube.com/paid_memberships',
     cancelEmail: 'support@youtube.com',
-    description: 'Ad-free YouTube video, background play & YouTube Music',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.youtube.com/premium',
+    filterGroup: 'Streaming',
     keywords: ['youtube', 'video', 'music', 'tv', 'streaming', 'google'],
     cancelSteps: [
       'Visit youtube.com/paid_memberships in your browser',
@@ -190,20 +137,10 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Click Deactivate -> Continue to cancel',
     ],
   },
-  {
-    id: 'audible-uk',
-    name: 'Audible UK',
-    price: 8.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Music & Audio',
-    filterGroup: 'Streaming',
+  audible_uk: {
     color: '#F8991D',
-    cancelUrl: 'https://www.audible.co.uk/account/overview',
-    cancelEmail: '',
-    description: 'Audiobooks, podcasts & spoken-word audio',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.audible.co.uk/ep/memberbenefits',
+    filterGroup: 'Streaming',
     keywords: ['audible', 'audiobooks', 'books', 'audio', 'music', 'amazon', 'podcasts'],
     cancelSteps: [
       'Sign in at audible.co.uk on desktop site and open Account Details',
@@ -211,19 +148,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Spend any remaining credits before confirming cancellation',
     ],
   },
-  {
-    id: 'bbc-sounds',
-    name: 'BBC TV Licence',
-    price: 14.12,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'News & Magazines',
-    filterGroup: 'Streaming',
+  bbc_tv_licence: {
     color: '#E01919',
-    cancelUrl: 'https://www.tvlicensing.co.uk/check-if-you-need-one/topics/cancellations-and-refunds',
     cancelEmail: 'enquiries@tvlicensing.co.uk',
-    description: 'BBC iPlayer & UK TV Licensing Direct Debit',
-    defaultTrialDays: 14,
+    trialUrl: 'https://www.tvlicensing.co.uk/',
+    filterGroup: 'Streaming',
     keywords: ['bbc', 'tv', 'licence', 'iplayer', 'sounds', 'broadcast'],
     cancelSteps: [
       'Visit tvlicensing.co.uk/cancel',
@@ -231,20 +160,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Cancel your ongoing Direct Debit with your UK bank (Monzo/Barclays/Lloyds/Revolut)',
     ],
   },
-  {
-    id: 'dazn-uk',
-    name: 'DAZN UK Sports',
-    price: 19.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  dazn_uk: {
     color: '#FAB400',
-    cancelUrl: 'https://www.dazn.com/en-GB/myaccount',
     cancelEmail: 'help@dazn.com',
-    description: 'Live boxing, MMA, NFL Game Pass & football streaming',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.dazn.com/en-GB',
+    filterGroup: 'Streaming',
     keywords: ['dazn', 'sports', 'boxing', 'football', 'tv', 'streaming', 'nfl'],
     cancelSteps: [
       'Sign in to dazn.com/en-GB/myaccount',
@@ -252,20 +172,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Note: Flexible pass requires 30 days notice; confirm cancellation date',
     ],
   },
-  {
-    id: 'paramount-plus',
-    name: 'Paramount+ UK',
-    price: 6.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  paramount_plus_uk: {
     color: '#0064FF',
-    cancelUrl: 'https://www.paramountplus.com/gb/account/',
     cancelEmail: 'support@paramountplus.com',
-    description: 'Hollywood blockbusters, Showtime & CBS Originals',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.paramountplus.com/gb/',
+    filterGroup: 'Streaming',
     keywords: ['paramount', 'tv', 'movies', 'streaming', 'films', 'series'],
     cancelSteps: [
       'Log into paramountplus.com/gb/account',
@@ -273,20 +184,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Confirm cancellation to stop auto-renewal after your 7-day trial',
     ],
   },
-  {
-    id: 'discovery-plus',
-    name: 'Discovery+ UK (TNT Sports)',
-    price: 6.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Streaming',
-    filterGroup: 'Streaming',
+  discovery_plus_tnt_uk: {
     color: '#0056FF',
-    cancelUrl: 'https://auth.discoveryplus.com/gb/my-account',
     cancelEmail: 'support@discoveryplus.co.uk',
-    description: 'Documentaries, Eurosport & TNT Sports streaming',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.discoveryplus.com/gb',
+    filterGroup: 'Streaming',
     keywords: ['discovery', 'tnt', 'sports', 'tv', 'streaming', 'documentaries'],
     cancelSteps: [
       'Go to discoveryplus.com/gb and open Account',
@@ -294,19 +196,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Confirm cancellation prior to your next billing date',
     ],
   },
-  {
-    id: 'guardian',
-    name: 'The Guardian Digital',
-    price: 11.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'News & Magazines',
-    filterGroup: 'Streaming',
+  the_guardian_digital: {
     color: '#052962',
-    cancelUrl: 'https://manage.theguardian.com/billing',
     cancelEmail: 'customer.help@theguardian.com',
-    description: 'The Guardian Editions & premium app journalism',
-    defaultTrialDays: 14,
+    trialUrl: 'https://support.theguardian.com/subscribe/digital',
+    filterGroup: 'Streaming',
     keywords: ['guardian', 'news', 'newspaper', 'magazines', 'reading'],
     cancelSteps: [
       'Log into manage.theguardian.com',
@@ -314,22 +208,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Click Cancel Subscription and confirm before the next billing cycle',
     ],
   },
-
-  // ==================== GYMS, FITNESS & HEALTH ====================
-  {
-    id: 'puregym',
-    name: 'PureGym Membership',
-    price: 19.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  puregym_core_uk: {
     color: '#00A499',
-    cancelUrl: 'https://www.puregym.com/member/',
     cancelEmail: 'member.services@puregym.com',
-    description: 'UK 24/7 gym access & classes',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.puregym.com/join/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'puregym', 'fitness', 'workout', 'health', 'weights'],
     cancelSteps: [
       'Log into your account at puregym.com/member/',
@@ -338,19 +221,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Confirm the cancellation and keep the confirmation reference email',
     ],
   },
-  {
-    id: 'the-gym-group',
-    name: 'The Gym Group',
-    price: 16.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  the_gym_group_uk: {
     color: '#FF5A00',
-    cancelUrl: 'https://www.thegymgroup.com/login/',
     cancelEmail: 'membership@thegymgroup.com',
-    description: '24/7 no-contract low-cost UK gym membership',
-    defaultTrialDays: 7,
+    trialUrl: 'https://www.thegymgroup.com/join-now/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'the gym group', 'fitness', 'workout', 'health'],
     cancelSteps: [
       'Cancel your Direct Debit directly via your UK banking app (Monzo, Barclays, Revolut)',
@@ -358,19 +233,11 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Verify cancellation in your Member Area at thegymgroup.com',
     ],
   },
-  {
-    id: 'david-lloyd',
-    name: 'David Lloyd Clubs',
-    price: 129.0,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  david_lloyd_uk: {
     color: '#003B5C',
-    cancelUrl: 'https://www.davidlloyd.co.uk/help-centre/membership/',
     cancelEmail: 'membership@davidlloyd.co.uk',
-    description: 'Premium UK health, racquets, spa & swimming club',
-    defaultTrialDays: 14,
+    trialUrl: 'https://www.davidlloyd.co.uk/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'david lloyd', 'fitness', 'tennis', 'spa', 'swim', 'health'],
     cancelSteps: [
       'Open the David Lloyd Clubs app -> Manage My Membership -> Request Cancellation',
@@ -378,38 +245,22 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Save your written cancellation acknowledgment from club support',
     ],
   },
-  {
-    id: 'jd-gyms',
-    name: 'JD Gyms UK',
-    price: 21.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  jd_gyms_uk: {
     color: '#D4AF37',
-    cancelUrl: 'https://www.jdgyms.co.uk/cancel-membership/',
     cancelEmail: 'help@jdgyms.co.uk',
-    description: 'No-contract UK gym, sauna & fitness classes',
-    defaultTrialDays: 14,
+    trialUrl: 'https://www.jdgyms.co.uk/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'jd gyms', 'fitness', 'workout', 'sauna'],
     cancelSteps: [
       'Complete the online cancellation form at jdgyms.co.uk/cancel-membership/',
       'Wait for the confirmation email before cancelling your Direct Debit at the bank',
     ],
   },
-  {
-    id: 'virgin-active',
-    name: 'Virgin Active UK',
-    price: 85.0,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  virgin_active_uk: {
     color: '#E10A0A',
-    cancelUrl: 'https://my.virginactive.co.uk/',
     cancelEmail: 'customerservices@virginactive.co.uk',
-    description: 'Health club, pool, Reformer Pilates & classes',
-    defaultTrialDays: 14,
+    trialUrl: 'https://www.virginactive.co.uk/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'virgin active', 'fitness', 'pilates', 'swim', 'health'],
     cancelSteps: [
       'Log into the Virgin Active app or my.virginactive.co.uk',
@@ -417,141 +268,76 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Submit notice by the 17th of the month for termination at the end of the following month',
     ],
   },
-  {
-    id: 'strava',
-    name: 'Strava Subscription',
-    price: 8.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  strava_uk: {
     color: '#FC4C02',
-    cancelUrl: 'https://www.strava.com/account',
     cancelEmail: 'support@strava.com',
-    description: 'Running, cycling GPS tracking, leaderboards & routes',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.strava.com/subscribe',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'fitness', 'running', 'cycling', 'strava', 'health', 'sport'],
     cancelSteps: [
       'Log into strava.com/account (or Apple/Google subscriptions if billed via phone)',
       'Click Cancel Your Subscription and complete the confirmation page',
     ],
   },
-  {
-    id: 'myfitnesspal',
-    name: 'MyFitnessPal Premium',
-    price: 15.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  myfitnesspal_premium_uk: {
     color: '#0066EE',
-    cancelUrl: 'https://www.myfitnesspal.com/account/my-subscription',
     cancelEmail: 'support@myfitnesspal.com',
-    description: 'Macro tracker, barcode scanner & nutrition coaching',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.myfitnesspal.com/premium',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'fitness', 'calories', 'diet', 'nutrition', 'health'],
     cancelSteps: [
       'Go to myfitnesspal.com/account/my-subscription',
       'Click Cancel Subscription (or cancel via iOS Settings -> Subscriptions)',
     ],
   },
-  {
-    id: 'whoop',
-    name: 'WHOOP 4.0 Membership',
-    price: 27.0,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  whoop_uk: {
     color: '#10B981',
-    cancelUrl: 'https://app.whoop.com/membership',
     cancelEmail: 'support@whoop.com',
-    description: '24/7 wearable recovery, strain & sleep coaching',
-    defaultTrialDays: 30,
     trialUrl: 'https://join.whoop.com/gb/en/trial/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'fitness', 'whoop', 'wearable', 'sleep', 'health'],
     cancelSteps: [
       'Log in at app.whoop.com/membership on web browser',
       'Select Cancel Membership (during 30-day trial, request return label to avoid annual charge)',
     ],
   },
-  {
-    id: 'headspace',
-    name: 'Headspace Meditation',
-    price: 9.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  headspace_uk: {
     color: '#F47D31',
-    cancelUrl: 'https://www.headspace.com/subscription/manage',
     cancelEmail: 'help@headspace.com',
-    description: 'Guided mindfulness, sleep casts & stress relief',
-    defaultTrialDays: 14,
     trialUrl: 'https://www.headspace.com/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'health', 'mindfulness', 'meditation', 'sleep', 'headspace', 'mental'],
     cancelSteps: [
       'Visit headspace.com/subscription/manage',
       'Click Turn Off Auto-Renewal and confirm cancellation',
     ],
   },
-  {
-    id: 'calm',
-    name: 'Calm Premium',
-    price: 11.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Fitness & Gym',
-    filterGroup: 'Gyms',
+  calm_premium_uk: {
     color: '#38BDF8',
-    cancelUrl: 'https://www.calm.com/profile/subscription',
     cancelEmail: 'support@calm.com',
-    description: 'Sleep Stories, meditation & relaxation soundscapes',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.calm.com/',
+    filterGroup: 'Gyms',
     keywords: ['gym', 'health', 'calm', 'sleep', 'meditation', 'mindfulness'],
     cancelSteps: [
       'Log in to calm.com/profile/subscription (or iOS App Store Subscriptions)',
       'Click Cancel Subscription at least 24 hours before your 7-day trial ends',
     ],
   },
-
-  // ==================== GAMING & TECH ====================
-  {
-    id: 'ps-plus',
-    name: 'PlayStation Plus',
-    price: 10.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Gaming',
-    filterGroup: 'Tech & AI',
+  playstation_plus_uk: {
     color: '#00439C',
-    cancelUrl: 'https://store.playstation.com/',
     cancelEmail: 'help@uk.playstation.com',
-    description: 'Online multiplayer, PS5 monthly games & Game Catalogue',
-    defaultTrialDays: 7,
+    trialUrl: 'https://store.playstation.com/',
+    filterGroup: 'Tech & AI',
     keywords: ['gaming', 'ps5', 'playstation', 'sony', 'games', 'tech'],
     cancelSteps: [
       'Go to PlayStation Settings -> Users and Accounts -> Account -> Payment and Subscriptions',
       'Select Subscriptions -> PlayStation Plus -> Turn Off Auto-Renew',
     ],
   },
-  {
-    id: 'xbox-game-pass',
-    name: 'Xbox Game Pass Ultimate',
-    price: 14.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Gaming',
-    filterGroup: 'Tech & AI',
+  xbox_game_pass_ultimate_uk: {
     color: '#107C10',
-    cancelUrl: 'https://account.microsoft.com/services',
-    cancelEmail: '',
-    description: 'Day-one Xbox & PC games, EA Play & Cloud Gaming',
-    defaultTrialDays: 14,
     trialUrl: 'https://www.xbox.com/en-GB/xbox-game-pass',
+    filterGroup: 'Tech & AI',
     keywords: ['gaming', 'xbox', 'microsoft', 'pc', 'games', 'tech'],
     cancelSteps: [
       'Sign in at account.microsoft.com/services',
@@ -559,39 +345,22 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Select Cancel subscription or Turn off recurring billing',
     ],
   },
-  {
-    id: 'nintendo-switch-online',
-    name: 'Nintendo Switch Online',
-    price: 3.49,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Gaming',
-    filterGroup: 'Tech & AI',
+  nintendo_switch_online_uk: {
     color: '#E60012',
-    cancelUrl: 'https://ec.nintendo.com/my/membership',
     cancelEmail: 'customer-support@nintendo.co.uk',
-    description: 'Switch online play, cloud saves & classic NES/SNES library',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.nintendo.co.uk/Nintendo-Switch-Online/',
+    filterGroup: 'Tech & AI',
     keywords: ['gaming', 'nintendo', 'switch', 'games', 'tech'],
     cancelSteps: [
       'Visit ec.nintendo.com/my/membership and sign in',
       'Click Terminate Automatic Renewal for Nintendo Switch Online',
     ],
   },
-  {
-    id: 'chatgpt-plus',
-    name: 'ChatGPT Plus',
-    price: 19.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'AI & Tech',
-    filterGroup: 'Tech & AI',
+  chatgpt_plus_uk: {
     color: '#10A37F',
-    cancelUrl: 'https://chatgpt.com/#settings',
     cancelEmail: 'support@openai.com',
-    description: 'Advanced GPT-4o reasoning, priority access & search',
-    defaultTrialDays: 14,
+    trialUrl: 'https://chatgpt.com/',
+    filterGroup: 'Tech & AI',
     keywords: ['ai', 'chatgpt', 'openai', 'tech', 'software', 'productivity'],
     cancelSteps: [
       'Open ChatGPT and click your profile in the bottom left',
@@ -599,98 +368,52 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Click Manage My Subscription (Stripe portal) -> Cancel Plan',
     ],
   },
-  {
-    id: 'claude-pro',
-    name: 'Claude Pro (Anthropic)',
-    price: 18.0,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'AI & Tech',
-    filterGroup: 'Tech & AI',
+  claude_pro_uk: {
     color: '#D97757',
-    cancelUrl: 'https://claude.ai/settings/billing',
     cancelEmail: 'support@anthropic.com',
-    description: '5x more Claude usage, priority coding & research',
-    defaultTrialDays: 14,
+    trialUrl: 'https://claude.ai/',
+    filterGroup: 'Tech & AI',
     keywords: ['ai', 'claude', 'anthropic', 'tech', 'coding', 'productivity'],
     cancelSteps: [
       'Log into claude.ai and go to Settings -> Billing',
       'Click Cancel Subscription and confirm in the Stripe portal',
     ],
   },
-  {
-    id: 'apple-icloud',
-    name: 'Apple iCloud+ (200GB)',
-    price: 2.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Productivity',
-    filterGroup: 'Tech & AI',
+  apple_icloud_200gb_uk: {
     color: '#3B82F6',
-    cancelUrl: 'https://support.apple.com/en-gb/108318',
-    cancelEmail: '',
-    description: 'iPhone backup storage, Private Relay & Hide My Email',
-    defaultTrialDays: 30,
+    trialUrl: 'https://www.apple.com/uk/icloud/',
+    filterGroup: 'Tech & AI',
     keywords: ['apple', 'icloud', 'cloud', 'storage', 'tech', 'iphone'],
     cancelSteps: [
       'On iPhone, open Settings -> [Your Name] -> iCloud -> Manage Account Storage',
       'Tap Change Storage Plan -> Downgrade Options -> Free (5GB)',
     ],
   },
-  {
-    id: 'google-one',
-    name: 'Google One (AI / Cloud)',
-    price: 7.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Productivity',
-    filterGroup: 'Tech & AI',
+  google_one_ai_uk: {
     color: '#4285F4',
-    cancelUrl: 'https://one.google.com/settings',
-    cancelEmail: '',
-    description: 'Google Drive, Gmail & Photos cloud storage + Gemini AI',
-    defaultTrialDays: 30,
     trialUrl: 'https://one.google.com/',
+    filterGroup: 'Tech & AI',
     keywords: ['google', 'cloud', 'drive', 'storage', 'gemini', 'ai', 'tech'],
     cancelSteps: [
       'Go to one.google.com/settings in your browser',
       'Click Cancel Membership -> Cancel to confirm',
     ],
   },
-  {
-    id: 'microsoft-365',
-    name: 'Microsoft 365 Personal',
-    price: 5.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Productivity',
-    filterGroup: 'Tech & AI',
+  microsoft_365_personal_uk: {
     color: '#0078D4',
-    cancelUrl: 'https://account.microsoft.com/services',
-    cancelEmail: '',
-    description: 'Word, Excel, PowerPoint & 1TB OneDrive cloud storage',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.microsoft.com/en-gb/microsoft-365/try',
+    filterGroup: 'Tech & AI',
     keywords: ['microsoft', 'office', 'word', 'excel', 'onedrive', 'tech', 'productivity'],
     cancelSteps: [
       'Sign in at account.microsoft.com/services',
       'Select Manage next to Microsoft 365 -> Cancel subscription',
     ],
   },
-  {
-    id: 'nordvpn',
-    name: 'NordVPN UK',
-    price: 10.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'AI & Tech',
-    filterGroup: 'Tech & AI',
+  nordvpn_uk: {
     color: '#4687FF',
-    cancelUrl: 'https://my.nordaccount.com/dashboard/nordvpn/billing/',
     cancelEmail: 'support@nordvpn.com',
-    description: 'VPN privacy, threat protection & secure browsing plan',
-    defaultTrialDays: 30,
     trialUrl: 'https://nordvpn.com/',
+    filterGroup: 'Tech & AI',
     keywords: ['vpn', 'nordvpn', 'security', 'privacy', 'tech'],
     cancelSteps: [
       'Sign in to your Nord Account and open Billing',
@@ -698,82 +421,42 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Turn off auto-renewal and confirm the change (30-day money-back guarantee available)',
     ],
   },
-  {
-    id: 'expressvpn',
-    name: 'ExpressVPN',
-    price: 10.49,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'AI & Tech',
-    filterGroup: 'Tech & AI',
+  expressvpn_uk: {
     color: '#DA3940',
-    cancelUrl: 'https://www.expressvpn.com/subscriptions',
     cancelEmail: 'support@expressvpn.com',
-    description: 'High-speed UK & global encrypted VPN servers',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.expressvpn.com/',
+    filterGroup: 'Tech & AI',
     keywords: ['vpn', 'expressvpn', 'security', 'privacy', 'tech'],
     cancelSteps: [
       'Sign in at expressvpn.com/subscriptions',
       'Click Edit subscription settings -> Turn Off Automatic Renewal',
     ],
   },
-  {
-    id: 'adobe-cc',
-    name: 'Adobe Creative Cloud',
-    price: 19.97,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Productivity',
-    filterGroup: 'Tech & AI',
+  adobe_creative_cloud_uk: {
     color: '#FA0F00',
-    cancelUrl: 'https://account.adobe.com/plans',
-    cancelEmail: '',
-    description: 'Photoshop, Lightroom, Premiere Pro & Acrobat PDF',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.adobe.com/uk/creativecloud.html',
+    filterGroup: 'Tech & AI',
     keywords: ['adobe', 'photoshop', 'design', 'video', 'pdf', 'tech', 'creative'],
     cancelSteps: [
       'Sign in at account.adobe.com/plans and click Manage Plan',
       'Tip: Cancel within 14 days of starting for a full refund with £0 early termination fee',
     ],
   },
-  {
-    id: 'canva-pro',
-    name: 'Canva Pro UK',
-    price: 12.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Productivity',
-    filterGroup: 'Tech & AI',
+  canva_pro_uk: {
     color: '#7D2AE8',
-    cancelUrl: 'https://www.canva.com/settings/billing-and-teams',
-    cancelEmail: '',
-    description: 'Magic Studio AI design, background remover & brand kits',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.canva.com/en_gb/pro/',
+    filterGroup: 'Tech & AI',
     keywords: ['canva', 'design', 'graphics', 'ai', 'tech', 'productivity'],
     cancelSteps: [
       'Open Canva Settings -> Billing & Plans',
       'Click the three dots next to Canva Pro -> Cancel Plan',
     ],
   },
-
-  // ==================== UK DELIVERY, FOOD & LIFESTYLE ====================
-  {
-    id: 'deliveroo-plus',
-    name: 'Deliveroo Plus',
-    price: 3.49,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  deliveroo_plus_uk: {
     color: '#00CDBC',
-    cancelUrl: 'https://deliveroo.co.uk/account',
     cancelEmail: 'support@deliveroo.co.uk',
-    description: 'Free delivery on UK restaurant & grocery orders',
-    defaultTrialDays: 14,
     trialUrl: 'https://deliveroo.co.uk/plus',
+    filterGroup: 'Food & Delivery',
     keywords: ['food', 'delivery', 'deliveroo', 'takeaway', 'groceries', 'restaurant'],
     cancelSteps: [
       'Open the Deliveroo app or deliveroo.co.uk/account',
@@ -781,59 +464,30 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Tap Cancel Membership and verify cancellation',
     ],
   },
-  {
-    id: 'uber-one',
-    name: 'Uber One UK',
-    price: 4.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  uber_one_uk: {
     color: '#F59E0B',
-    cancelUrl: 'https://m.uber.com/',
-    cancelEmail: '',
-    description: '£0 Delivery Fee on Uber Eats & 5–10% off Uber rides',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.uber.com/gb/en/u/uber-one/',
+    filterGroup: 'Food & Delivery',
     keywords: ['uber', 'ubereats', 'food', 'delivery', 'taxi', 'rides'],
     cancelSteps: [
       'Open the Uber or Uber Eats app -> Account -> Uber One',
       'Tap Manage Membership -> End Membership at least 48h before renewal',
     ],
   },
-  {
-    id: 'just-eat-plus',
-    name: 'Just Eat+',
-    price: 5.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  just_eat_plus_uk: {
     color: '#FF8000',
-    cancelUrl: 'https://www.just-eat.co.uk/account',
-    cancelEmail: '',
-    description: 'Unlimited free delivery on eligible UK takeaways',
-    defaultTrialDays: 30,
+    trialUrl: 'https://www.just-eat.co.uk/',
+    filterGroup: 'Food & Delivery',
     keywords: ['just eat', 'food', 'delivery', 'takeaway'],
     cancelSteps: [
       'Open the Just Eat app -> Profile -> Just Eat+',
       'Select Manage Membership -> Cancel Just Eat+',
     ],
   },
-  {
-    id: 'hellofresh-uk',
-    name: 'HelloFresh UK',
-    price: 39.96,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  hellofresh_uk: {
     color: '#70C98A',
-    cancelUrl: 'https://www.hellofresh.co.uk/my-account',
-    cancelEmail: '',
-    description: 'Weekly UK recipe box & fresh meal-kit delivery',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.hellofresh.co.uk/',
+    filterGroup: 'Food & Delivery',
     keywords: ['hellofresh', 'food', 'delivery', 'meals', 'cooking', 'recipes', 'box'],
     cancelSteps: [
       'Sign in and open your HelloFresh account settings',
@@ -841,195 +495,165 @@ export const POPULAR_PRESETS: PopularPreset[] = [
       'Complete the confirmation steps before Wednesday 11:59 PM cut-off',
     ],
   },
-  {
-    id: 'gousto',
-    name: 'Gousto Recipe Box',
-    price: 36.75,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  gousto_uk: {
     color: '#E42313',
-    cancelUrl: 'https://www.gousto.co.uk/my-gousto/subscription-settings',
     cancelEmail: 'info@gousto.co.uk',
-    description: 'UK fresh recipe meal kits delivered to your door',
-    defaultTrialDays: 7,
     trialUrl: 'https://www.gousto.co.uk/',
+    filterGroup: 'Food & Delivery',
     keywords: ['gousto', 'food', 'delivery', 'meals', 'recipes', 'box'],
     cancelSteps: [
       'Log in at gousto.co.uk -> Account -> Subscription Settings',
       'Click Cancel Account at least 3 days before your next scheduled delivery at 12:00 PM',
     ],
   },
-  {
-    id: 'pret-coffee',
-    name: 'Club Pret Subscription',
-    price: 5.0,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  club_pret_uk: {
     color: '#8B1D41',
-    cancelUrl: 'https://www.pret.co.uk/en-GB/account',
-    cancelEmail: '',
-    description: '50% off up to 5 barista-made drinks a day at Pret UK',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.pret.co.uk/en-GB/club-pret',
-    keywords: ['pret', 'coffee', 'drinks', 'food', 'cafe'],
+    filterGroup: 'Food & Delivery',
+    keywords: ['pret', 'coffee', 'drinks', 'food', 'cafe', 'club pret'],
     cancelSteps: [
       'Sign into the Pret app or pret.co.uk/en-GB/account',
       'Go to Manage Subscription -> Cancel Club Pret',
     ],
   },
-  {
-    id: 'tesco-clubcard-plus',
-    name: 'Tesco Clubcard Plus',
-    price: 7.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  tesco_clubcard_plus_uk: {
     color: '#00539F',
-    cancelUrl: 'https://secure.tesco.com/clubcard/myaccount',
-    cancelEmail: '',
-    description: '10% off 2 big in-store Tesco shops every month',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.tesco.com/clubcard/clubcard-plus',
+    filterGroup: 'Food & Delivery',
     keywords: ['tesco', 'clubcard', 'groceries', 'food', 'supermarket', 'shopping'],
     cancelSteps: [
       'Sign in at secure.tesco.com/clubcard/myaccount',
       'Go to Clubcard Plus -> Cancel subscription',
     ],
   },
-  {
-    id: 'asos-premier',
-    name: 'ASOS Premier UK',
-    price: 12.95,
-    currency: '£',
-    frequency: 'yearly',
-    category: 'Food & Delivery',
-    filterGroup: 'Food & Delivery',
+  asos_premier_uk: {
     color: '#A0A0A0',
-    cancelUrl: 'https://my.asos.com/my-account',
-    cancelEmail: '',
-    description: 'Unlimited Next-Day UK fashion delivery for a year',
-    defaultTrialDays: 14,
+    trialUrl: 'https://www.asos.com/premier-delivery/',
+    filterGroup: 'Food & Delivery',
+    frequency: 'yearly',
     keywords: ['asos', 'delivery', 'shopping', 'clothes', 'fashion'],
     cancelSteps: [
       'Log in at my.asos.com -> ASOS Premier',
       'Turn off Auto-Renew so you are not billed again next year',
     ],
   },
-
-  // ==================== FINANCE & CREDIT ====================
-  {
-    id: 'experian-creditexpert',
-    name: 'Experian CreditExpert',
-    price: 14.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Utilities',
-    filterGroup: 'Finance',
+  experian_creditexpert_uk: {
     color: '#1D4ED8',
-    cancelUrl: 'https://www.experian.co.uk/consumer/my-account.html',
     cancelEmail: 'customerservices@uk.experian.com',
-    description: 'Daily UK credit report updates, score boost & fraud alerts',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.experian.co.uk/consumer/credit-expert.html',
+    filterGroup: 'Finance',
     keywords: ['finance', 'credit', 'score', 'experian', 'mortgage', 'bank'],
     cancelSteps: [
       'Log into experian.co.uk -> My Account -> Subscription details',
       'Click Downgrade to Free Experian Account before your 30-day trial expires',
     ],
   },
-  {
-    id: 'clearscore-protect',
-    name: 'ClearScore Protect',
-    price: 4.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Utilities',
-    filterGroup: 'Finance',
+  clearscore_protect_uk: {
     color: '#06B6D4',
-    cancelUrl: 'https://my.clearscore.com/account',
     cancelEmail: 'help@clearscore.com',
-    description: 'Dark web identity monitoring & daily credit score refresh',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.clearscore.com/protect',
+    filterGroup: 'Finance',
     keywords: ['finance', 'credit', 'score', 'clearscore', 'identity'],
     cancelSteps: [
       'Log into my.clearscore.com/account -> ClearScore Protect',
       'Click Cancel Subscription (your core ClearScore report remains 100% free)',
     ],
   },
-  {
-    id: 'equifax-uk',
-    name: 'Equifax Credit Report & Score',
-    price: 14.95,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Utilities',
-    filterGroup: 'Finance',
+  equifax_uk: {
     color: '#B91C1C',
-    cancelUrl: 'https://www.equifax.co.uk/myequifax',
-    cancelEmail: '',
-    description: 'Full UK Equifax credit file, WebDetect & alerts',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.equifax.co.uk/',
+    filterGroup: 'Finance',
     keywords: ['finance', 'credit', 'score', 'equifax', 'report'],
     cancelSteps: [
       'Log into equifax.co.uk/myequifax -> My Account',
       'Select Cancel Subscription before your 30-day free trial ends',
     ],
   },
-  {
-    id: 'monzo-perks',
-    name: 'Monzo Perks / Max',
-    price: 7.0,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Utilities',
-    filterGroup: 'Finance',
+  monzo_perks_uk: {
     color: '#FF365D',
-    cancelUrl: 'https://monzo.com/help',
     cancelEmail: 'help@monzo.com',
-    description: 'Credit insights, high-interest savings, Greggs treat & Railcard',
-    defaultTrialDays: 14,
-    keywords: ['finance', 'monzo', 'bank', 'banking', 'perks', 'plus', 'max'],
+    trialUrl: 'https://monzo.com/features/monzo-perks/',
+    filterGroup: 'Finance',
+    keywords: ['finance', 'credit', 'score', 'monzo', 'bank', 'banking', 'perks', 'plus', 'max'],
     cancelSteps: [
       'Open the Monzo app on your smartphone',
       'Tap your profile icon -> Your Monzo Plan',
       'Scroll to the bottom and select Cancel Plan',
     ],
   },
-  {
-    id: 'revolut-premium',
-    name: 'Revolut Premium / Metal',
-    price: 7.99,
-    currency: '£',
-    frequency: 'monthly',
-    category: 'Utilities',
-    filterGroup: 'Finance',
+  revolut_premium_uk: {
     color: '#38BDF8',
-    cancelUrl: 'https://www.revolut.com/legal/paid-plans/',
-    cancelEmail: '',
-    description: 'Unlimited FX exchange, travel insurance & bundled partner apps',
-    defaultTrialDays: 30,
     trialUrl: 'https://www.revolut.com/revolut-premium/',
+    filterGroup: 'Finance',
     keywords: ['finance', 'revolut', 'bank', 'banking', 'metal', 'premium', 'travel'],
     cancelSteps: [
       'Open the Revolut app -> tap your Profile icon -> Your Plan',
       'Scroll down to Manage -> Change Plan -> Downgrade to Standard (Free)',
     ],
   },
-];
+};
+
+function resolveDefaultTrialDays(trialDurationDays: number): 7 | 14 | 30 {
+  if (trialDurationDays === 30 || trialDurationDays === 14 || trialDurationDays === 7) {
+    return trialDurationDays;
+  }
+  return 7;
+}
+
+export function mapPresetToPopularPreset(preset: PresetService): PopularPreset {
+  const meta = PRESET_METADATA[preset.id] || {
+    color: '#D4AF7C',
+    keywords: [preset.name.toLowerCase()],
+    cancelSteps: [
+      `Sign into your account at ${preset.name}`,
+      `Navigate to Account Settings -> Subscriptions`,
+      `Select Cancel Subscription and confirm termination`,
+    ],
+  };
+
+  const defaultTrialDays = resolveDefaultTrialDays(preset.trial_duration_days);
+
+  return {
+    id: preset.id,
+    name: preset.name,
+    price: preset.monthly_price_gbp,
+    currency: '£',
+    frequency: meta.frequency || 'monthly',
+    category: preset.category,
+    filterGroup: meta.filterGroup || 'Streaming',
+    color: meta.color,
+    cancelUrl: preset.cancel_url,
+    cancelEmail: meta.cancelEmail || '',
+    cancelSteps: meta.cancelSteps,
+    description: (meta as any).description || preset.name,
+    defaultTrialDays,
+    trialUrl: meta.trialUrl || preset.cancel_url,
+    keywords: meta.keywords,
+    hasFreeTrial: preset.has_free_trial,
+    trialType: preset.trial_type,
+    notes: preset.notes,
+    monthlyPriceGbp: preset.monthly_price_gbp,
+    trialDurationDays: preset.trial_duration_days,
+  };
+}
+
+export function buildPopularPresets(database = getDatabase()): PopularPreset[] {
+  return database.presets.map(mapPresetToPopularPreset);
+}
+
+export let POPULAR_PRESETS: PopularPreset[] = buildPopularPresets();
+
+subscribeToDatabaseUpdates((updatedDb) => {
+  POPULAR_PRESETS = buildPopularPresets(updatedDb);
+});
 
 export function filterPopularPresets(
   searchQuery = '',
-  filterGroup: PresetFilterGroup = 'All'
+  filterGroup: PresetFilterGroup = 'All',
+  presetsList: PopularPreset[] = POPULAR_PRESETS
 ): PopularPreset[] {
   const q = searchQuery.trim().toLowerCase();
-  return POPULAR_PRESETS.filter((preset) => {
+  return presetsList.filter((preset) => {
     if (filterGroup !== 'All' && preset.filterGroup !== filterGroup) {
       return false;
     }
@@ -1037,7 +661,7 @@ export function filterPopularPresets(
     const inName = preset.name.toLowerCase().includes(q);
     const inCategory = preset.category.toLowerCase().includes(q);
     const inGroup = preset.filterGroup.toLowerCase().includes(q);
-    const inDesc = preset.description.toLowerCase().includes(q);
+    const inDesc = (preset.description || '').toLowerCase().includes(q);
     const inKeywords = (preset.keywords || []).some((kw) => kw.toLowerCase().includes(q));
     return inName || inCategory || inGroup || inDesc || inKeywords;
   });
@@ -1047,20 +671,20 @@ export const INITIAL_DEMO_SUBSCRIPTIONS: Subscription[] = [
   {
     id: 'sub-demo-1',
     name: 'Netflix UK Standard',
-    price: 10.99,
+    price: 12.99,
     currency: '£',
     frequency: 'monthly' as SubscriptionFrequency,
     category: 'Streaming' as SubscriptionCategory,
-    nextPaymentDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // in 3 days
+    nextPaymentDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     status: 'active' as const,
     color: '#E50914',
-    notes: 'Standard 1080p plan for 2 simultaneous screens in UK',
-    cancelUrl: 'https://www.netflix.com/youraccount',
+    notes: 'Standard 1080p plan for 2 simultaneous screens in UK. Instant online cancellation.',
+    cancelUrl: 'https://www.netflix.com/CancelPlan',
     cancelEmail: 'support@netflix.com',
     reminderDaysBefore: 3,
     paymentHistory: [
-      { id: 'h1', date: '2026-09-18', amount: 10.99, currency: '£', status: 'paid' as const },
-      { id: 'h2', date: '2026-08-18', amount: 10.99, currency: '£', status: 'paid' as const },
+      { id: 'h1', date: '2026-09-18', amount: 12.99, currency: '£', status: 'paid' as const },
+      { id: 'h2', date: '2026-08-18', amount: 12.99, currency: '£', status: 'paid' as const },
     ],
     createdAt: '2026-08-18',
   },
@@ -1071,10 +695,10 @@ export const INITIAL_DEMO_SUBSCRIPTIONS: Subscription[] = [
     currency: '£',
     frequency: 'monthly' as SubscriptionFrequency,
     category: 'Music & Audio' as SubscriptionCategory,
-    nextPaymentDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // in 12 days
+    nextPaymentDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     status: 'active' as const,
     color: '#1DB954',
-    notes: 'Individual UK ad-free streaming subscription',
+    notes: 'Individual UK ad-free streaming subscription. Retains playlists if cancelled.',
     cancelUrl: 'https://www.spotify.com/uk/account/overview/',
     cancelEmail: 'support@spotify.com',
     reminderDaysBefore: 2,

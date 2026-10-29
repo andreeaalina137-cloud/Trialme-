@@ -1,5 +1,7 @@
 import type { Subscription, SubscriptionCategory, UserPlan } from '../types/subscription';
+import type { TrialType, MonetryDatabase } from '../types/database';
 import { safeStorageGet, safeStorageSet, sanitizeSubscriptionsList, sanitizeUserPlan } from './storage';
+import { getDatabase, subscribeToDatabaseUpdates } from '../services/databaseService';
 
 export interface PriceHikeAlert {
   providerKey: string;
@@ -8,54 +10,6 @@ export interface PriceHikeAlert {
   newPrice: number;
   annualExtra: number;
   effectiveNote: string;
-}
-
-const UK_PRICE_HIKE_ALERTS: PriceHikeAlert[] = [
-  {
-    providerKey: 'netflix',
-    headline: 'UK Price Hike (+£2/mo)',
-    oldPrice: 10.99,
-    newPrice: 12.99,
-    annualExtra: 24.0,
-    effectiveNote: 'Netflix UK Standard rose by £24/yr. Consider switching or cancelling if underused.',
-  },
-  {
-    providerKey: 'spotify',
-    headline: 'UK Price Hike (+£1/mo)',
-    oldPrice: 10.99,
-    newPrice: 11.99,
-    annualExtra: 12.0,
-    effectiveNote: 'Spotify Premium Individual UK increased by £12/yr.',
-  },
-  {
-    providerKey: 'disney',
-    headline: 'UK Tier Hike (+£2/mo)',
-    oldPrice: 7.99,
-    newPrice: 9.99,
-    annualExtra: 24.0,
-    effectiveNote: 'Disney+ UK Standard increased by £24/yr unless switched to Ads or Annual.',
-  },
-  {
-    providerKey: 'sky',
-    headline: 'UK Mid-Contract Rise (+6.7%)',
-    oldPrice: 31.0,
-    newPrice: 34.0,
-    annualExtra: 36.0,
-    effectiveNote: 'Sky UK annual tariff adjustment adds ~£36/yr. You can negotiate or cancel within 31 days.',
-  },
-  {
-    providerKey: 'puregym',
-    headline: 'Peak Tariff Notice',
-    oldPrice: 17.99,
-    newPrice: 19.99,
-    annualExtra: 24.0,
-    effectiveNote: 'Check if Off-Peak or The Gym Group saves you £60+/yr.',
-  },
-];
-
-export function getUkPriceHikeAlert(subscriptionName: string): PriceHikeAlert | null {
-  const normalized = subscriptionName.toLowerCase();
-  return UK_PRICE_HIKE_ALERTS.find((item) => normalized.includes(item.providerKey)) || null;
 }
 
 export interface CuratedUkTrial {
@@ -70,62 +24,137 @@ export interface CuratedUkTrial {
   trialUrl: string;
   cancelUrl: string;
   highlight: string;
+  notes?: string;
+  trialType?: TrialType;
 }
 
-export const CURATED_UK_TRIALS: CuratedUkTrial[] = [
+const CURATED_TRIAL_METADATA: Record<
+  string,
   {
-    id: 'radar-amazon-prime',
-    name: 'Amazon Prime UK',
+    badge: string;
+    color: string;
+    trialUrl: string;
+    highlight: string;
+  }
+> = {
+  amazon_prime_uk: {
     badge: '30 Days Free',
-    trialDays: 30,
-    postTrialPrice: 8.99,
-    currency: '£',
-    category: 'Streaming',
     color: '#FF9900',
     trialUrl: 'https://www.amazon.co.uk/amazonprime',
-    cancelUrl: 'https://www.amazon.co.uk/mc/manage',
     highlight: 'Next-day UK delivery + Prime Video',
   },
-  {
-    id: 'radar-audible-uk',
-    name: 'Audible UK',
+  audible_uk: {
     badge: '30 Days + 1 Free Book',
-    trialDays: 30,
-    postTrialPrice: 8.99,
-    currency: '£',
-    category: 'Music & Audio',
     color: '#F8991D',
     trialUrl: 'https://www.audible.co.uk/ep/memberbenefits',
-    cancelUrl: 'https://www.audible.co.uk/account/overview',
     highlight: 'Keep your audiobook even if you cancel before day 27',
   },
-  {
-    id: 'radar-apple-tv',
-    name: 'Apple TV+ UK',
+  apple_tv_plus_uk: {
     badge: '7 Days Free',
-    trialDays: 7,
-    postTrialPrice: 8.99,
-    currency: '£',
-    category: 'Streaming',
     color: '#A5A5A5',
     trialUrl: 'https://tv.apple.com/gb',
-    cancelUrl: 'https://support.apple.com/en-gb/118428',
     highlight: 'Binge Apple Originals safely with a 3-day alarm',
   },
-  {
-    id: 'radar-nordvpn',
-    name: 'NordVPN UK',
+  nordvpn_uk: {
     badge: '30-Day Guarantee',
-    trialDays: 30,
-    postTrialPrice: 10.99,
-    currency: '£',
-    category: 'AI & Tech',
     color: '#4687FF',
     trialUrl: 'https://nordvpn.com/',
-    cancelUrl: 'https://my.nordaccount.com/dashboard/nordvpn/billing/',
     highlight: 'Full 30-day UK refund shield tracked automatically',
   },
-];
+};
+
+const HIKE_ALERT_METADATA: Record<string, { providerKey: string; headline: string; effectiveNote: string }> = {
+  netflix_standard_uk: {
+    providerKey: 'netflix',
+    headline: 'UK Price Hike (+£2/mo)',
+    effectiveNote: 'Netflix UK Standard rose by £24/yr. Consider switching or cancelling if underused.',
+  },
+  spotify_premium_uk: {
+    providerKey: 'spotify',
+    headline: 'UK Price Hike (+£1/mo)',
+    effectiveNote: 'Spotify Premium Individual UK increased by £12/yr.',
+  },
+  disney_plus_uk: {
+    providerKey: 'disney',
+    headline: 'UK Tier Hike (+£2/mo)',
+    effectiveNote: 'Disney+ UK Standard increased by £24/yr unless switched to Ads or Annual.',
+  },
+  sky_stream_uk: {
+    providerKey: 'sky',
+    headline: 'UK Mid-Contract Rise (+£3/mo)',
+    effectiveNote: 'Sky UK annual tariff adjustment adds ~£36/yr. You can negotiate or cancel within 31 days.',
+  },
+  puregym_core_uk: {
+    providerKey: 'puregym',
+    headline: 'Peak Tariff Notice (+£3/mo)',
+    effectiveNote: 'Check if Off-Peak or The Gym Group saves you £60+/yr.',
+  },
+  microsoft_365_personal_uk: {
+    providerKey: 'microsoft',
+    headline: 'Copilot AI Bundle Hike (+£2.50/mo)',
+    effectiveNote: 'Microsoft 365 Personal increased by £30/yr after Copilot AI integration.',
+  },
+};
+
+export function buildPriceHikeAlerts(db: MonetryDatabase = getDatabase()): PriceHikeAlert[] {
+  return db.uk_price_hike_alerts.map((raw) => {
+    const meta = HIKE_ALERT_METADATA[raw.service_id] || {
+      providerKey: raw.service_id.split('_')[0],
+      headline: `${raw.service_name} Price Hike`,
+      effectiveNote: `${raw.service_name} increased by £${raw.annual_impact_gbp}/yr.`,
+    };
+    return {
+      providerKey: meta.providerKey,
+      headline: meta.headline,
+      oldPrice: raw.old_price_gbp,
+      newPrice: raw.new_price_gbp,
+      annualExtra: raw.annual_impact_gbp,
+      effectiveNote: meta.effectiveNote,
+    };
+  });
+}
+
+export function buildCuratedUkTrials(db: MonetryDatabase = getDatabase()): CuratedUkTrial[] {
+  const trialIdSet = new Set(db.curated_uk_trials);
+  return db.presets
+    .filter((p) => trialIdSet.has(p.id))
+    .map((preset) => {
+      const meta = CURATED_TRIAL_METADATA[preset.id] || {
+        badge: `${preset.trial_duration_days || 7} Days Free`,
+        color: '#D4AF7C',
+        trialUrl: preset.cancel_url,
+        highlight: preset.notes,
+      };
+      return {
+        id: preset.id,
+        name: preset.name,
+        badge: meta.badge,
+        trialDays: preset.trial_duration_days || 7,
+        postTrialPrice: preset.monthly_price_gbp,
+        currency: '£',
+        category: preset.category,
+        color: meta.color,
+        trialUrl: meta.trialUrl,
+        cancelUrl: preset.cancel_url,
+        highlight: meta.highlight,
+        notes: preset.notes,
+        trialType: preset.trial_type,
+      };
+    });
+}
+
+export let UK_PRICE_HIKE_ALERTS: PriceHikeAlert[] = buildPriceHikeAlerts();
+export let CURATED_UK_TRIALS: CuratedUkTrial[] = buildCuratedUkTrials();
+
+subscribeToDatabaseUpdates((updatedDb) => {
+  UK_PRICE_HIKE_ALERTS = buildPriceHikeAlerts(updatedDb);
+  CURATED_UK_TRIALS = buildCuratedUkTrials(updatedDb);
+});
+
+export function getUkPriceHikeAlert(subscriptionName: string): PriceHikeAlert | null {
+  const normalized = subscriptionName.toLowerCase();
+  return UK_PRICE_HIKE_ALERTS.find((item) => normalized.includes(item.providerKey)) || null;
+}
 
 const LICENSE_STORAGE_KEY = 'subcleaner_license_key';
 const AI_QUOTA_MONTHLY_LIMIT = 10;

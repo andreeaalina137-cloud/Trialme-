@@ -19,6 +19,7 @@ import {
 import { getUkPriceHikeAlert } from '../utils/retentionAndTrust';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getAffiliateOffer } from '../data/cheaperAlternatives';
+import { useMonetryData } from '../context/DatabaseContext';
 
 interface SubscriptionDetailModalProps {
   isOpen: boolean;
@@ -77,6 +78,8 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   const annualCost = convertFrequencyToAnnual(subscription.price, subscription.frequency);
   const isCancelled = subscription.status === 'cancelled';
   const isTrial = subscription.status === 'trial';
+  const { findPresetByNameOrAlias } = useMonetryData();
+  const matchedPreset = findPresetByNameOrAlias(subscription.name);
   const affiliateOffer = getAffiliateOffer(subscription.name);
   const priceHikeAlert = !isCancelled ? getUkPriceHikeAlert(subscription.name) : null;
   const annualDiscountRate = affiliateOffer?.annualDiscountRate ?? 0;
@@ -471,12 +474,56 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 )}
               </div>
 
-              {subscription.notes && (
-                <div className="p-3.5 rounded-3xl bg-[#1F1F1F] border border-white/[0.08]">
-                  <div className="text-[11px] uppercase tracking-wider text-[#A0A0A0] font-semibold mb-1">
-                    {t('detail.notesLabel')}
+              {(subscription.notes || matchedPreset?.notes) && (
+                <div className="p-4 rounded-3xl bg-[#0A0A0A] border border-[#D4AF37]/50 shadow-md shadow-[#D4AF37]/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] uppercase tracking-wider">
+                      <ShieldAlert className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                      <span>Smart Trap Warning / Cancellation Tip</span>
+                    </div>
+                    {matchedPreset && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          matchedPreset.trial_type === 'none'
+                            ? 'bg-zinc-800 text-[#A0A0A0] border border-zinc-700'
+                            : matchedPreset.trial_type === 'cooling_off'
+                            ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                            : matchedPreset.trial_type === 'money_back'
+                            ? 'bg-sky-500/10 text-sky-300 border border-sky-500/30'
+                            : matchedPreset.trial_type === 'promo_discount'
+                            ? 'bg-purple-500/10 text-purple-300 border border-purple-500/30'
+                            : 'bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30'
+                        }`}
+                      >
+                        {matchedPreset.trial_type === 'none'
+                          ? 'No UK Free Trial'
+                          : matchedPreset.trial_type === 'cooling_off'
+                          ? '14-Day Cooling-Off'
+                          : matchedPreset.trial_type === 'money_back'
+                          ? '30-Day Refund Shield'
+                          : matchedPreset.trial_type === 'promo_discount'
+                          ? 'Promo Intro Offer'
+                          : `${matchedPreset.trial_duration_days}d Free Trial`}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-[#F5F5F5]/90 leading-relaxed">{subscription.notes}</p>
+                  <p className="text-xs text-[#F5F5F5]/90 leading-relaxed">
+                    {subscription.notes || matchedPreset?.notes}
+                  </p>
+                  {(subscription.cancelUrl || matchedPreset?.cancel_url) && (
+                    <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-xs">
+                      <span className="text-[#A0A0A0]">Cancellation Portal:</span>
+                      <a
+                        href={subscription.cancelUrl || matchedPreset?.cancel_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#D4AF37] hover:underline flex items-center gap-1 font-mono font-bold"
+                      >
+                        <span>Open Link</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
 

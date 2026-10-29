@@ -29,6 +29,7 @@ import {
 } from './utils/storage';
 import { INITIAL_DEMO_SUBSCRIPTIONS } from './data/popularPresets';
 import { LanguageProvider, useTranslation } from './i18n/LanguageContext';
+import { DatabaseProvider } from './context/DatabaseContext';
 import { Onboarding } from './components/Onboarding';
 import { BottomNav, TabType } from './components/BottomNav';
 import { HomeScreen } from './components/HomeScreen';
@@ -827,7 +828,7 @@ function AppContent() {
                       trialUrl: deal.trialUrl,
                       cancelUrl: deal.cancelUrl,
                       color: deal.color,
-                      notes: deal.highlight,
+                      notes: deal.notes || deal.highlight,
                     },
                     false // false because HomeScreen already called window.open
                   );
@@ -852,7 +853,7 @@ function AppContent() {
                         cancelEmail: preset.cancelEmail,
                         cancelGuideSteps: preset.cancelSteps,
                         color: preset.color,
-                        notes: preset.description,
+                        notes: preset.notes || preset.description,
                       },
                       Boolean(preset.trialUrl)
                     );
@@ -1065,7 +1066,9 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <AppContent />
+      <DatabaseProvider>
+        <AppContent />
+      </DatabaseProvider>
     </LanguageProvider>
   );
 }

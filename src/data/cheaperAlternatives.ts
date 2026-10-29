@@ -1,6 +1,8 @@
 import type { Subscription } from '../types/subscription';
-import { convertFrequencyToMonthly } from '../utils/subscriptionCalculations.ts';
+import { convertFrequencyToMonthly } from '../utils/subscriptionCalculations';
 import { POPULAR_PRESETS } from './popularPresets';
+import { getDatabase, subscribeToDatabaseUpdates } from '../services/databaseService';
+import type { MonetryDatabase } from '../types/database';
 
 export interface CheaperAlternative {
   id: string;
@@ -21,58 +23,131 @@ export interface AffiliateOffer {
   annualDiscountRate?: number;
 }
 
-export const AFFILIATE_OFFERS: AffiliateOffer[] = [
+const AFFILIATE_METADATA: Record<
+  string,
   {
-    aliases: ['amazon prime', 'prime video'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_AMAZON_PRIME_TRIAL_URL || 'https://www.amazon.co.uk/amazonprime',
-    trialDays: 30,
-    annualUrl: import.meta.env?.VITE_AFFILIATE_AMAZON_PRIME_ANNUAL_URL || 'https://www.amazon.co.uk/amazonprime',
-    annualDiscountRate: 0.11,
+    aliases: string[];
+    trialUrl: string;
+    annualUrl?: string;
+  }
+> = {
+  amazon_prime_uk: {
+    aliases: ['amazon prime', 'prime video', 'amazon'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_AMAZON_PRIME_TRIAL_URL) || 'https://www.amazon.co.uk/amazonprime',
+    annualUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_AMAZON_PRIME_ANNUAL_URL) || 'https://www.amazon.co.uk/amazonprime',
   },
-  {
-    aliases: ['audible'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_AUDIBLE_TRIAL_URL || 'https://www.audible.co.uk/ep/memberbenefits',
-    trialDays: 30,
+  audible_uk: {
+    aliases: ['audible', 'audible uk'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_AUDIBLE_TRIAL_URL) || 'https://www.audible.co.uk/ep/memberbenefits',
   },
-  {
-    aliases: ['apple tv'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_APPLE_TV_TRIAL_URL || 'https://tv.apple.com/gb',
-    trialDays: 7,
+  apple_tv_plus_uk: {
+    aliases: ['apple tv', 'apple tv+', 'apple tv plus'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_APPLE_TV_TRIAL_URL) || 'https://tv.apple.com/gb',
   },
-  {
-    aliases: ['nordvpn'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_NORDVPN_TRIAL_URL || 'https://nordvpn.com/',
-    trialDays: 30,
-    annualUrl: import.meta.env?.VITE_AFFILIATE_NORDVPN_ANNUAL_URL || 'https://nordvpn.com/pricing/',
-    annualDiscountRate: 0.2,
+  nordvpn_uk: {
+    aliases: ['nordvpn', 'nord vpn'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_NORDVPN_TRIAL_URL) || 'https://nordvpn.com/',
+    annualUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_NORDVPN_ANNUAL_URL) || 'https://nordvpn.com/pricing/',
   },
-  {
-    aliases: ['disney+ uk', 'disney plus'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_DISNEY_PLUS_TRIAL_URL || 'https://www.disneyplus.com/en-gb',
-    trialDays: 7,
-    annualUrl: import.meta.env?.VITE_AFFILIATE_DISNEY_PLUS_ANNUAL_URL || 'https://www.disneyplus.com/en-gb',
-    annualDiscountRate: 0.167,
+  disney_plus_uk: {
+    aliases: ['disney+ uk', 'disney plus', 'disney+'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_DISNEY_PLUS_TRIAL_URL) || 'https://www.disneyplus.com/en-gb',
+    annualUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_DISNEY_PLUS_ANNUAL_URL) || 'https://www.disneyplus.com/en-gb',
   },
-  {
-    aliases: ['hellofresh'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_HELLOFRESH_TRIAL_URL || 'https://www.hellofresh.co.uk/',
-    trialDays: 7,
-    annualUrl: import.meta.env?.VITE_AFFILIATE_HELLOFRESH_ANNUAL_URL || 'https://www.hellofresh.co.uk/',
-    annualDiscountRate: 0.2,
+  hellofresh_uk: {
+    aliases: ['hellofresh', 'hello fresh'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_HELLOFRESH_TRIAL_URL) || 'https://www.hellofresh.co.uk/',
+    annualUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_HELLOFRESH_ANNUAL_URL) || 'https://www.hellofresh.co.uk/',
   },
-  {
-    aliases: ['spotify'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_SPOTIFY_TRIAL_URL || 'https://www.spotify.com/uk/premium/',
-    trialDays: 30,
+  spotify_premium_uk: {
+    aliases: ['spotify', 'spotify premium'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_SPOTIFY_TRIAL_URL) || 'https://www.spotify.com/uk/premium/',
   },
-  {
-    aliases: ['puregym', 'puregym membership'],
-    trialUrl: import.meta.env?.VITE_AFFILIATE_PUREGYM_TRIAL_URL || 'https://www.puregym.com/join/',
-    trialDays: 7,
-    annualUrl: import.meta.env?.VITE_AFFILIATE_PUREGYM_ANNUAL_URL || 'https://www.puregym.com/join/',
-    annualDiscountRate: 0.15,
+  puregym_core_uk: {
+    aliases: ['puregym', 'puregym membership', 'pure gym'],
+    trialUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_PUREGYM_TRIAL_URL) || 'https://www.puregym.com/join/',
+    annualUrl: (typeof process !== 'undefined' && process.env?.VITE_AFFILIATE_PUREGYM_ANNUAL_URL) || 'https://www.puregym.com/join/',
   },
-];
+};
+
+const ALTERNATIVE_URLS: Record<string, { url: string; preferredFor?: string[] }> = {
+  'NOW TV Entertainment': { url: 'https://www.nowtv.com/', preferredFor: ['sky', 'netflix', 'stubby'] },
+  'Disney+ UK (With Ads)': { url: 'https://www.disneyplus.com/en-gb', preferredFor: ['netflix', 'disney', 'hotstar'] },
+  'Amazon Prime Video (Standalone)': { url: 'https://www.amazon.co.uk/prime', preferredFor: ['prime', 'amazon'] },
+  'Apple TV+ UK': { url: 'https://tv.apple.com/gb', preferredFor: ['apple', 'tv'] },
+  'Paramount+ UK (Basic)': { url: 'https://www.paramountplus.com/uk', preferredFor: ['paramount', 'comsise'] },
+  'Crunchyroll (Fan Tier)': { url: 'https://www.crunchyroll.com/', preferredFor: ['anime', 'crunchyroll'] },
+  'The Gym Group (Off-Peak)': { url: 'https://www.thegymgroup.com/memberships/', preferredFor: ['puregym', 'fitness', 'gym'] },
+  'energie Fitness UK': { url: 'https://www.energiefitness.com/', preferredFor: ['gym', 'fitness'] },
+  'Better UK (Pay & Play)': { url: 'https://www.better.org.uk/', preferredFor: ['gym', 'swim', 'leisure'] },
+  'Anytime Fitness UK': { url: 'https://www.anytimefitness.co.uk/', preferredFor: ['anytime', 'fitness'] },
+  'Nike Training Club': { url: 'https://www.nike.com/ntc-app', preferredFor: ['fitness', 'workout'] },
+  'SWEAT App': { url: 'https://www.sweat.com/', preferredFor: ['sweat', 'fitness', 'home'] },
+  'YouTube Music Premium': { url: 'https://music.youtube.com/', preferredFor: ['youtube', 'music'] },
+  'Tidal Individual UK': { url: 'https://tidal.com/', preferredFor: ['tidal', 'music', 'hifi'] },
+  'SoundCloud Go': { url: 'https://soundcloud.com/', preferredFor: ['soundcloud', 'music'] },
+  'Amazon Music Prime': { url: 'https://music.amazon.co.uk/', preferredFor: ['amazon', 'music'] },
+  'Apple Music Individual': { url: 'https://music.apple.com/uk', preferredFor: ['apple', 'music'] },
+  'Deliveroo Plus (Silver)': { url: 'https://www.deliveroo.co.uk/', preferredFor: ['deliveroo'] },
+  'Uber One UK': { url: 'https://www.ubereats.com/uk/', preferredFor: ['ubereats', 'delivery', 'uber'] },
+  'Tesco Delivery Saver (Off-Peak)': { url: 'https://www.tesco.com/groceries/en-GB/delivery-saver', preferredFor: ['tesco', 'delivery', 'groceries'] },
+  'Ocado Smart Pass (Midweek)': { url: 'https://www.ocado.com/', preferredFor: ['ocado', 'groceries'] },
+  'The Guardian (Web / Standard)': { url: 'https://www.theguardian.com/uk', preferredFor: ['guardian', 'the-guardian'] },
+  'Monzo (Standard Account)': { url: 'https://www.monzo.com/', preferredFor: ['monzo', 'banking'] },
+  'Starling Bank (Current Account)': { url: 'https://www.starlingbank.com/', preferredFor: ['starling', 'banking'] },
+  'Revolut (Standard Plan)': { url: 'https://www.revolut.com/', preferredFor: ['revolut', 'standard'] },
+  'Chase UK (Current Account)': { url: 'https://www.chase.co.uk/', preferredFor: ['chase', 'banking'] },
+  'Google One Basic (100GB)': { url: 'https://one.google.com/', preferredFor: ['google', 'cloud', 'storage'] },
+  'Notion (Free Plan)': { url: 'https://www.notion.com/', preferredFor: ['notion', 'productivity'] },
+  'Asana (Personal Plan)': { url: 'https://asana.com/', preferredFor: ['asana', 'productivity'] },
+  'Proton VPN (Free Tier)': { url: 'https://protonvpn.com/', preferredFor: ['vpn', 'privacy'] },
+  'Surfshark VPN (24m Plan)': { url: 'https://surfshark.com/deal', preferredFor: ['nordvpn', 'vpn', 'security'] },
+  'PlayStation Plus (Essential)': { url: 'https://www.playstation.com/uk/en/products/PlayStation-Plus/', preferredFor: ['psn', 'playstation', 'sony'] },
+  'Epic Games Store': { url: 'https://www.epicgames.com/', preferredFor: ['epic', 'games'] },
+  'Xbox Game Pass Core': { url: 'https://www.xbox.com/en-GB/xbox-game-pass', preferredFor: ['xbox', 'game-pass', 'microsoft'] },
+};
+
+export function buildAffiliateOffers(db: MonetryDatabase = getDatabase()): AffiliateOffer[] {
+  return db.affiliate_offers.map((raw) => {
+    const meta = AFFILIATE_METADATA[raw.preset_id] || {
+      aliases: [raw.preset_id.replace(/_/g, ' ')],
+      trialUrl: 'https://google.co.uk',
+    };
+    return {
+      aliases: meta.aliases,
+      trialUrl: meta.trialUrl,
+      trialDays: raw.trial_days,
+      annualUrl: meta.annualUrl,
+      annualDiscountRate: raw.annual_discount_pct > 0 ? raw.annual_discount_pct / 100 : undefined,
+    };
+  });
+}
+
+export function buildAlternatives(db: MonetryDatabase = getDatabase()): CheaperAlternative[] {
+  return db.alternatives.map((alt) => {
+    const meta = ALTERNATIVE_URLS[alt.name] || {
+      url: 'https://www.google.co.uk/',
+    };
+    return {
+      id: alt.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name: alt.name,
+      category: alt.category,
+      monthlyPrice: alt.monthly_price_gbp,
+      currency: '£',
+      url: meta.url,
+      preferredFor: meta.preferredFor,
+      tags: [alt.tag.toLowerCase(), alt.category.toLowerCase()],
+    };
+  });
+}
+
+export let AFFILIATE_OFFERS: AffiliateOffer[] = buildAffiliateOffers();
+export let ALTERNATIVES: CheaperAlternative[] = buildAlternatives();
+
+subscribeToDatabaseUpdates((updatedDb) => {
+  AFFILIATE_OFFERS = buildAffiliateOffers(updatedDb);
+  ALTERNATIVES = buildAlternatives(updatedDb);
+});
 
 function normaliseName(name: string): string {
   return name.toLocaleLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -105,358 +180,6 @@ export function getAffiliateOffer(name: string): AffiliateOffer | undefined {
   return undefined;
 }
 
-const ALTERNATIVES: CheaperAlternative[] = [
-  // ===== Streaming =====
-  {
-    id: 'buynowtv',
-    name: 'NOW TV Entertainment',
-    category: 'Streaming',
-    monthlyPrice: 9.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_NOW_TV_URL || 'https://www.nowtv.com/',
-    preferredFor: ['sky', 'netflix', 'stubby'],
-    tags: ['streaming', 'tv', 'no-contract'],
-  },
-  {
-    id: 'disney-uk',
-    name: 'Disney+ UK',
-    category: 'Streaming',
-    monthlyPrice: 7.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_DISNEY_PLUS_URL || 'https://www.disneyplus.com/en-gb',
-    preferredFor: ['netflix', 'disney', 'hotstar'],
-    tags: ['streaming', 'family', 'movies'],
-  },
-  {
-    id: 'amazon-prime',
-    name: 'Amazon Prime Video',
-    category: 'Streaming',
-    monthlyPrice: 5.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_AMAZON_PRIME_URL || 'https://www.amazon.co.uk/prime',
-    preferredFor: ['prime', 'amazon'],
-    tags: ['streaming', 'video', 'music'],
-  },
-  {
-    id: 'max-uk',
-    name: 'Max (HBO Max UK)',
-    category: 'Streaming',
-    monthlyPrice: 8.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_MAX_URL || 'https://www.max.com/uk',
-    preferredFor: ['hbo', 'max', 'discovery'],
-    tags: ['streaming', 'premium', 'movies'],
-  },
-  {
-    id: 'paramount',
-    name: 'Paramount+ UK',
-    category: 'Streaming',
-    monthlyPrice: 6.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_PARAMOUNT_URL || 'https://www.paramountplus.com/uk',
-    preferredFor: ['paramount', 'comsise'],
-    tags: ['streaming', 'tv', 'comedy'],
-  },
-  {
-    id: 'crunchyroll',
-    name: 'Crunchyroll (Anime)',
-    category: 'Streaming',
-    monthlyPrice: 4.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_CRUNCHYROLL_URL || 'https://www.crunchyroll.com/',
-    preferredFor: ['anime', 'crunchyroll'],
-    tags: ['streaming', 'anime', 'subtitles'],
-  },
-  {
-    id: 'athletic-health',
-    name: 'Athletic Health Unlimited',
-    category: 'Fitness & Gym',
-    monthlyPrice: 11.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_ATHLETIC_HEALTH_URL || 'https://www.athletichealth.com/',
-    preferredFor: ['fitbit', 'health'],
-    tags: ['gym', 'fitness', 'wearable'],
-  },
-  {
-    id: '24-7-gym',
-    name: '24 Hour Fitness',
-    category: 'Fitness & Gym',
-    monthlyPrice: 14.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_24HR_FITNESS_URL || 'https://www.24hourfitness.com/',
-    preferredFor: ['24h', 'hour', 'fitness'],
-    tags: ['gym', '24-hour', 'club'],
-  },
-  {
-    id: 'the-gym-group',
-    name: 'The Gym Group',
-    category: 'Fitness & Gym',
-    monthlyPrice: 13.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_GYM_GROUP_URL || 'https://www.thegymgroup.com/memberships/',
-    preferredFor: ['puregym', 'fitness', 'gym'],
-    tags: ['gym', 'fitness', 'budget'],
-  },
-  {
-    id: 'surfshark-vpn',
-    name: 'Surfshark VPN',
-    category: 'AI & Tech',
-    monthlyPrice: 2.49,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_SURFSHARK_URL || 'https://surfshark.com/deal',
-    preferredFor: ['nordvpn', 'vpn', 'security'],
-    tags: ['software', 'vpn', 'security'],
-  },
-  {
-    id: 'gold-gymnasium',
-    name: "Gold's Gym (UK)",
-    category: 'Fitness & Gym',
-    monthlyPrice: 12.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_GOODS_GYM_URL || 'https://www.goldsgym.com/uk/',
-    preferredFor: ['golds', 'gym', 'fitness'],
-    tags: ['gym', 'global', 'fitness'],
-  },
-  {
-    id: 'anytime',
-    name: 'Anytime Fitness',
-    category: 'Fitness & Gym',
-    monthlyPrice: 13.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_ANYTIME_FITNESS_URL || 'https://www.anytimefitness.co.uk/',
-    preferredFor: ['anytime', 'fitness'],
-    tags: ['gym', '24/7', 'franchise'],
-  },
-  {
-    id: 'sweat',
-    name: 'SWEAT by Kelsey Wells',
-    category: 'Fitness & Gym',
-    monthlyPrice: 10.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_SWEAT_URL || 'https://www.sweat.com/',
-    preferredFor: ['sweat', 'fitness', 'home'],
-    tags: ['fitness', 'home', 'online'],
-  },
-  {
-    id: 'youtube-music',
-    name: 'YouTube Music Premium',
-    category: 'Music & Audio',
-    monthlyPrice: 9.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_YOUTUBE_MUSIC_URL || 'https://music.youtube.com/',
-    preferredFor: ['youtube', 'music'],
-    tags: ['music', 'audio', 'ads-free'],
-  },
-  {
-    id: 'tidal',
-    name: 'Tidal HiFi',
-    category: 'Music & Audio',
-    monthlyPrice: 9.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_TIDAL_URL || 'https://tidal.com/',
-    preferredFor: ['tidal', 'music', 'hifi'],
-    tags: ['music', 'audio', 'hi-fi'],
-  },
-  {
-    id: 'soundcloud',
-    name: 'SoundCloud Go+',
-    category: 'Music & Audio',
-    monthlyPrice: 7.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_SOUNDCLOUD_URL || 'https://soundcloud.com/',
-    preferredFor: ['soundcloud', 'music'],
-    tags: ['music', 'audio'],
-  },
-  {
-    id: 'pandora',
-    name: 'Pandora (UK Podcast/Music)',
-    category: 'Music & Audio',
-    monthlyPrice: 4.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_PANDORA_URL || 'https://www.pandora.com/',
-    preferredFor: ['pandora', 'music'],
-    tags: ['music', 'podcast'],
-  },
-  {
-    id: 'apple-music',
-    name: 'Apple Music Individual',
-    category: 'Music & Audio',
-    monthlyPrice: 10.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_APPLE_MUSIC_URL || 'https://music.apple.com/uk',
-    preferredFor: ['apple', 'music'],
-    tags: ['music', 'audio', 'ios'],
-  },
-
-  // ===== Food & Delivery =====
-  {
-    id: 'deliveroo-standalone',
-    name: 'Deliveroo (Standalone)',
-    category: 'Food & Delivery',
-    monthlyPrice: 2.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_DELIVEROO_STANDALONE_URL || 'https://www.deliveroo.co.uk/',
-    preferredFor: ['deliveroo'],
-    tags: ['food', 'delivery', 'groceries'],
-  },
-  {
-    id: 'uber-fresh',
-    name: 'Uber Eats (Standalone)',
-    category: 'Food & Delivery',
-    monthlyPrice: 3.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_UBER_EATS_STANDALONE_URL || 'https://www.ubereats.com/uk/',
-    preferredFor: ['ubereats', 'delivery'],
-    tags: ['food', 'delivery', 'restaurant'],
-  },
-  {
-    id: 'just-eat',
-    name: 'Just Eat (Standalone)',
-    category: 'Food & Delivery',
-    monthlyPrice: 1.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_JUST_EAT_URL || 'https://www.just-eat.co.uk/',
-    preferredFor: ['just-eat', 'food', 'delivery'],
-    tags: ['food', 'delivery', 'uk'],
-  },
-  {
-    id: 'ocado',
-    name: 'Ocado (The Good Meal Club)',
-    category: 'Food & Delivery',
-    monthlyPrice: 8.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_OCADO_URL || 'https://www.ocado.com/',
-    preferredFor: ['ocado', 'groceries'],
-    tags: ['food', 'groceries', 'home'],
-  },
-
-  // ===== News & Magazines =====
-  {
-    id: 'the-guardian',
-    name: 'The Guardian (Free+Ad)',
-    category: 'News & Magazines',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_GUARDIAN_URL || 'https://www.theguardian.com/uk',
-    preferredFor: ['guardian', 'the-guardian'],
-    tags: ['news', 'free', 'ad-supported'],
-  },
-  {
-    id: 'monzo-basic',
-    name: 'Monzo (Basic Free Account)',
-    category: 'Utilities',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_MONZO_BASIC_URL || 'https://www.monzo.com/',
-    preferredFor: ['monzo', 'banking'],
-    tags: ['banking', 'free', 'uk'],
-  },
-  {
-    id: 'starling',
-    name: 'Starling Bank (Free Account)',
-    category: 'Utilities',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_STARLING_URL || 'https://www.starlingbank.com/',
-    preferredFor: ['starling', 'banking'],
-    tags: ['banking', 'free', 'uk'],
-  },
-  {
-    id: 'revolut-standard',
-    name: 'Revolut (Standard Plan)',
-    category: 'Utilities',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_REVOLUT_STANDARD_URL || 'https://www.revolut.com/',
-    preferredFor: ['revolut', 'standard'],
-    tags: ['banking', 'free', 'multi-currency'],
-  },
-  {
-    id: 'barclays',
-    name: 'Barclays (Basic Current Account)',
-    category: 'Utilities',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_BARCLAYS_URL || 'https://www.barclays.co.uk/',
-    preferredFor: ['barclays', 'banking'],
-    tags: ['banking', 'free', 'uk'],
-  },
-
-  // ===== Productivity =====
-  {
-    id: 'google-workspace',
-    name: 'Google Workspace Individual',
-    category: 'Productivity',
-    monthlyPrice: 7.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_GOOGLE_WORKSPACE_URL || 'https://workspace.google.com/',
-    preferredFor: ['google', 'workspace', 'productivity'],
-    tags: ['productivity', 'email', 'storage'],
-  },
-  {
-    id: 'notion',
-    name: 'Notion (Free Plan)',
-    category: 'Productivity',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_NOTION_URL || 'https://www.notion.com/',
-    preferredFor: ['notion', 'productivity'],
-    tags: ['productivity', 'notes', 'free'],
-  },
-  {
-    id: 'asana',
-    name: 'Asana (Free Plan)',
-    category: 'Productivity',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_ASANA_URL || 'https://asana.com/',
-    preferredFor: ['asana', 'productivity'],
-    tags: ['productivity', 'project', 'free'],
-  },
-  {
-    id: 'evernote',
-    name: 'Evernote (Free Plan)',
-    category: 'Productivity',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_EVERNOTE_URL || 'https://evernote.com/',
-    preferredFor: ['evernote', 'productivity'],
-    tags: ['productivity', 'notes', 'free'],
-  },
-
-  // ===== Gaming =====
-  {
-    id: 'ps-plus',
-    name: 'PlayStation Plus (Essential)',
-    category: 'Gaming',
-    monthlyPrice: 6.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_PS_PLUS_URL || 'https://www.playstation.com/uk/en/products/PlayStation-Plus/',
-    preferredFor: ['psn', 'playstation', 'sony'],
-    tags: ['gaming', 'console', 'multiplayer'],
-  },
-  {
-    id: 'epic-games',
-    name: 'Epic Games Store (Monthly Free)',
-    category: 'Gaming',
-    monthlyPrice: 0,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_EPIC_URL || 'https://www.epicgames.com/',
-    preferredFor: ['epic', 'udemy'],
-    tags: ['gaming', 'free', 'pc'],
-  },
-  {
-    id: 'xbox-game-pass-core',
-    name: 'Xbox Game Pass Core',
-    category: 'Gaming',
-    monthlyPrice: 7.99,
-    currency: '£',
-    url: import.meta.env?.VITE_AFFILIATE_XBOX_GAME_PASS_URL || 'https://www.xbox.com/en-GB/xbox-game-pass',
-    preferredFor: ['xbox', 'game-pass', 'microsoft'],
-    tags: ['gaming', 'console', 'pc'],
-  },
-];
-
 export function getCheaperAlternative(
   subscription: Subscription,
   subscriptions: Subscription[]
@@ -470,12 +193,13 @@ export function getCheaperAlternative(
       .map((item) => normaliseName(item.name))
   );
 
-  const candidates = ALTERNATIVES.filter((item) =>
+  const candidates = ALTERNATIVES.filter(
+    (item) =>
       item.category === subscription.category &&
       item.currency === subscription.currency &&
       item.monthlyPrice < monthlyCost &&
       !trackedNames.has(normaliseName(item.name))
-    );
+  );
   const sourceName = normaliseName(subscription.name);
   const preferredAlternative = candidates.find((item) =>
     item.preferredFor?.some((provider) => sourceName.includes(provider))

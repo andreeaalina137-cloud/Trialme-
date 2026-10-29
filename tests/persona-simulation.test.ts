@@ -184,7 +184,7 @@ test('Persona 1 (Serial Free-Trial Hunter): Starts 5 free trials back-to-back ac
 // ============================================================================
 test('Persona 2 (Frustrated Rapid-Clicker / Rage-Tapper): Sub-50ms triple taps on Add, Switch Annual, and Cancel produce zero duplicates or double-counted savings', () => {
   const store = createSimulatedAppStore([], 'pro');
-  const disneyPreset = POPULAR_PRESETS.find((p) => p.name === 'Disney+ UK')!;
+  const disneyPreset = POPULAR_PRESETS.find((p) => p.name === 'Disney+ UK Standard' || p.name === 'Disney+ UK')!;
 
   const payload = {
     name: disneyPreset.name,
@@ -544,7 +544,7 @@ test('Persona 10 (Small-Screen / iPhone SE User): Long UK service names and high
     assert.match(formatted, /^£\d+\.\d{2}$/, `Formatted price ${formatted} is clean`);
   }
   const davidLloyd = POPULAR_PRESETS.find((p) => p.name === 'David Lloyd Clubs')!;
-  assert.equal(formatPrice(davidLloyd.price, '£'), '£129.00');
+  assert.equal(formatPrice(davidLloyd.price, '£'), '£145.00');
 });
 
 // ============================================================================

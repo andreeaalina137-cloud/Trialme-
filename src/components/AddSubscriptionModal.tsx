@@ -13,6 +13,7 @@ import {
   Download,
   Search,
   Clock,
+  AlertTriangle,
 } from 'lucide-react';
 import type { Subscription, SubscriptionCategory, SubscriptionFrequency, UserPlan } from '../types/subscription';
 import { POPULAR_PRESETS, type PopularPreset, type PresetFilterGroup } from '../data/popularPresets';
@@ -770,9 +771,41 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                   {formatPrice(preset.price, preset.currency)}/mo
                                 </span>
                                 <span className="text-[#A0A0A0]/40">·</span>
-                                <span className="rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/30 px-2 py-0.5 text-[10px] font-semibold text-[#D4AF7C]">
-                                  {defaultDays}-Day Trial
-                                </span>
+                                {(() => {
+                                  if (!preset.hasFreeTrial && preset.trialType === 'none') {
+                                    return (
+                                      <span className="rounded-full bg-zinc-800/80 border border-zinc-600/50 px-2 py-0.5 text-[10px] font-semibold text-[#A0A0A0]">
+                                        No UK Free Trial
+                                      </span>
+                                    );
+                                  }
+                                  if (preset.trialType === 'cooling_off') {
+                                    return (
+                                      <span className="rounded-full bg-amber-500/10 border border-amber-500/40 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                                        14-Day Cooling-Off
+                                      </span>
+                                    );
+                                  }
+                                  if (preset.trialType === 'money_back') {
+                                    return (
+                                      <span className="rounded-full bg-sky-500/10 border border-sky-500/40 px-2 py-0.5 text-[10px] font-semibold text-sky-300">
+                                        30-Day Refund Shield
+                                      </span>
+                                    );
+                                  }
+                                  if (preset.trialType === 'promo_discount') {
+                                    return (
+                                      <span className="rounded-full bg-purple-500/10 border border-purple-500/40 px-2 py-0.5 text-[10px] font-semibold text-purple-300">
+                                        Promo Intro Offer
+                                      </span>
+                                    );
+                                  }
+                                  return (
+                                    <span className="rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/30 px-2 py-0.5 text-[10px] font-semibold text-[#D4AF7C]">
+                                      {defaultDays}-Day Trial
+                                    </span>
+                                  );
+                                })()}
                                 <span>·</span>
                                 <span className="truncate">{preset.category}</span>
                               </div>
@@ -934,6 +967,31 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                               <span>10am Alarm: <strong className="text-[#D4AF7C]">{formatArmedAlarmDateTime(drawerTiming.alarmArmedAt)}</strong></span>
                             </div>
 
+                            {preset.notes && (
+                              <div className="rounded-2xl p-3.5 bg-[#0A0A0A] border border-[#D4AF37]/50 shadow-md shadow-[#D4AF37]/10 space-y-1.5">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] uppercase tracking-wider">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                                  <span>Smart Trap Warning / Cancellation Tip</span>
+                                </div>
+                                <p className="text-xs text-[#F5F5F5]/90 leading-relaxed">{preset.notes}</p>
+                                {preset.cancelUrl && (
+                                  <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-xs">
+                                    <span className="text-[#A0A0A0]">Cancellation URL:</span>
+                                    <a
+                                      href={preset.cancelUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[#D4AF37] hover:underline flex items-center gap-1 font-mono font-bold"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <span>Open Portal</span>
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
                               <button
                                 type="button"
@@ -954,6 +1012,29 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                 <ExternalLink className="w-3 h-3 shrink-0 text-[#A0A0A0]" />
                               </button>
                             </div>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setName(preset.name);
+                                setPrice(preset.price.toString());
+                                setCategory(preset.category);
+                                setColor(preset.color);
+                                setCancelUrl(preset.cancelUrl);
+                                setNotes(preset.notes || preset.description);
+                                if (preset.hasFreeTrial) {
+                                  setIsTrial(true);
+                                  applyManualTrialDuration(preset.trialDurationDays || preset.defaultTrialDays);
+                                } else {
+                                  setIsTrial(false);
+                                }
+                                setActiveTab('manual');
+                              }}
+                              className="w-full py-1.5 text-center text-[11px] font-semibold text-[#A0A0A0] hover:text-[#D4AF7C] transition-colors cursor-pointer"
+                            >
+                              Customize in Manual Entry →
+                            </button>
                           </div>
                         )}
                       </div>
@@ -1016,6 +1097,46 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                   required
                 />
               </div>
+
+              {(() => {
+                const matchedPreset = name.trim()
+                  ? POPULAR_PRESETS.find(
+                      (p) =>
+                        p.name.toLowerCase() === name.trim().toLowerCase() ||
+                        p.name.toLowerCase().includes(name.trim().toLowerCase())
+                    )
+                  : null;
+                if (!matchedPreset) return null;
+                return (
+                  <div className="rounded-2xl p-3.5 bg-[#0A0A0A] border border-[#D4AF37]/50 space-y-1.5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <span>Smart Trap Warning / Cancellation Tip</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setName(matchedPreset.name);
+                          setPrice(matchedPreset.price.toString());
+                          setCategory(matchedPreset.category);
+                          setColor(matchedPreset.color);
+                          setCancelUrl(matchedPreset.cancelUrl);
+                          setNotes(matchedPreset.notes || matchedPreset.description);
+                          if (matchedPreset.hasFreeTrial) {
+                            setIsTrial(true);
+                            applyManualTrialDuration(matchedPreset.trialDurationDays || matchedPreset.defaultTrialDays);
+                          }
+                        }}
+                        className="text-[10px] text-[#D4AF7C] underline font-bold cursor-pointer"
+                      >
+                        Auto-fill £{matchedPreset.price} & Info
+                      </button>
+                    </div>
+                    <p className="text-xs text-[#F5F5F5]/90 leading-relaxed">{matchedPreset.notes}</p>
+                  </div>
+                );
+              })()}
 
               {getAffiliateOffer(name) && (
                 <button

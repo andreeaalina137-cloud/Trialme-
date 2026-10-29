@@ -18,6 +18,8 @@ import type { DetectedSubscription, Subscription, UserPlan } from '../types/subs
 import { getAiScannerMonthlyQuota, incrementAiScannerMonthlyQuota } from '../utils/retentionAndTrust';
 import { addMonthsClamped, formatLocalDateKey } from '../utils/subscriptionCalculations';
 import { isDuplicateScannedSubscription } from '../utils/subscriptionIdentity';
+import { getPresets } from '../services/databaseService';
+import type { PresetService } from '../types/database';
 import { BrandIcon } from './BrandIcon';
 import { GoldBellIcon } from './GoldBellIcon';
 import { useTranslation } from '../i18n/LanguageContext';
@@ -47,24 +49,42 @@ const DEFAULT_SHOWCASE_DETECTED: Array<{
   { id: 'ai-spotify', name: 'Spotify Premium', price: 10.99, category: 'Music & Audio', color: '#1DB954' },
 ];
 
+function findMatchingPreset(detectedName: string): PresetService | undefined {
+  if (!detectedName) return undefined;
+  const norm = detectedName.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const presets = getPresets();
+  return presets.find((p) => {
+    const pNorm = p.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    return norm.includes(pNorm) || pNorm.includes(norm);
+  });
+}
+
 const getFallbackSubscriptions = (
   statementType: 'barclays' | 'revolut' = 'barclays',
   currency: string
 ): DetectedSubscription[] => {
+  const presets = getPresets();
+  const getPresetPrice = (query: string, fallback: number) => {
+    const match = presets.find(
+      (p) => p.name.toLowerCase().includes(query.toLowerCase()) || p.id.includes(query.toLowerCase())
+    );
+    return match ? match.monthly_price_gbp : fallback;
+  };
+
   const subscriptions = statementType === 'revolut'
     ? [
-        { name: 'Adobe Creative Cloud', price: 19.97, category: 'Productivity' as const },
-        { name: 'ChatGPT Plus', price: 19.99, category: 'AI & Tech' as const },
-        { name: 'Canva Pro', price: 11.99, category: 'Productivity' as const },
-        { name: 'Amazon Prime Video UK', price: 8.99, category: 'Streaming' as const },
-        { name: 'The Guardian Digital', price: 11.99, category: 'News & Magazines' as const },
+        { name: 'Adobe Creative Cloud', price: getPresetPrice('adobe', 19.97), category: 'Productivity' as const },
+        { name: 'ChatGPT Plus', price: getPresetPrice('chatgpt', 19.99), category: 'AI & Tech' as const },
+        { name: 'Canva Pro', price: getPresetPrice('canva', 12.99), category: 'Productivity' as const },
+        { name: 'Amazon Prime Video UK', price: getPresetPrice('amazon', 8.99), category: 'Streaming' as const },
+        { name: 'The Guardian Digital', price: getPresetPrice('guardian', 12.00), category: 'News & Magazines' as const },
       ]
     : [
-        { name: 'Adobe Creative Cloud', price: 19.97, category: 'Productivity' as const },
-        { name: 'ChatGPT Plus', price: 19.99, category: 'AI & Tech' as const },
-        { name: 'Canva Pro', price: 11.99, category: 'Productivity' as const },
-        { name: 'Netflix UK Standard', price: 10.99, category: 'Streaming' as const },
-        { name: 'Spotify Premium UK', price: 11.99, category: 'Music & Audio' as const },
+        { name: 'Adobe Creative Cloud', price: getPresetPrice('adobe', 19.97), category: 'Productivity' as const },
+        { name: 'ChatGPT Plus', price: getPresetPrice('chatgpt', 19.99), category: 'AI & Tech' as const },
+        { name: 'Canva Pro', price: getPresetPrice('canva', 12.99), category: 'Productivity' as const },
+        { name: 'Netflix UK Standard', price: getPresetPrice('netflix', 12.99), category: 'Streaming' as const },
+        { name: 'Spotify Premium UK', price: getPresetPrice('spotify', 11.99), category: 'Music & Audio' as const },
       ];
 
   return subscriptions.map((subscription, index) => ({
@@ -181,6 +201,8 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
 
     const nextPaymentDate = addMonthsClamped(new Date(), 1);
     const formattedDate = formatLocalDateKey(nextPaymentDate);
+    const matched = findMatchingPreset(item.name);
+    const finalPrice = currencySymbol === '£' && matched ? matched.monthly_price_gbp : item.price;
     const matchingColor =
       DEFAULT_SHOWCASE_DETECTED.find((d) => d.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]))?.color ||
       '#D4AF7C';
@@ -188,13 +210,15 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     onImportSubscriptions([
       {
         name: item.name,
-        price: item.price,
+        price: finalPrice,
         currency: item.currency || currencySymbol,
         frequency: item.frequency,
-        category: item.category,
+        category: matched?.category || item.category,
         nextPaymentDate: formattedDate,
         status: 'active',
         color: matchingColor,
+        cancelUrl: matched?.cancel_url,
+        notes: matched?.notes,
         reminderDaysBefore: 3,
       },
     ]);
@@ -218,17 +242,22 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     const formattedDate = formatLocalDateKey(nextPaymentDate);
 
     onImportSubscriptions(
-      selectedItems.map((item) => ({
-        name: item.name,
-        price: item.price,
-        currency: item.currency || currencySymbol,
-        frequency: item.frequency,
-        category: item.category,
-        nextPaymentDate: formattedDate,
-        status: 'active',
-        color: '#D4AF7C',
-        reminderDaysBefore: 3,
-      }))
+      selectedItems.map((item) => {
+        const matched = findMatchingPreset(item.name);
+        return {
+          name: item.name,
+          price: currencySymbol === '£' && matched ? matched.monthly_price_gbp : item.price,
+          currency: item.currency || currencySymbol,
+          frequency: item.frequency,
+          category: matched?.category || item.category,
+          nextPaymentDate: formattedDate,
+          status: 'active',
+          color: '#D4AF7C',
+          cancelUrl: matched?.cancel_url,
+          notes: matched?.notes,
+          reminderDaysBefore: 3,
+        };
+      })
     );
     resetScannerState();
     onClose();

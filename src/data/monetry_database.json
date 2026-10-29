@@ -1,0 +1,843 @@
+{
+  "last_updated": "2026-10-29",
+  "version": "1.1.0",
+  "curated_uk_trials": [
+    "amazon_prime_uk",
+    "audible_uk",
+    "apple_tv_plus_uk",
+    "nordvpn_uk"
+  ],
+  "presets": [
+    {
+      "id": "netflix_standard_uk",
+      "name": "Netflix UK Standard",
+      "category": "Streaming",
+      "monthly_price_gbp": 13.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://www.netflix.com/CancelPlan",
+      "notes": "No UK free trial. Standard 1080p plan is £13.99/mo (Standard with Ads is £7.99/mo, Premium 4K is £20.99/mo). Instant online cancellation."
+    },
+    {
+      "id": "spotify_premium_uk",
+      "name": "Spotify Premium UK",
+      "category": "Music & Audio",
+      "monthly_price_gbp": 11.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.spotify.com/uk/account/overview/",
+      "notes": "30-day free trial. £11.99/mo Individual plan (Student £5.99/mo, Duo £16.99/mo). Cancelling downgrades to Spotify Free without losing playlists."
+    },
+    {
+      "id": "disney_plus_uk",
+      "name": "Disney+ UK Standard",
+      "category": "Streaming",
+      "monthly_price_gbp": 11.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://www.disneyplus.com/account/subscription",
+      "notes": "No UK free trial. Standard 1080p plan is £11.99/mo (£119.90/yr). Standard with Ads is £6.99/mo; Premium 4K is £15.99/mo. Cancel online anytime."
+    },
+    {
+      "id": "amazon_prime_uk",
+      "name": "Amazon Prime UK",
+      "category": "Streaming",
+      "monthly_price_gbp": 8.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.amazon.co.uk/gp/primecentral",
+      "notes": "30-day free trial. £8.99/mo (£95/yr). Ad-free Prime Video costs an extra £2.99/mo. Warning: Trial defaults to an automatic £95/year annual renewal if not switched."
+    },
+    {
+      "id": "apple_tv_plus_uk",
+      "name": "Apple TV+ UK",
+      "category": "Streaming",
+      "monthly_price_gbp": 9.99,
+      "has_free_trial": true,
+      "trial_duration_days": 7,
+      "trial_type": "free_trial",
+      "cancel_url": "https://tv.apple.com/settings",
+      "notes": "7-day free trial. £9.99/mo (£89.99/yr). IMMEDIATE CUTOFF TRAP: If you cancel during the 7-day trial, Apple terminates access instantly. Set alert for day 6."
+    },
+    {
+      "id": "now_tv_uk",
+      "name": "NOW TV (Cinema / Entertainment)",
+      "category": "Streaming",
+      "monthly_price_gbp": 9.99,
+      "has_free_trial": true,
+      "trial_duration_days": 7,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.nowtv.com/gb/my-account/memberships",
+      "notes": "7-day free trial on Entertainment or Cinema (£9.99/mo). Warning: NOW Boost (£6/mo) is pre-checked as a separate 7-day trial during checkout."
+    },
+    {
+      "id": "sky_stream_uk",
+      "name": "Sky Stream & TV",
+      "category": "Streaming",
+      "monthly_price_gbp": 34,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://www.sky.com/help/articles/cancel-sky-tv",
+      "notes": "14-day statutory cooling-off. Rolling monthly plan (£34/mo) requires strict 31 days advance notice to cancel. 24-month contract locks you in with early exit penalties."
+    },
+    {
+      "id": "youtube_premium_uk",
+      "name": "YouTube Premium UK",
+      "category": "Streaming",
+      "monthly_price_gbp": 12.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.youtube.com/paid_memberships",
+      "notes": "30-day free trial. £12.99/mo individual (£129.99/yr). iOS APP STORE TRAP: Subscribing inside Apple's iOS app charges £16.99/mo. Always sign up via web browser."
+    },
+    {
+      "id": "audible_uk",
+      "name": "Audible UK",
+      "category": "Music & Audio",
+      "monthly_price_gbp": 7.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.audible.co.uk/account/overview",
+      "notes": "30-day free trial (includes 1 free credit). £7.99/mo. UNSPENT CREDIT TRAP: Spend all credits before cancelling—unused credits disappear immediately upon cancellation."
+    },
+    {
+      "id": "bbc_tv_licence",
+      "name": "BBC TV Licence",
+      "category": "News & Magazines",
+      "monthly_price_gbp": 15,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://www.tvlicensing.co.uk/check-if-you-need-one/topics/cancellations-and-refunds-top7",
+      "notes": "14-day cooling-off. £180.00/yr (£15.00/mo). New Direct Debits bill ~£30/mo for first 6 months to create a buffer. Cancel online if you declare you do not watch live TV or iPlayer."
+    },
+    {
+      "id": "dazn_uk",
+      "name": "DAZN UK Sports",
+      "category": "Streaming",
+      "monthly_price_gbp": 25.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://www.dazn.com/myaccount/subscription",
+      "notes": "No free trial. SEVERE NOTICE TRAP: Monthly Flex (£25.99/mo) enforces a mandatory 30-day notice period with a final pro-rata bill. Annual contract (£15.99/mo) has zero early exit."
+    },
+    {
+      "id": "paramount_plus_uk",
+      "name": "Paramount+ UK Standard",
+      "category": "Streaming",
+      "monthly_price_gbp": 9.99,
+      "has_free_trial": true,
+      "trial_duration_days": 7,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.paramountplus.com/account/",
+      "notes": "7-day free trial. Standard 1080p plan is £9.99/mo (Basic with Ads is £5.99/mo, Premium 4K is £12.99/mo). Cancel in account settings 24h prior to renewal."
+    },
+    {
+      "id": "discovery_plus_tnt_uk",
+      "name": "Discovery+ UK (TNT Sports)",
+      "category": "Streaming",
+      "monthly_price_gbp": 30.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://www.discoveryplus.com/gb/my-account",
+      "notes": "No free trial. £30.99/mo rolling monthly pass for TNT Sports (Premier League, UEFA Champions League, UFC, boxing & MotoGP). Cancel online anytime."
+    },
+    {
+      "id": "the_guardian_digital",
+      "name": "The Guardian Digital",
+      "category": "News & Magazines",
+      "monthly_price_gbp": 12,
+      "has_free_trial": true,
+      "trial_duration_days": 14,
+      "trial_type": "free_trial",
+      "cancel_url": "https://manage.theguardian.com/",
+      "notes": "14-day free trial on mobile apps. £12.00/mo All-Access Digital (ad-free web and premium Guardian & Feast apps). Basic web articles remain free."
+    },
+    {
+      "id": "puregym_core_uk",
+      "name": "PureGym Membership",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 23.99,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://www.puregym.com/members/",
+      "notes": "14-day statutory cooling-off. Core plan averages £23.99/mo. Cancel online via member dashboard at least 4 working days before Direct Debit payment."
+    },
+    {
+      "id": "the_gym_group_uk",
+      "name": "The Gym Group",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 21.99,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://www.thegymgroup.com/member-area/",
+      "notes": "14-day cooling-off. Standard 'Do It' membership is £21.99/mo (off-peak from £15.99/mo). Cancel via online member portal or bank Direct Debit 4 days prior."
+    },
+    {
+      "id": "david_lloyd_uk",
+      "name": "David Lloyd Clubs",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 145,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://www.davidlloyd.co.uk/help-centre/membership/",
+      "notes": "14-day cooling-off. SEVERE CONTRACT LOCK-IN: Requires 3 full calendar months written notice to cancel after your initial 12-month commitment expires."
+    },
+    {
+      "id": "jd_gyms_uk",
+      "name": "JD Gyms UK",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 22.99,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://www.jdgyms.co.uk/cancel-membership/",
+      "notes": "14-day cooling-off. £22.99/mo standard plan. WARNING: Do NOT just cancel your Direct Debit—submit their online cancellation form 14 days in advance to avoid arrears."
+    },
+    {
+      "id": "virgin_active_uk",
+      "name": "Virgin Active UK",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 109,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://www.virginactive.co.uk/help",
+      "notes": "14-day cooling-off. Standard club flexi membership is £109.00/mo. Requires formal 30-day written notice. Never cancel Direct Debit without written confirmation."
+    },
+    {
+      "id": "strava_uk",
+      "name": "Strava Subscription",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 8.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.strava.com/account",
+      "notes": "30-day free trial. £8.99/mo (£54.99/yr). ANNUAL BILLING TRAP: Most 30-day trial signups default to billing the £54.99 annual plan at day 30 unless set to monthly."
+    },
+    {
+      "id": "myfitnesspal_premium_uk",
+      "name": "MyFitnessPal Premium",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 15.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.myfitnesspal.com/account/my-account",
+      "notes": "30-day free trial. £15.99/mo (£64.99/yr). Warning: Trial automatically rolls into £64.99 annual charge on day 30 unless explicitly changed or cancelled."
+    },
+    {
+      "id": "whoop_uk",
+      "name": "WHOOP 4.0 Membership",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 27,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://app.whoop.com/membership",
+      "notes": "30-day free trial (£27.00/mo after). HARDWARE RETURN TRAP: You must cancel online AND post the sensor and pack back within the return window, or you will be charged a £110+ hardware fee or annual lock-in."
+    },
+    {
+      "id": "headspace_uk",
+      "name": "Headspace Meditation",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 9.99,
+      "has_free_trial": true,
+      "trial_duration_days": 7,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.headspace.com/subscription/manage",
+      "notes": "7-day free trial on monthly plan (£9.99/mo). Note: 14-day trial option signs you up for £49.99/yr annual billing."
+    },
+    {
+      "id": "calm_premium_uk",
+      "name": "Calm Premium",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 11.99,
+      "has_free_trial": true,
+      "trial_duration_days": 7,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.calm.com/profile/manage-subscription",
+      "notes": "7-day free trial. £11.99/mo. Trap alert: The 7-day trial automatically defaults to a £39.99/yr annual charge unless cancelled 24 hours before expiration."
+    },
+    {
+      "id": "playstation_plus_uk",
+      "name": "PlayStation Plus",
+      "category": "Gaming",
+      "monthly_price_gbp": 10.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://store.playstation.com/",
+      "notes": "No free trial in the UK. Extra tier is £10.99/mo (Essential is £6.99/mo, Premium is £13.49/mo). Turn off auto-renewal via account settings."
+    },
+    {
+      "id": "xbox_game_pass_ultimate_uk",
+      "name": "Xbox Game Pass Ultimate",
+      "category": "Gaming",
+      "monthly_price_gbp": 16.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://account.microsoft.com/services",
+      "notes": "No free trial. £16.99/mo (occasional £1 for 14 days promo). Cancel recurring billing online in Microsoft Services & Subscriptions."
+    },
+    {
+      "id": "nintendo_switch_online_uk",
+      "name": "Nintendo Switch Online",
+      "category": "Gaming",
+      "monthly_price_gbp": 3.49,
+      "has_free_trial": true,
+      "trial_duration_days": 7,
+      "trial_type": "free_trial",
+      "cancel_url": "https://ec.nintendo.com/my/membership",
+      "notes": "7-day free trial. £3.49/mo (or £17.99/yr). Warning: Auto-renewal is switched on automatically upon starting the trial; turn off auto-renewal immediately in eShop."
+    },
+    {
+      "id": "chatgpt_plus_uk",
+      "name": "ChatGPT Plus",
+      "category": "AI & Tech",
+      "monthly_price_gbp": 19.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://chatgpt.com/#settings/Subscription",
+      "notes": "No free trial. £19.99/mo via app store or $20 + 20% UK VAT (~£19.20) via Stripe. Instant online cancellation via My Plan."
+    },
+    {
+      "id": "claude_pro_uk",
+      "name": "Claude Pro (Anthropic)",
+      "category": "AI & Tech",
+      "monthly_price_gbp": 18,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://claude.ai/settings/billing",
+      "notes": "No free trial. £18.00/mo (approx $20 + UK VAT) managed directly via Stripe portal. Cancel anytime before monthly renewal."
+    },
+    {
+      "id": "apple_icloud_200gb_uk",
+      "name": "Apple iCloud+ (200GB)",
+      "category": "Productivity",
+      "monthly_price_gbp": 2.99,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://support.apple.com/en-gb/108047",
+      "notes": "No free trial. £2.99/mo for 200GB (Family Sharing included). Downgrade to 5GB free tier anytime in iPhone iCloud settings."
+    },
+    {
+      "id": "google_one_ai_uk",
+      "name": "Google One (Cloud / AI)",
+      "category": "Productivity",
+      "monthly_price_gbp": 7.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://one.google.com/settings",
+      "notes": "30-day free trial on Google One AI Premium (£18.99/mo); Standard 2TB is £7.99/mo. Cancel online in Google One membership settings."
+    },
+    {
+      "id": "microsoft_365_personal_uk",
+      "name": "Microsoft 365 Personal",
+      "category": "Productivity",
+      "monthly_price_gbp": 8.49,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://account.microsoft.com/services",
+      "notes": "30-day free trial. £8.49/mo (£84.99/yr) includes Word, Excel, 1TB OneDrive & Copilot AI. Warning: Free trial automatically defaults to £84.99 annual billing if not cancelled."
+    },
+    {
+      "id": "nordvpn_uk",
+      "name": "NordVPN UK",
+      "category": "AI & Tech",
+      "monthly_price_gbp": 10.99,
+      "has_free_trial": false,
+      "trial_duration_days": 30,
+      "trial_type": "money_back",
+      "cancel_url": "https://my.nordaccount.com/billing/my-subscriptions/",
+      "notes": "30-day money-back guarantee shield: Requires upfront payment, then requesting a refund via 24/7 live chat before day 30. Rolling monthly renewal is £10.99/mo."
+    },
+    {
+      "id": "expressvpn_uk",
+      "name": "ExpressVPN",
+      "category": "AI & Tech",
+      "monthly_price_gbp": 10.49,
+      "has_free_trial": false,
+      "trial_duration_days": 30,
+      "trial_type": "money_back",
+      "cancel_url": "https://www.expressvpn.com/subscriptions",
+      "notes": "30-day money-back guarantee (requires contact with live support for refund). Rolling monthly plan is £10.49/mo. 7-day true free trial is iOS/Android mobile only."
+    },
+    {
+      "id": "adobe_creative_cloud_uk",
+      "name": "Adobe Creative Cloud",
+      "category": "Productivity",
+      "monthly_price_gbp": 19.97,
+      "has_free_trial": true,
+      "trial_duration_days": 7,
+      "trial_type": "free_trial",
+      "cancel_url": "https://account.adobe.com/plans",
+      "notes": "7-day free trial. MAJOR CONTRACT TRAP: Cancelling after day 14 of an annual commitment triggers Adobe's early cancellation fee of up to 50% of the remaining contract value!"
+    },
+    {
+      "id": "canva_pro_uk",
+      "name": "Canva Pro UK",
+      "category": "Productivity",
+      "monthly_price_gbp": 12.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.canva.com/settings/billing-and-teams",
+      "notes": "30-day free trial. £12.99/mo (£99.99/yr). Instant online cancellation; designs remain accessible on Canva Free tier."
+    },
+    {
+      "id": "deliveroo_plus_uk",
+      "name": "Deliveroo Plus (Silver)",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 3.49,
+      "has_free_trial": true,
+      "trial_duration_days": 14,
+      "trial_type": "free_trial",
+      "cancel_url": "https://deliveroo.co.uk/account",
+      "notes": "14-day free trial. £3.49/mo for orders over £15. Secret tip: Deliveroo Plus Silver is free for 12 months if linked with Amazon Prime!"
+    },
+    {
+      "id": "uber_one_uk",
+      "name": "Uber One UK",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 4.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://m.uber.com/",
+      "notes": "30-day free trial. £4.99/mo (£49.99/yr). CRITICAL DEADLINE: Must cancel at least 48 hours prior to renewal date, otherwise the system locks cancellation until the next cycle."
+    },
+    {
+      "id": "just_eat_plus_uk",
+      "name": "Just Eat+",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 5.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.just-eat.co.uk/account/",
+      "notes": "30-day free trial. £5.99/mo. Free delivery on orders over £15 from participating restaurants. Cancel anytime in account settings."
+    },
+    {
+      "id": "hellofresh_uk",
+      "name": "HelloFresh UK",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 39.96,
+      "has_free_trial": false,
+      "trial_duration_days": 7,
+      "trial_type": "promo_discount",
+      "cancel_url": "https://www.hellofresh.co.uk/account-settings/plan-settings",
+      "notes": "Introductory promo discount (not £0 free). Weekly rolling deliveries. Strict cut-off: Must skip or cancel by Wednesday 11:59 PM before your delivery week."
+    },
+    {
+      "id": "gousto_uk",
+      "name": "Gousto Recipe Box",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 36.75,
+      "has_free_trial": false,
+      "trial_duration_days": 7,
+      "trial_type": "promo_discount",
+      "cancel_url": "https://www.gousto.co.uk/my-gousto/subscription-settings",
+      "notes": "Intro promo discount. Auto-renews weekly. Must pause or cancel before the 12:00 PM noon deadline 3 days before scheduled box delivery."
+    },
+    {
+      "id": "club_pret_uk",
+      "name": "Club Pret Subscription",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 10,
+      "has_free_trial": false,
+      "trial_duration_days": 0,
+      "trial_type": "none",
+      "cancel_url": "https://www.pret.co.uk/en-GB/account",
+      "notes": "No free trial. £10.00/mo (replaces former £30 coffee pass) gives 50% off up to 5 barista-made drinks/day. Cancel anytime in Pret account."
+    },
+    {
+      "id": "tesco_clubcard_plus_uk",
+      "name": "Tesco Clubcard Plus",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 7.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://secure.tesco.com/clubcard/myaccount/",
+      "notes": "30-day free trial. £7.99/mo. Offers 10% off two in-store grocery shops per month (up to £40/mo savings). Both discounts can be used during the trial."
+    },
+    {
+      "id": "asos_premier_uk",
+      "name": "ASOS Premier UK",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 9.95,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://my.asos.com/",
+      "notes": "Billed at £9.95/yr upfront. 14-day statutory cooling-off refund applies ONLY if you have placed 0 orders using Premier delivery. Requires £15 min spend for next-day delivery."
+    },
+    {
+      "id": "experian_creditexpert_uk",
+      "name": "Experian CreditExpert",
+      "category": "Utilities",
+      "monthly_price_gbp": 14.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.experian.co.uk/consumer/elling/cancel.html",
+      "notes": "30-day free trial. £14.99/mo. Free trial unlocks full credit report and score simulator; cancels smoothly to basic free Experian account."
+    },
+    {
+      "id": "clearscore_protect_uk",
+      "name": "ClearScore Protect",
+      "category": "Utilities",
+      "monthly_price_gbp": 4.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://app.clearscore.com/account",
+      "notes": "30-day free trial. £4.99/mo dark web & ID fraud monitoring add-on. Core ClearScore credit report and monthly score remain 100% free forever."
+    },
+    {
+      "id": "equifax_uk",
+      "name": "Equifax Credit Report & Score",
+      "category": "Utilities",
+      "monthly_price_gbp": 14.95,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://www.equifax.co.uk/MyEquifax/",
+      "notes": "30-day free trial. £14.95/mo. Full Equifax statutory credit report with WebDetect alert protection. Cancel in MyEquifax settings."
+    },
+    {
+      "id": "monzo_perks_uk",
+      "name": "Monzo Perks / Max",
+      "category": "Utilities",
+      "monthly_price_gbp": 7,
+      "has_free_trial": false,
+      "trial_duration_days": 14,
+      "trial_type": "cooling_off",
+      "cancel_url": "https://monzo.com/",
+      "notes": "14-day cooling-off window. Monzo Perks is £7.00/mo; Monzo Max is £17.00/mo. IMPORTANT: A 3-month minimum term applies if you keep the plan past day 14."
+    },
+    {
+      "id": "revolut_premium_uk",
+      "name": "Revolut Premium / Metal",
+      "category": "Utilities",
+      "monthly_price_gbp": 8.99,
+      "has_free_trial": true,
+      "trial_duration_days": 30,
+      "trial_type": "free_trial",
+      "cancel_url": "https://app.revolut.com/",
+      "notes": "30-day trial (£8.99/mo after). CRITICAL CONTRACT TRAP: Paid Revolut plans are 12-month commitments. Cancelling after your trial/cooling-off incurs a 2-month break fee (£17.98) plus physical card delivery costs."
+    }
+  ],
+  "affiliate_offers": [
+    {
+      "preset_id": "amazon_prime_uk",
+      "trial_days": 30,
+      "annual_discount_pct": 11
+    },
+    {
+      "preset_id": "audible_uk",
+      "trial_days": 30,
+      "annual_discount_pct": 0
+    },
+    {
+      "preset_id": "apple_tv_plus_uk",
+      "trial_days": 7,
+      "annual_discount_pct": 0
+    },
+    {
+      "preset_id": "nordvpn_uk",
+      "trial_days": 30,
+      "annual_discount_pct": 20
+    },
+    {
+      "preset_id": "disney_plus_uk",
+      "trial_days": 0,
+      "annual_discount_pct": 16.7
+    },
+    {
+      "preset_id": "hellofresh_uk",
+      "trial_days": 7,
+      "annual_discount_pct": 20
+    },
+    {
+      "preset_id": "spotify_premium_uk",
+      "trial_days": 30,
+      "annual_discount_pct": 0
+    },
+    {
+      "preset_id": "puregym_core_uk",
+      "trial_days": 14,
+      "annual_discount_pct": 15
+    }
+  ],
+  "alternatives": [
+    {
+      "name": "NOW TV Entertainment",
+      "category": "Streaming",
+      "monthly_price_gbp": 9.99,
+      "tag": "No-contract alternative to Sky"
+    },
+    {
+      "name": "Disney+ UK (With Ads)",
+      "category": "Streaming",
+      "monthly_price_gbp": 6.99,
+      "tag": "Budget Disney/Marvel tier"
+    },
+    {
+      "name": "Amazon Prime Video (Standalone)",
+      "category": "Streaming",
+      "monthly_price_gbp": 5.99,
+      "tag": "Cheaper video-only plan"
+    },
+    {
+      "name": "Apple TV+ UK",
+      "category": "Streaming",
+      "monthly_price_gbp": 9.99,
+      "tag": "High-production originals"
+    },
+    {
+      "name": "Paramount+ UK (Basic)",
+      "category": "Streaming",
+      "monthly_price_gbp": 5.99,
+      "tag": "Ad-supported films & TV"
+    },
+    {
+      "name": "Crunchyroll (Fan Tier)",
+      "category": "Streaming",
+      "monthly_price_gbp": 4.99,
+      "tag": "Budget anime streaming"
+    },
+    {
+      "name": "The Gym Group (Off-Peak)",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 15.99,
+      "tag": "Budget alternative to PureGym"
+    },
+    {
+      "name": "energie Fitness UK",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 19.99,
+      "tag": "Low-cost UK local gyms"
+    },
+    {
+      "name": "Better UK (Pay & Play)",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 12.99,
+      "tag": "Council leisure centres"
+    },
+    {
+      "name": "Anytime Fitness UK",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 34.99,
+      "tag": "24/7 key fob access gyms"
+    },
+    {
+      "name": "Parkrun UK",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 0,
+      "tag": "Free weekly 5k community runs"
+    },
+    {
+      "name": "Nike Training Club",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 0,
+      "tag": "100% free home workout app"
+    },
+    {
+      "name": "Freeletics (Free Tier)",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 0,
+      "tag": "Free bodyweight workouts"
+    },
+    {
+      "name": "Medito",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 0,
+      "tag": "100% free forever meditation"
+    },
+    {
+      "name": "Insight Timer (Free)",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 0,
+      "tag": "Largest free meditation library"
+    },
+    {
+      "name": "YouTube Meditation Tracks",
+      "category": "Fitness & Gym",
+      "monthly_price_gbp": 0,
+      "tag": "Free soundscapes & sleep audio"
+    },
+    {
+      "name": "Apple Music Individual",
+      "category": "Music & Audio",
+      "monthly_price_gbp": 10.99,
+      "tag": "Spatial audio & lossless"
+    },
+    {
+      "name": "Deliveroo Plus (Silver)",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 3.49,
+      "tag": "Free with Amazon Prime"
+    },
+    {
+      "name": "Uber One UK",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 4.99,
+      "tag": "Delivery + Ride discounts"
+    },
+    {
+      "name": "Tesco Delivery Saver (Off-Peak)",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 3.99,
+      "tag": "Unlimited grocery deliveries"
+    },
+    {
+      "name": "Ocado Smart Pass (Midweek)",
+      "category": "Food & Delivery",
+      "monthly_price_gbp": 4.99,
+      "tag": "Midweek grocery delivery"
+    },
+    {
+      "name": "The Guardian (Web / Standard)",
+      "category": "News & Magazines",
+      "monthly_price_gbp": 0,
+      "tag": "Free UK news without paywall"
+    },
+    {
+      "name": "Monzo (Standard Account)",
+      "category": "Utilities",
+      "monthly_price_gbp": 0,
+      "tag": "£0/mo fee-free UK banking"
+    },
+    {
+      "name": "Starling Bank (Current Account)",
+      "category": "Utilities",
+      "monthly_price_gbp": 0,
+      "tag": "£0/mo fee-free UK travel & banking"
+    },
+    {
+      "name": "Revolut (Standard Plan)",
+      "category": "Utilities",
+      "monthly_price_gbp": 0,
+      "tag": "£0/mo basic currency & cards"
+    },
+    {
+      "name": "Chase UK (Current Account)",
+      "category": "Utilities",
+      "monthly_price_gbp": 0,
+      "tag": "£0/mo + 1% cashback on spending"
+    },
+    {
+      "name": "Google One Basic (100GB)",
+      "category": "Productivity",
+      "monthly_price_gbp": 1.59,
+      "tag": "Cheap cloud backup"
+    },
+    {
+      "name": "Notion (Free Plan)",
+      "category": "Productivity",
+      "monthly_price_gbp": 0,
+      "tag": "Free notes & workspace"
+    },
+    {
+      "name": "Asana (Personal Plan)",
+      "category": "Productivity",
+      "monthly_price_gbp": 0,
+      "tag": "Free task management"
+    },
+    {
+      "name": "Proton VPN (Free Tier)",
+      "category": "AI & Tech",
+      "monthly_price_gbp": 0,
+      "tag": "Unlimited £0 data VPN (no ads)"
+    },
+    {
+      "name": "Surfshark VPN (24m Plan)",
+      "category": "AI & Tech",
+      "monthly_price_gbp": 2.49,
+      "tag": "Budget unlimited-device VPN"
+    },
+    {
+      "name": "PlayStation Plus (Essential)",
+      "category": "Gaming",
+      "monthly_price_gbp": 6.99,
+      "tag": "Entry tier online gaming"
+    },
+    {
+      "name": "Epic Games Store",
+      "category": "Gaming",
+      "monthly_price_gbp": 0,
+      "tag": "Free PC games every Thursday"
+    },
+    {
+      "name": "Xbox Game Pass Core",
+      "category": "Gaming",
+      "monthly_price_gbp": 6.99,
+      "tag": "Entry console multiplayer tier"
+    }
+  ],
+  "uk_price_hike_alerts": [
+    {
+      "service_id": "netflix_standard_uk",
+      "service_name": "Netflix UK Standard",
+      "old_price_gbp": 12.99,
+      "new_price_gbp": 13.99,
+      "annual_impact_gbp": 12
+    },
+    {
+      "service_id": "spotify_premium_uk",
+      "service_name": "Spotify Premium UK",
+      "old_price_gbp": 10.99,
+      "new_price_gbp": 11.99,
+      "annual_impact_gbp": 12
+    },
+    {
+      "service_id": "disney_plus_uk",
+      "service_name": "Disney+ UK Standard",
+      "old_price_gbp": 9.99,
+      "new_price_gbp": 11.99,
+      "annual_impact_gbp": 24
+    },
+    {
+      "service_id": "sky_stream_uk",
+      "service_name": "Sky Stream & TV",
+      "old_price_gbp": 31,
+      "new_price_gbp": 34,
+      "annual_impact_gbp": 36
+    },
+    {
+      "service_id": "puregym_core_uk",
+      "service_name": "PureGym Peak Tariff",
+      "old_price_gbp": 19.99,
+      "new_price_gbp": 23.99,
+      "annual_impact_gbp": 48
+    },
+    {
+      "service_id": "microsoft_365_personal_uk",
+      "service_name": "Microsoft 365 Personal",
+      "old_price_gbp": 5.99,
+      "new_price_gbp": 8.49,
+      "annual_impact_gbp": 30
+    }
+  ]
+}

@@ -237,6 +237,16 @@ export const ConfirmTrialActivationModal: React.FC<ConfirmTrialActivationModalPr
               </span>
             </div>
 
+            {pendingTrial.notes && (
+              <div className="w-full rounded-2xl bg-[#0A0A0A] border border-[#D4AF37]/50 p-3 text-left space-y-1 shadow-sm">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider">
+                  <AlertTriangle className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                  <span>Smart Trap Warning / Cancellation Tip</span>
+                </div>
+                <p className="text-xs text-[#F5F5F5]/90 leading-relaxed">{pendingTrial.notes}</p>
+              </div>
+            )}
+
             {isDuplicate && (
               <div className="w-full rounded-2xl bg-amber-500/10 border border-amber-500/30 p-2.5 text-left text-xs text-amber-300 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />

@@ -812,7 +812,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               onClick={() => setShowTrialRadar((v) => !v)}
               className="btn-secondary-luxury min-h-[40px] shrink-0 rounded-full px-3.5 py-2 text-xs font-bold text-[#D4AF7C] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
             >
-              {showTrialRadar ? 'Hide' : 'Explore (4)'}
+              {showTrialRadar ? 'Hide' : `Explore (${CURATED_UK_TRIALS.length})`}
             </button>
           </div>
 
