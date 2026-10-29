@@ -27,6 +27,7 @@ import {
 } from '../utils/calendarReminder';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getAffiliateOffer, type AffiliateOffer } from '../data/cheaperAlternatives';
+import type { PendingTrialActivation } from './ConfirmTrialActivationModal';
 
 interface PendingAffiliateTrial {
   offer: AffiliateOffer;
@@ -43,6 +44,7 @@ interface AddSubscriptionModalProps {
   onOpenPaywall: () => void;
   onOpenAiScanner: () => void;
   onTrialTracked: (name: string, days: number, subscriptionId: string) => void;
+  onStartTrialFlow?: (trialData: PendingTrialActivation) => void;
   subscriptions?: Subscription[];
   bonusSlots?: number;
   onOpenGiftSlot?: () => void;
@@ -95,6 +97,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   onOpenPaywall,
   onOpenAiScanner,
   onTrialTracked,
+  onStartTrialFlow,
   subscriptions = [],
   bonusSlots = 0,
   onOpenGiftSlot,
@@ -212,6 +215,24 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   ) => {
     if (!offer) return;
     checkPlanAndProceed(() => {
+      if (onStartTrialFlow) {
+        onStartTrialFlow({
+          name: trial.name,
+          price: trial.price,
+          currency: trial.currency || currencySymbol,
+          frequency: trial.frequency,
+          category: trial.category,
+          defaultTrialDays: defaultDays,
+          trialUrl: offer.trialUrl,
+          cancelUrl: trial.cancelUrl,
+          cancelEmail: trial.cancelEmail,
+          cancelGuideSteps: trial.cancelGuideSteps,
+          color: trial.color,
+          notes: trial.notes,
+        });
+        onClose();
+        return;
+      }
       window.open(offer.trialUrl, '_blank', 'noopener,noreferrer');
       setDuplicateNotice(false);
       setPendingTrialDays(defaultDays);
@@ -303,6 +324,25 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     checkPlanAndProceed(() => {
       const offer = getAffiliateOffer(preset.name);
       const trialUrl = preset.trialUrl || offer?.trialUrl;
+      if (onStartTrialFlow) {
+        onStartTrialFlow({
+          name: preset.name,
+          price: preset.price,
+          currency: preset.currency || currencySymbol,
+          frequency: preset.frequency,
+          category: preset.category,
+          defaultTrialDays: pendingTrialDays,
+          trialUrl,
+          cancelUrl: preset.cancelUrl,
+          cancelEmail: preset.cancelEmail,
+          cancelGuideSteps: preset.cancelSteps,
+          color: preset.color,
+          notes: preset.description,
+        });
+        setExpandedPresetId(null);
+        onClose();
+        return;
+      }
       if (trialUrl) {
         window.open(trialUrl, '_blank', 'noopener,noreferrer');
       }
@@ -750,6 +790,29 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (isTracked) return;
+                                    if (onStartTrialFlow) {
+                                      checkPlanAndProceed(() => {
+                                        const offer = getAffiliateOffer(preset.name);
+                                        const trialDays = preset.defaultTrialDays ?? offer?.trialDays ?? 30;
+                                        const trialUrl = preset.trialUrl || offer?.trialUrl;
+                                        onStartTrialFlow({
+                                          name: preset.name,
+                                          price: preset.price,
+                                          currency: preset.currency || currencySymbol,
+                                          frequency: preset.frequency,
+                                          category: preset.category,
+                                          defaultTrialDays: trialDays,
+                                          trialUrl,
+                                          cancelUrl: preset.cancelUrl,
+                                          cancelEmail: preset.cancelEmail,
+                                          cancelGuideSteps: preset.cancelSteps,
+                                          color: preset.color,
+                                          notes: preset.description,
+                                        });
+                                        onClose();
+                                      });
+                                      return;
+                                    }
                                     handlePresetAffiliateTrial(preset);
                                   }}
                                   aria-label={isTracked ? `${preset.name} already tracked` : `Start ${preset.name} free trial`}

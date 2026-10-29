@@ -908,6 +908,13 @@ function AppContent() {
                   onOpenPaywall={() => setIsPaywallOpen(true)}
                   onOpenAiScanner={() => setCurrentTab('scan')}
                   onTrialTracked={handleTrialTracked}
+                  onStartTrialFlow={(trialData) => {
+                    handleTriggerTrialLink(trialData, Boolean(trialData.trialUrl));
+                    setCurrentTab('home');
+                    if (!trialData.trialUrl) {
+                      setIsConfirmTrialModalOpen(true);
+                    }
+                  }}
                   subscriptions={subscriptions}
                   bonusSlots={bonusSlots}
                   onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
@@ -973,6 +980,13 @@ function AppContent() {
             onOpenPaywall={() => setIsPaywallOpen(true)}
             onOpenAiScanner={() => setIsAiScannerOpen(true)}
             onTrialTracked={handleTrialTracked}
+            onStartTrialFlow={(trialData) => {
+              handleTriggerTrialLink(trialData, Boolean(trialData.trialUrl));
+              setIsAddModalOpen(false);
+              if (!trialData.trialUrl) {
+                setIsConfirmTrialModalOpen(true);
+              }
+            }}
             subscriptions={subscriptions}
             bonusSlots={bonusSlots}
             onOpenGiftSlot={() => setIsGiftSlotOpen(true)}

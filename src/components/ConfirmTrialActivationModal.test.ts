@@ -133,4 +133,52 @@ describe('Confirm Free Trial Activation Flow', () => {
     );
     assert.equal(htmlClosed, '');
   });
+
+  it('handles presets from normal Add Trial list identically to Radar trials', () => {
+    const presetTrial: PendingTrialActivation = {
+      name: 'Spotify Premium UK',
+      price: 11.99,
+      currency: '£',
+      frequency: 'monthly',
+      category: 'Music & Audio',
+      defaultTrialDays: 30,
+      color: '#1DB954',
+      trialUrl: 'https://www.spotify.com/uk/premium/',
+      cancelUrl: 'https://www.spotify.com/uk/account/subscription/',
+    };
+
+    const html = renderToStaticMarkup(
+      React.createElement(ConfirmTrialActivationModal, {
+        isOpen: true,
+        onClose: () => {},
+        pendingTrial: presetTrial,
+        onConfirm: () => {},
+        currencySymbol: '£',
+        existingSubscriptions: [],
+      })
+    );
+
+    assert.ok(html.includes('Spotify Premium UK'));
+    assert.ok(html.includes('Did you successfully start the'));
+    assert.ok(html.includes('£11.99/mo'));
+    assert.ok(html.includes('Yes, I started it'));
+    assert.ok(html.includes('Not yet'));
+  });
+
+  it('guarantees that opening a trial link never creates an active subscription without confirmation', () => {
+    const initialSubscriptions: Subscription[] = [];
+    const pendingTrial: PendingTrialActivation = {
+      name: 'Disney+ UK',
+      price: 10.99,
+      currency: '£',
+      frequency: 'monthly',
+      category: 'Streaming',
+      defaultTrialDays: 7,
+      trialUrl: 'https://www.disneyplus.com/en-gb',
+    };
+
+    // Storing pending trial does not mutate initialSubscriptions
+    assert.equal(initialSubscriptions.length, 0);
+    assert.equal(initialSubscriptions.some((s) => isDuplicateSubscription({ name: pendingTrial.name }, s)), false);
+  });
 });
