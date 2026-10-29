@@ -44,6 +44,8 @@ interface AddSubscriptionModalProps {
   onOpenAiScanner: () => void;
   onTrialTracked: (name: string, days: number, subscriptionId: string) => void;
   subscriptions?: Subscription[];
+  bonusSlots?: number;
+  onOpenGiftSlot?: () => void;
 }
 
 const CATEGORIES: SubscriptionCategory[] = [
@@ -94,6 +96,8 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   onOpenAiScanner,
   onTrialTracked,
   subscriptions = [],
+  bonusSlots = 0,
+  onOpenGiftSlot,
 }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'quick' | 'manual'>('quick');
@@ -162,7 +166,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   if (!isOpen) return null;
 
   const checkPlanAndProceed = (callback: () => void) => {
-    const { allowed } = canAddSubscription(currentSubscriptionCount, userPlan);
+    const { allowed } = canAddSubscription(currentSubscriptionCount, userPlan, bonusSlots);
     if (!allowed) {
       onOpenPaywall();
       return;
@@ -606,6 +610,27 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
           {duplicateNotice && (
             <div role="status" className="rounded-full border border-[#D4AF7C]/35 bg-[#161616] px-4 py-2.5 text-xs text-[#D4AF7C]">
               {t('add.duplicateNotice')}
+            </div>
+          )}
+
+          {userPlan === 'free' && currentSubscriptionCount >= 2 + bonusSlots && onOpenGiftSlot && (
+            <div className="rounded-2xl border border-[#D4AF7C]/30 bg-[#1F1F1F] p-3 flex items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <Gift className="w-4 h-4 text-[#D4AF7C] shrink-0" />
+                <span className="text-[11px] text-[#A0A0A0] truncate">
+                  Free limit reached ({currentSubscriptionCount}/{2 + bonusSlots}). Invite a mate for +1 free slot!
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenGiftSlot();
+                }}
+                className="text-xs font-bold text-[#D4AF7C] hover:underline shrink-0 cursor-pointer"
+              >
+                Gift Slot
+              </button>
             </div>
           )}
 

@@ -141,6 +141,12 @@ test('canAddSubscription enforces Free tier max 2 active limit and unlocks on Pr
   assert.equal(canAddSubscription(2, 'free').allowed, false);
   assert.equal(canAddSubscription(3, 'free').allowed, false);
 
+  // Free plan with bonus invite slots
+  assert.equal(canAddSubscription(2, 'free', 1).allowed, true); // 2 active out of 3 allowed
+  assert.equal(canAddSubscription(3, 'free', 1).allowed, false); // 3 active, max reached
+  assert.equal(canAddSubscription(3, 'free', 2).allowed, true); // 3 active out of 4 allowed
+  assert.equal(canAddSubscription(4, 'free', 2).allowed, false); // 4 active, max reached
+
   // Standard plan
   assert.equal(canAddSubscription(2, 'standard').allowed, true);
   assert.equal(canAddSubscription(10, 'standard').allowed, true);

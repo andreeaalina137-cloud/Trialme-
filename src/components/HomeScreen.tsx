@@ -62,6 +62,8 @@ interface HomeScreenProps {
   onStartRadarTrial?: (trial: CuratedUkTrial) => void;
   onQuickAddPreset?: (preset: PopularPreset, asTrial?: boolean) => void;
   activeSection?: 'dashboard' | 'trials' | 'subscriptions' | 'calendar' | 'reports';
+  bonusSlots?: number;
+  onOpenGiftSlot?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -78,6 +80,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onStartRadarTrial,
   onQuickAddPreset,
   activeSection = 'dashboard',
+  bonusSlots = 0,
+  onOpenGiftSlot,
 }) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -658,6 +662,28 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
         </div>
 
+        {/* Free Tier Limit Reached Banner */}
+        {userPlan === 'free' && activeCount >= 2 + bonusSlots && onOpenGiftSlot && (
+          <div className="rounded-3xl bg-[#161616] border border-[#D4AF7C]/35 p-3.5 flex items-center justify-between gap-3 shadow-xl">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/35 flex items-center justify-center shrink-0 text-[#D4AF7C]">
+                <Gift className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#F5F5F5] truncate">Free slot limit reached ({activeCount}/{2 + bonusSlots})</div>
+                <div className="text-[10px] text-[#A0A0A0] truncate">Invite a mate & unlock +1 slot for free</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenGiftSlot}
+              className="btn-champagne shrink-0 px-3.5 py-1.5 rounded-full text-xs font-bold text-[#0A0A0A] active:scale-[0.97] transition-all cursor-pointer shadow-md shadow-[#D4AF7C]/20"
+            >
+              +1 Free Slot
+            </button>
+          </div>
+        )}
+
         {/* Total Potential Charges & Cash-Flow Projection Card */}
         <div className="rounded-3xl bg-[#161616] border border-white/[0.08] p-4 space-y-3 shadow-xl backdrop-blur-xl">
           <div className="flex items-center justify-between">
@@ -714,15 +740,37 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {userPlan === 'free' && (
-            <div className="pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-[#A0A0A0]">
-              <span>{t('home.freeLimitWarning', { count: activeCount })}</span>
-              <button
-                type="button"
-                onClick={onOpenPaywall}
-                className="font-bold text-[#D4AF7C] hover:underline cursor-pointer"
-              >
-                {t('home.unlockLifetime')}
-              </button>
+            <div className="pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-[#A0A0A0] flex-wrap gap-2">
+              <span className="flex items-center gap-1.5">
+                <span>
+                  Free slots: <strong className="text-[#F5F5F5] font-mono">{activeCount}/{2 + bonusSlots}</strong>
+                </span>
+                {bonusSlots > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#D4AF7C]/20 text-[#D4AF7C] border border-[#D4AF7C]/30">
+                    +{bonusSlots} bonus
+                  </span>
+                )}
+              </span>
+              <div className="flex items-center gap-2">
+                {onOpenGiftSlot && (
+                  <button
+                    type="button"
+                    onClick={onOpenGiftSlot}
+                    className="font-bold text-[#D4AF7C] hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    <Gift className="w-3 h-3" />
+                    <span>Invite for +1 slot</span>
+                  </button>
+                )}
+                {onOpenGiftSlot && <span className="text-white/20">·</span>}
+                <button
+                  type="button"
+                  onClick={onOpenPaywall}
+                  className="font-bold text-[#D4AF7C] hover:underline cursor-pointer"
+                >
+                  {t('home.unlockLifetime')}
+                </button>
+              </div>
             </div>
           )}
 

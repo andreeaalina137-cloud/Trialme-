@@ -316,20 +316,23 @@ export function getDaysUntilNextPayment(dateStr: string, fromDateStr?: string): 
 
 /**
  * Checks whether user can add another subscription under their current plan.
- * Free plan: maximum 2 active subscriptions. When trying to add a 3rd, prompt paywall!
+ * Free plan: base 2 active subscriptions + bonus slots earned via friend invites.
  * Standard and Pro: unlimited.
  */
 export function canAddSubscription(
   currentActiveSubscriptionsCount: number,
-  plan: UserPlan
-): { allowed: boolean; maxAllowed: number; currentCount: number } {
+  plan: UserPlan,
+  bonusSlots: number = 0
+): { allowed: boolean; maxAllowed: number; currentCount: number; bonusSlots: number } {
   const safeCount = Math.max(0, Math.floor(Number.isFinite(currentActiveSubscriptionsCount) ? currentActiveSubscriptionsCount : 0));
-  const maxAllowed = plan === 'free' ? 2 : Infinity;
+  const safeBonus = Math.max(0, Math.floor(Number.isFinite(bonusSlots) ? bonusSlots : 0));
+  const maxAllowed = plan === 'free' ? 2 + safeBonus : Infinity;
   const allowed = safeCount < maxAllowed;
   return {
     allowed,
     maxAllowed,
     currentCount: safeCount,
+    bonusSlots: safeBonus,
   };
 }
 

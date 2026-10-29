@@ -30,6 +30,7 @@ interface SubscriptionDetailModalProps {
   currencySymbol: string;
   userPlan?: UserPlan;
   activeSubscriptionsCount?: number;
+  bonusSlots?: number;
   onOpenPaywall?: () => void;
 }
 
@@ -43,6 +44,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   currencySymbol,
   userPlan,
   activeSubscriptionsCount,
+  bonusSlots = 0,
   onOpenPaywall,
 }) => {
   const { t } = useTranslation();
@@ -133,7 +135,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   };
 
   const handleReactivate = () => {
-    if (userPlan === 'free' && typeof activeSubscriptionsCount === 'number' && activeSubscriptionsCount >= 2) {
+    if (userPlan === 'free' && typeof activeSubscriptionsCount === 'number' && activeSubscriptionsCount >= 2 + bonusSlots) {
       if (onOpenPaywall) {
         onOpenPaywall();
       }

@@ -11,7 +11,6 @@ import {
   roundCurrency,
 } from './utils/subscriptionCalculations';
 import {
-  calculateSmartTrialTiming,
   downloadSubscriptionReminderIcs,
   getSubscriptionReminderDate,
 } from './utils/calendarReminder';
@@ -39,11 +38,18 @@ import { CancelAssistantModal } from './components/CancelAssistantModal';
 import { PaywallModal } from './components/PaywallModal';
 import { AiStatementScannerModal } from './components/AiStatementScannerModal';
 import { SettingsScreen } from './components/SettingsScreen';
+import { GiftSlotModal } from './components/GiftSlotModal';
 import { NotificationBanner } from './components/NotificationBanner';
+import {
+  ConfirmTrialActivationModal,
+  type PendingTrialActivation,
+  type ConfirmedTrialPayload,
+} from './components/ConfirmTrialActivationModal';
 import { MobileFrameWrapper, type SidebarSection } from './components/MobileFrameWrapper';
 import { ConfettiExplosion } from './components/ConfettiExplosion';
 import type { ConfettiBurst, ConfettiOrigin } from './components/ConfettiExplosion';
 import { playCashRegister, playNotificationSound, playSubtlePop, playTaDing } from './utils/soundEffects';
+import { getBonusSlots, claimInviteCode } from './utils/inviteSystem';
 
 function AppContent() {
   const { t } = useTranslation();
@@ -104,8 +110,86 @@ function AppContent() {
   const [selectedCancelSub, setSelectedCancelSub] = useState<Subscription | null>(null);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isAiScannerOpen, setIsAiScannerOpen] = useState(false);
+  const [bonusSlots, setBonusSlots] = useState<number>(() => getBonusSlots());
+  const [isGiftSlotOpen, setIsGiftSlotOpen] = useState(false);
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const alertedDueSubscriptions = useRef(new Set<string>());
+
+  // Free Trial Confirmation Flow
+  const [pendingTrialActivation, setPendingTrialActivation] = useState<PendingTrialActivation | null>(() => {
+    const saved = safeStorageGet('monetry_pending_trial') ?? safeStorageGet('subcleaner_pending_trial');
+    if (!saved) return null;
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed.name === 'string') {
+        // Exclude stale clicks older than 24 hours
+        if (parsed.timestamp && Date.now() - parsed.timestamp > 24 * 60 * 60 * 1000) {
+          return null;
+        }
+        return parsed;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  });
+  const [isConfirmTrialModalOpen, setIsConfirmTrialModalOpen] = useState(false);
+  const trialLinkOpenedRef = useRef(false);
+
+  // Detect when user returns to the app after clicking a Free Trial link
+  useEffect(() => {
+    const handleReturnToApp = () => {
+      if (trialLinkOpenedRef.current || pendingTrialActivation) {
+        setIsConfirmTrialModalOpen(true);
+        trialLinkOpenedRef.current = false;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleReturnToApp();
+      }
+    };
+
+    const handleFocus = () => {
+      handleReturnToApp();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [pendingTrialActivation]);
+
+  useEffect(() => {
+    // Process referral/invite URL parameters (?invite=TM-XXXX or ?ref=TM-XXXX)
+    const inviteParam = urlParams.get('invite') || urlParams.get('ref');
+    if (inviteParam) {
+      const claimResult = claimInviteCode(inviteParam);
+      if (claimResult.success) {
+        setBonusSlots(claimResult.bonusSlots);
+        playTaDing();
+        triggerCelebration({ x: 0.5, y: 0.5 });
+        setActiveNotification({
+          id: `welcome-invite-${Date.now()}`,
+          title: '🎁 Welcome Bonus Unlocked!',
+          message: 'You unlocked +1 free subscription slot from a friend’s invite (3 slots total)!',
+          date: new Date().toISOString(),
+          read: false,
+          type: 'savings',
+        });
+        try {
+          const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+          window.history.replaceState({}, document.title, cleanUrl);
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     safeStorageSet('subcleaner_onboarding_done', onboardingDone ? 'true' : 'false');
@@ -130,6 +214,8 @@ function AppContent() {
       if (e.key !== 'Escape') return;
       if (isPaywallOpen) {
         setIsPaywallOpen(false);
+      } else if (isGiftSlotOpen) {
+        setIsGiftSlotOpen(false);
       } else if (isAiScannerOpen) {
         setIsAiScannerOpen(false);
       } else if (selectedCancelSub) {
@@ -144,7 +230,7 @@ function AppContent() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPaywallOpen, isAiScannerOpen, selectedCancelSub, selectedDetailSub, isAddModalOpen, currentTab]);
+  }, [isPaywallOpen, isGiftSlotOpen, isAiScannerOpen, selectedCancelSub, selectedDetailSub, isAddModalOpen, currentTab]);
 
   useEffect(() => {
     safeStorageSet('subcleaner_user_plan', userPlan);
@@ -258,7 +344,7 @@ function AppContent() {
       return false;
     }
 
-    if (!canAddSubscription(activeSubscriptionsCount, userPlan).allowed) {
+    if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
       setIsPaywallOpen(true);
       return false;
     }
@@ -322,6 +408,74 @@ function AppContent() {
       subscriptionId,
     });
     playTaDing();
+  };
+
+  const handleTriggerTrialLink = (trialData: PendingTrialActivation, shouldOpenUrl = true) => {
+    setPendingTrialActivation(trialData);
+    safeStorageSet('monetry_pending_trial', JSON.stringify({ ...trialData, timestamp: Date.now() }));
+    trialLinkOpenedRef.current = true;
+    if (shouldOpenUrl && trialData.trialUrl) {
+      window.open(trialData.trialUrl, '_blank', 'noopener,noreferrer');
+    }
+    // Opening the trial link NEVER marks the trial as active!
+  };
+
+  const handleConfirmTrialActivation = (payload: ConfirmedTrialPayload) => {
+    const limitCheck = canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots);
+    if (!limitCheck.allowed) {
+      setIsConfirmTrialModalOpen(false);
+      setIsPaywallOpen(true);
+      return;
+    }
+
+    const nextPayment = formatLocalDateKey(payload.expiryDate);
+    const subData: Omit<Subscription, 'id' | 'createdAt' | 'paymentHistory'> = {
+      name: payload.name,
+      price: payload.price,
+      currency: payload.currency,
+      frequency: payload.frequency,
+      category: payload.category,
+      nextPaymentDate: nextPayment,
+      status: 'trial',
+      trialEndDate: nextPayment,
+      trialStartAt: payload.activationDate.toISOString(),
+      trialExpiresAt: payload.expiryDate.toISOString(),
+      trialDurationDays: payload.trialDurationDays,
+      alarmArmedAt: payload.alarmArmedAt,
+      reminderDaysBefore: payload.reminderDaysBefore,
+      color: payload.color || '#D4AF7C',
+      cancelUrl: payload.cancelUrl,
+      cancelEmail: payload.cancelEmail,
+      cancelGuideSteps: payload.cancelGuideSteps,
+      notes: payload.notes,
+    };
+
+    const addedId = handleAddSubscription(subData);
+    if (addedId) {
+      downloadSubscriptionReminderIcs(
+        { ...subData, id: addedId, createdAt: formatLocalDateKey(new Date()), paymentHistory: [] },
+        nextPayment,
+        payload.reminderDaysBefore,
+        t('calendar.summary', { name: payload.name }),
+        t('calendar.description', { name: payload.name }),
+        t('calendar.alarm', { name: payload.name, days: payload.reminderDaysBefore }),
+        t('calendar.fileName', { name: payload.name })
+      );
+      handleTrialTracked(payload.name, payload.trialDurationDays, addedId);
+      triggerCelebration({ x: 0.5, y: 0.4 });
+    }
+
+    setPendingTrialActivation(null);
+    safeStorageSet('monetry_pending_trial', '');
+    setIsConfirmTrialModalOpen(false);
+    trialLinkOpenedRef.current = false;
+  };
+
+  const handleDismissTrialActivation = () => {
+    setPendingTrialActivation(null);
+    safeStorageSet('monetry_pending_trial', '');
+    setIsConfirmTrialModalOpen(false);
+    trialLinkOpenedRef.current = false;
   };
 
   const handleUpdateSubscription = (updated: Subscription) => {
@@ -407,7 +561,7 @@ function AppContent() {
         const currentActive = existingAndImported.filter(
           (s) => s.status === 'active' || s.status === 'trial'
         ).length;
-        if (!canAddSubscription(currentActive, userPlan).allowed) {
+        if (!canAddSubscription(currentActive, userPlan, bonusSlots).allowed) {
           hitLimit = true;
           return;
         }
@@ -644,6 +798,8 @@ function AppContent() {
                 onOpenCalendar={() => setCurrentTab('calendar')}
                 onLoadShowcaseTrials={handleLoadShowcaseTrials}
                 onOpenPaywall={() => setIsPaywallOpen(true)}
+                bonusSlots={bonusSlots}
+                onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
                 onCelebrate={triggerCelebration}
                 onClearCancelled={handleClearCancelledSubscriptions}
                 activeSection={
@@ -656,86 +812,52 @@ function AppContent() {
                     : activeSection
                 }
                 onStartRadarTrial={(deal) => {
-                  if (userPlan === 'free' && activeSubscriptionsCount >= 2) {
+                  if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
                     setIsPaywallOpen(true);
                     return;
                   }
-                  const timing = calculateSmartTrialTiming(deal.trialDays);
-                  const subData: Omit<Subscription, 'id' | 'createdAt' | 'paymentHistory'> = {
-                    name: deal.name,
-                    price: deal.postTrialPrice,
-                    currency: deal.currency || currencySymbol,
-                    frequency: 'monthly',
-                    category: deal.category,
-                    nextPaymentDate: timing.trialEndDate,
-                    status: 'trial',
-                    trialEndDate: timing.trialEndDate,
-                    trialStartAt: timing.trialStartAt,
-                    trialExpiresAt: timing.trialExpiresAt,
-                    trialDurationDays: deal.trialDays,
-                    alarmArmedAt: timing.alarmArmedAt,
-                    color: deal.color,
-                    cancelUrl: deal.cancelUrl,
-                    notes: deal.highlight,
-                    reminderDaysBefore: timing.reminderDaysBefore,
-                  };
-                  const addedId = handleAddSubscription(subData);
-                  if (addedId) {
-                    downloadSubscriptionReminderIcs(
-                      { ...subData, id: addedId, createdAt: new Date().toISOString().split('T')[0], paymentHistory: [] },
-                      timing.trialEndDate,
-                      timing.reminderDaysBefore,
-                      t('calendar.summary', { name: deal.name }),
-                      t('calendar.description', { name: deal.name }),
-                      t('calendar.alarm', { name: deal.name, days: timing.reminderDaysBefore }),
-                      t('calendar.fileName', { name: deal.name })
-                    );
-                    handleTrialTracked(deal.name, deal.trialDays, addedId);
-                  }
+                  handleTriggerTrialLink(
+                    {
+                      name: deal.name,
+                      price: deal.postTrialPrice,
+                      currency: deal.currency || currencySymbol,
+                      frequency: 'monthly',
+                      category: deal.category,
+                      defaultTrialDays: deal.trialDays,
+                      trialUrl: deal.trialUrl,
+                      cancelUrl: deal.cancelUrl,
+                      color: deal.color,
+                      notes: deal.highlight,
+                    },
+                    false // false because HomeScreen already called window.open
+                  );
                 }}
                 onQuickAddPreset={(preset, asTrial) => {
-                  if (userPlan === 'free' && activeSubscriptionsCount >= 2) {
+                  if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
                     setIsPaywallOpen(true);
                     return;
                   }
                   if (asTrial) {
-                    if (preset.trialUrl) {
-                      window.open(preset.trialUrl, '_blank', 'noopener,noreferrer');
-                    }
                     const trialDays = preset.defaultTrialDays || 30;
-                    const timing = calculateSmartTrialTiming(trialDays);
-                    const subData: Omit<Subscription, 'id' | 'createdAt' | 'paymentHistory'> = {
-                      name: preset.name,
-                      price: preset.price,
-                      currency: preset.currency || currencySymbol,
-                      frequency: preset.frequency,
-                      category: preset.category,
-                      nextPaymentDate: timing.trialEndDate,
-                      status: 'trial',
-                      trialEndDate: timing.trialEndDate,
-                      trialStartAt: timing.trialStartAt,
-                      trialExpiresAt: timing.trialExpiresAt,
-                      trialDurationDays: trialDays,
-                      alarmArmedAt: timing.alarmArmedAt,
-                      color: preset.color,
-                      cancelUrl: preset.cancelUrl,
-                      cancelEmail: preset.cancelEmail,
-                      cancelGuideSteps: preset.cancelSteps,
-                      notes: preset.description,
-                      reminderDaysBefore: timing.reminderDaysBefore,
-                    };
-                    const addedId = handleAddSubscription(subData);
-                    if (addedId) {
-                      downloadSubscriptionReminderIcs(
-                        { ...subData, id: addedId, createdAt: new Date().toISOString().split('T')[0], paymentHistory: [] },
-                        timing.trialEndDate,
-                        timing.reminderDaysBefore,
-                        t('calendar.summary', { name: preset.name }),
-                        t('calendar.description', { name: preset.name }),
-                        t('calendar.alarm', { name: preset.name, days: timing.reminderDaysBefore }),
-                        t('calendar.fileName', { name: preset.name })
-                      );
-                      handleTrialTracked(preset.name, trialDays, addedId);
+                    handleTriggerTrialLink(
+                      {
+                        name: preset.name,
+                        price: preset.price,
+                        currency: preset.currency || currencySymbol,
+                        frequency: preset.frequency,
+                        category: preset.category,
+                        defaultTrialDays: trialDays,
+                        trialUrl: preset.trialUrl,
+                        cancelUrl: preset.cancelUrl,
+                        cancelEmail: preset.cancelEmail,
+                        cancelGuideSteps: preset.cancelSteps,
+                        color: preset.color,
+                        notes: preset.description,
+                      },
+                      Boolean(preset.trialUrl)
+                    );
+                    if (!preset.trialUrl) {
+                      setIsConfirmTrialModalOpen(true);
                     }
                   } else {
                     handleAddSubscription({
@@ -787,6 +909,8 @@ function AppContent() {
                   onOpenAiScanner={() => setCurrentTab('scan')}
                   onTrialTracked={handleTrialTracked}
                   subscriptions={subscriptions}
+                  bonusSlots={bonusSlots}
+                  onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
                 />
               </div>
             )}
@@ -812,6 +936,8 @@ function AppContent() {
                 }}
                 onSelectPlan={(plan) => setUserPlan(plan)}
                 onReplayOnboarding={() => setOnboardingDone(false)}
+                bonusSlots={bonusSlots}
+                onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
               />
             )}
             </div>
@@ -848,6 +974,8 @@ function AppContent() {
             onOpenAiScanner={() => setIsAiScannerOpen(true)}
             onTrialTracked={handleTrialTracked}
             subscriptions={subscriptions}
+            bonusSlots={bonusSlots}
+            onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
           />
 
           <SubscriptionDetailModal
@@ -863,6 +991,7 @@ function AppContent() {
             currencySymbol={currencySymbol}
             userPlan={userPlan}
             activeSubscriptionsCount={activeSubscriptionsCount}
+            bonusSlots={bonusSlots}
             onOpenPaywall={() => setIsPaywallOpen(true)}
           />
 
@@ -883,6 +1012,16 @@ function AppContent() {
             onClose={() => setIsPaywallOpen(false)}
             onSelectPlan={(plan) => setUserPlan(plan)}
             currencySymbol={currencySymbol}
+            onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
+          />
+
+          <GiftSlotModal
+            isOpen={isGiftSlotOpen}
+            onClose={() => setIsGiftSlotOpen(false)}
+            bonusSlots={bonusSlots}
+            onBonusSlotsChange={(newCount) => setBonusSlots(newCount)}
+            activeCount={activeSubscriptionsCount}
+            userPlan={userPlan}
           />
 
           <AiStatementScannerModal
@@ -892,6 +1031,15 @@ function AppContent() {
             userPlan={userPlan}
             currencySymbol={currencySymbol}
             onOpenPaywall={() => setIsPaywallOpen(true)}
+            existingSubscriptions={subscriptions}
+          />
+
+          <ConfirmTrialActivationModal
+            isOpen={isConfirmTrialModalOpen}
+            onClose={handleDismissTrialActivation}
+            pendingTrial={pendingTrialActivation}
+            onConfirm={handleConfirmTrialActivation}
+            currencySymbol={currencySymbol}
             existingSubscriptions={subscriptions}
           />
         </div>

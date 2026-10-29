@@ -21,6 +21,7 @@ import {
   Volume2,
   VolumeX,
   Compass,
+  Gift,
 } from 'lucide-react';
 import type { AppCurrency, Subscription, UserPlan, SupportedLanguage } from '../types/subscription';
 import { CURRENCIES, formatPrice, calculateMonthlyTotal, calculateTotalSavings } from '../utils/subscriptionCalculations';
@@ -50,6 +51,8 @@ interface SettingsScreenProps {
   onRestoreBackup?: (subscriptions: Subscription[], restoredPlan?: UserPlan) => void;
   onSelectPlan?: (plan: UserPlan) => void;
   onReplayOnboarding?: () => void;
+  bonusSlots?: number;
+  onOpenGiftSlot?: () => void;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -69,6 +72,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onRestoreBackup,
   onSelectPlan,
   onReplayOnboarding,
+  bonusSlots = 0,
+  onOpenGiftSlot,
 }) => {
   const { t, language, setLanguage, languages } = useTranslation();
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'terms' | null>(null);
@@ -521,6 +526,29 @@ ${subscriptions
               </div>
               <ChevronRight className="w-4 h-4 text-[#A0A0A0]" />
             </button>
+            {onOpenGiftSlot && (
+              <button
+                type="button"
+                onClick={onOpenGiftSlot}
+                className="w-full p-3.5 flex items-center justify-between hover:bg-white/[0.03] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer border-b border-white/[0.04]"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Gift className="w-4 h-4 text-[#D4AF7C] shrink-0" />
+                  <div className="min-w-0">
+                    <span className="font-semibold text-[#F5F5F5] block">Gift a Slot · Invite Friends</span>
+                    <span className="text-[10px] text-[#A0A0A0] block">Give a mate +1 slot and unlock +1 for yourself</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {bonusSlots > 0 && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF7C]/20 text-[#D4AF7C] border border-[#D4AF7C]/30">
+                      +{bonusSlots} Unlocked
+                    </span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-[#A0A0A0]" />
+                </div>
+              </button>
+            )}
             <button
               onClick={handleShareApp}
               className="w-full p-3.5 flex items-center justify-between hover:bg-white/[0.03] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"

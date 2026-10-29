@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Check, Sparkles, Zap, Crown, ShieldCheck, Lock, KeyRound } from 'lucide-react';
+import { X, Check, Sparkles, Zap, Crown, ShieldCheck, Lock, KeyRound, Gift } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { UserPlan } from '../types/subscription';
 import { formatPrice } from '../utils/subscriptionCalculations';
@@ -12,6 +12,7 @@ interface PaywallModalProps {
   onClose: () => void;
   onSelectPlan: (plan: UserPlan) => void;
   currencySymbol: string;
+  onOpenGiftSlot?: () => void;
 }
 
 export const PaywallModal: React.FC<PaywallModalProps> = ({
@@ -19,6 +20,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
   onClose,
   onSelectPlan,
   currencySymbol,
+  onOpenGiftSlot,
 }) => {
   const { t } = useTranslation();
   const [selectedTier, setSelectedTier] = useState<'standard' | 'pro'>('pro');
@@ -231,6 +233,31 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
               </div>
             </div>
           </button>
+
+          {/* Alternative: Gift a Slot / Invite a Mate */}
+          {onOpenGiftSlot && (
+            <div className="rounded-3xl border border-[#D4AF7C]/30 bg-[#161616] p-3.5 flex items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="h-8 w-8 rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/35 flex items-center justify-center shrink-0 text-[#D4AF7C]">
+                  <Gift className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-[#F5F5F5] truncate">Want a free slot instead?</div>
+                  <div className="text-[10px] text-[#A0A0A0] truncate">Invite a mate & unlock +1 slot without paying</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenGiftSlot();
+                }}
+                className="btn-secondary-luxury shrink-0 px-3.5 py-1.5 rounded-full text-xs font-bold text-[#D4AF7C] active:scale-[0.97] transition-all cursor-pointer"
+              >
+                Gift a Slot
+              </button>
+            </div>
+          )}
 
           {showRestoreBox && (
             <div className="rounded-3xl border border-white/10 bg-[#161616] p-3.5 space-y-2">
