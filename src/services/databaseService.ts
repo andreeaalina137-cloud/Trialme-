@@ -13,7 +13,17 @@ export const MONETRY_DB_CACHE_KEY = 'MONETRY_DB_CACHE';
 export const REMOTE_DB_URL =
   (typeof process !== 'undefined' && process.env?.VITE_REMOTE_DB_URL) ||
   (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_REMOTE_DB_URL) ||
-  'https://raw.githubusercontent.com/username/subcleaner/main/src/data/monetry_database.json';
+  '';
+
+export function isPlaceholderUrl(url: string | undefined | null): boolean {
+  if (!url || typeof url !== 'string') return true;
+  const trimmed = url.trim();
+  return (
+    trimmed === '' ||
+    trimmed.includes('username/subcleaner') ||
+    trimmed.includes('example.com')
+  );
+}
 
 type DatabaseListener = (db: MonetryDatabase) => void;
 const listeners = new Set<DatabaseListener>();
@@ -107,6 +117,11 @@ let syncPromise: Promise<MonetryDatabase> | null = null;
  */
 export async function syncDatabase(remoteUrl = REMOTE_DB_URL): Promise<MonetryDatabase> {
   const currentDb = getDatabase();
+
+  // If no remote URL is configured or it's a placeholder, rely 100% on the bundled offline JSON database
+  if (isPlaceholderUrl(remoteUrl)) {
+    return currentDb;
+  }
 
   if (syncPromise) {
     return syncPromise;

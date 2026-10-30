@@ -1,4 +1,42 @@
+import * as pdfjsLib from 'pdfjs-dist';
 import type { PdfExtractionResult } from '../types/scanner.types';
+
+let pdfWorkerUrl: string | null = null;
+
+export async function initPdfWorker(): Promise<string | null> {
+  if (pdfWorkerUrl) return pdfWorkerUrl;
+  if (typeof window === 'undefined') return null;
+
+  try {
+    // Vite bundles the worker directly from the npm package via ?url
+    const mod = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+    if (mod && typeof mod.default === 'string') {
+      pdfWorkerUrl = mod.default;
+      if (pdfjsLib?.GlobalWorkerOptions) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+      }
+      return pdfWorkerUrl;
+    }
+  } catch {
+    // Fallback if running outside Vite bundler
+  }
+
+  if (pdfjsLib?.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        '/node_modules/pdfjs-dist/build/pdf.worker.min.mjs',
+        window.location.origin
+      ).toString();
+      pdfWorkerUrl = pdfjsLib.GlobalWorkerOptions.workerSrc;
+    } catch {}
+  }
+
+  return pdfWorkerUrl;
+}
+
+if (typeof window !== 'undefined') {
+  void initPdfWorker();
+}
 
 async function importOptional(specifier: string): Promise<Record<string, unknown> | null> {
   try {
@@ -176,38 +214,69 @@ async function extractNativePdfLines(buffer: ArrayBuffer): Promise<string[]> {
   return allLines;
 }
 
-async function extractWithPdfJs(buffer: ArrayBuffer): Promise<string | null> {
-  const mod = await importOptional('pdfjs-dist');
-  if (!mod) return null;
+async function extractWithPdfJs(buffer: ArrayBuffer): Promise<string[] | null> {
+  // In Node.js / test environments where Worker or DOM is unavailable, allow native extractor to run
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
-  const getDocument = mod.getDocument as
-    | ((src: { data: ArrayBuffer; disableWorker: boolean }) => {
-        promise: Promise<{
-          numPages: number;
-          getPage: (n: number) => Promise<{
-            getTextContent: () => Promise<{ items: Array<{ str?: string }> }>;
-          }>;
-        }>;
-      })
-    | undefined;
-
-  if (typeof getDocument !== 'function') return null;
+  await initPdfWorker();
 
   try {
-    const pdf = await getDocument({ data: buffer.slice(0), disableWorker: true }).promise;
-    const pages: string[] = [];
-    for (let i = 1; i <= pdf.numPages; i += 1) {
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(buffer),
+      useWorkerFetch: false,
+      useSystemFonts: true,
+    });
+
+    const pdf = await loadingTask.promise;
+    const allLines: string[] = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      const line = content.items
-        .map((item) => (typeof item.str === 'string' ? item.str : ''))
-        .join(' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      if (line) pages.push(line);
+
+      // Group text items by vertical position (Y coordinate) so statement columns stay on the same line
+      let lastY: number | null = null;
+      let currentLine: string[] = [];
+
+      for (const rawItem of content.items) {
+        if (!rawItem || typeof rawItem !== 'object' || !('str' in rawItem)) continue;
+        const item = rawItem as { str: string; transform?: number[]; hasEOL?: boolean };
+        const str = item.str;
+        const transform = item.transform;
+        const y = Array.isArray(transform) && typeof transform[5] === 'number' ? Math.round(transform[5]) : null;
+
+        // A shift in vertical baseline signals a new line
+        if (lastY !== null && y !== null && Math.abs(y - lastY) > 3) {
+          const joined = currentLine.join(' ').replace(/\s+/g, ' ').trim();
+          if (joined.length >= 3) allLines.push(joined);
+          currentLine = [];
+        }
+
+        if (str && str.trim().length > 0) {
+          currentLine.push(str.trim());
+        }
+
+        if (item.hasEOL) {
+          const joined = currentLine.join(' ').replace(/\s+/g, ' ').trim();
+          if (joined.length >= 3) allLines.push(joined);
+          currentLine = [];
+          lastY = null;
+        } else if (y !== null) {
+          lastY = y;
+        }
+      }
+
+      if (currentLine.length > 0) {
+        const joined = currentLine.join(' ').replace(/\s+/g, ' ').trim();
+        if (joined.length >= 3) allLines.push(joined);
+      }
     }
-    return pages.join('\n');
-  } catch {
+
+    return allLines.length > 0 ? allLines : null;
+  } catch (err) {
+    console.warn('[pdfTextExtractor] pdfjs-dist extraction fallback to native:', err);
     return null;
   }
 }
@@ -215,14 +284,11 @@ async function extractWithPdfJs(buffer: ArrayBuffer): Promise<string | null> {
 export async function extractPdfText(file: File | Blob): Promise<PdfExtractionResult> {
   const buffer = await file.arrayBuffer();
 
-  // 1. Try pdfjs-dist if installed
-  const pdfJsText = await extractWithPdfJs(buffer);
-  if (pdfJsText && pdfJsText.replace(/\s/g, '').length >= 24) {
-    const lines = pdfJsText
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter((l) => l.length >= 3);
-    return { text: pdfJsText, lines, usedOcrFallback: false, engine: 'pdfjs' };
+  // 1. Try pdfjs-dist with npm-bundled worker (100% offline, zero-404)
+  const pdfJsLines = await extractWithPdfJs(buffer);
+  if (pdfJsLines && pdfJsLines.length > 0) {
+    const text = pdfJsLines.join('\n');
+    return { text, lines: pdfJsLines, usedOcrFallback: false, engine: 'pdfjs' };
   }
 
   // 2. Comprehensive native PDF stream extractor (decompresses Flate streams)

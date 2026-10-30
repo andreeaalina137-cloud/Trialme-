@@ -2,6 +2,23 @@ import type { OcrExecutionResult } from '../types/scanner.types';
 
 export type OcrProgressHandler = (percent: number, status: string) => void;
 
+let cachedWorkerUrl: string | null = null;
+
+async function getTesseractWorkerUrl(): Promise<string | undefined> {
+  if (cachedWorkerUrl) return cachedWorkerUrl;
+  if (typeof window === 'undefined') return undefined;
+
+  try {
+    const mod = await import('tesseract.js/dist/worker.min.js?url');
+    if (mod && typeof mod.default === 'string') {
+      cachedWorkerUrl = mod.default;
+      return cachedWorkerUrl;
+    }
+  } catch {}
+
+  return undefined;
+}
+
 async function importOptional(specifier: string): Promise<Record<string, unknown> | null> {
   try {
     const dynamicImport = new Function('s', 'return import(s)') as (
@@ -48,7 +65,9 @@ export async function runOfflineOcr(
 
   let worker: TesseractWorkerLike | null = null;
   try {
+    const workerPath = await getTesseractWorkerUrl();
     worker = await createWorker('eng', 1, {
+      ...(workerPath ? { workerPath } : {}),
       logger: (message) => {
         const ratio = typeof message.progress === 'number' ? message.progress : 0;
         onProgress?.(Math.round(ratio * 100), message.status ?? 'recognizing text');
@@ -57,7 +76,8 @@ export async function runOfflineOcr(
     const result = await worker.recognize(image);
     const text = result.data.text ?? '';
     return { text, lines: splitOcrLines(text), engine: 'tesseract' };
-  } catch {
+  } catch (err) {
+    onProgress?.(100, 'OCR engine fallback to realistic UK statement matcher.');
     return { text: '', lines: [], engine: 'unavailable' };
   } finally {
     if (worker) {
