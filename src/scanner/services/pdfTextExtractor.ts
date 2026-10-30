@@ -21,16 +21,6 @@ export async function initPdfWorker(): Promise<string | null> {
     // Fallback if running outside Vite bundler
   }
 
-  if (pdfjsLib?.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
-    try {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-        '/node_modules/pdfjs-dist/build/pdf.worker.min.mjs',
-        window.location.origin
-      ).toString();
-      pdfWorkerUrl = pdfjsLib.GlobalWorkerOptions.workerSrc;
-    } catch {}
-  }
-
   return pdfWorkerUrl;
 }
 

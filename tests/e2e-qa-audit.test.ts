@@ -34,9 +34,7 @@ import {
   CURATED_UK_TRIALS,
   createBackupJson,
   generateLicenseKey,
-  getAiScannerMonthlyQuota,
   getUkPriceHikeAlert,
-  incrementAiScannerMonthlyQuota,
   parseRestoredLicensePlan,
 } from '../src/utils/retentionAndTrust';
 import { SUPPORTED_LANGUAGES, TRANSLATIONS } from '../src/i18n/translations';
@@ -446,17 +444,6 @@ describe('SubCleaner A-to-Z End-to-End (E2E) QA Simulation Suite', () => {
       assert.equal(isDuplicateSubscription(activeNetflix, cancelledNetflix), false);
     });
 
-    it('tracks AI Statement Scanner monthly fair-use quota accurately', () => {
-      const testDate = new Date('2029-05-15T12:00:00Z');
-      const initialQuota = getAiScannerMonthlyQuota(testDate);
-      assert.equal(initialQuota.limit, 10);
-      assert.equal(initialQuota.used, 0);
-      assert.equal(initialQuota.remaining, 10);
-
-      const afterOne = incrementAiScannerMonthlyQuota(testDate);
-      assert.equal(afterOne.used, 1);
-      assert.equal(afterOne.remaining, 9);
-    });
   });
 
   // =========================================================================

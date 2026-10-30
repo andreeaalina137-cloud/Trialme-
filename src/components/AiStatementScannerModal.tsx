@@ -15,7 +15,6 @@ import {
   X,
 } from 'lucide-react';
 import type { DetectedSubscription, Subscription, UserPlan } from '../types/subscription';
-import { getAiScannerMonthlyQuota, incrementAiScannerMonthlyQuota } from '../utils/retentionAndTrust';
 import { addMonthsClamped, formatLocalDateKey } from '../utils/subscriptionCalculations';
 import { isDuplicateScannedSubscription } from '../utils/subscriptionIdentity';
 import { getPresets } from '../services/databaseService';
@@ -84,16 +83,12 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   const [detectedItems, setDetectedItems] = useState<DetectedSubscription[]>([]);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [showAllDetected, setShowAllDetected] = useState(false);
-  const [quota, setQuota] = useState(() => getAiScannerMonthlyQuota());
-  const [quotaWarning, setQuotaWarning] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetScannerState = () => {
     scanner.reset();
     setDetectedItems([]);
     setAddedIds(new Set());
-    setQuotaWarning('');
-    setQuota(getAiScannerMonthlyQuota());
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -143,22 +138,11 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const currentQuota = getAiScannerMonthlyQuota();
-    if (currentQuota.remaining <= 0) {
-      setQuotaWarning('Monthly fair-use limit reached (10/10 AI statement scans). Resets on the 1st of next month.');
-      event.target.value = '';
-      return;
-    }
-    const updatedQuota = incrementAiScannerMonthlyQuota();
-    setQuota({ ...updatedQuota, monthKey: currentQuota.monthKey });
-    setQuotaWarning('');
-
     await scanner.scanFile(file);
     event.target.value = '';
   };
 
   const handleScanSample = async (type: 'barclays' | 'revolut') => {
-    setQuotaWarning('');
     if (type === 'barclays') {
       await scanner.scanRawLines(BARCLAYS_SAMPLE_LINES, 'demo');
     } else {
@@ -321,9 +305,9 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         </div>
       </div>
 
-      {(quotaWarning || (scanner.stage === 'error' && scanner.error?.message)) && (
+      {scanner.stage === 'error' && scanner.error?.message && (
         <div className="max-w-xl mx-auto rounded-2xl border border-[#D4AF7C]/40 bg-[#161616] px-3.5 py-2.5 text-xs text-[#D4AF7C]">
-          {quotaWarning || scanner.error?.message}
+          {scanner.error.message}
         </div>
       )}
 
@@ -441,7 +425,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
           {/* Trust Badge */}
           <div className="rounded-2xl bg-[#1F1F1F] border border-white/[0.06] p-2.5 text-[11px] text-[#A0A0A0] flex items-center justify-center gap-1.5">
             <Lock className="w-3.5 h-3.5 text-[#D4AF7C] shrink-0" />
-            <span>100% Private – Processed locally, no Open Banking login required ({quota.remaining}/{quota.limit} scans left)</span>
+            <span>100% Private – Processed locally, no Open Banking login required (Unlimited Offline Scans)</span>
           </div>
 
           {/* Quick Demo Statement Triggers */}

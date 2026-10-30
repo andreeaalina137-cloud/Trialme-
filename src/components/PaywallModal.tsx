@@ -177,7 +177,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
               </div>
               <div className="flex items-center gap-2 text-[#F5F5F5]">
                 <Check className="w-3.5 h-3.5 text-[#D4AF7C] shrink-0" />
-                <span><strong>{t('paywall.featureAiScanner')}</strong> (10 scans/mo fair-use)</span>
+                <span><strong>{t('paywall.featureAiScanner')}</strong> (unlimited offline scans)</span>
               </div>
               <div className="flex items-center gap-2 text-[#F5F5F5]">
                 <Check className="w-3.5 h-3.5 text-[#D4AF7C] shrink-0" />

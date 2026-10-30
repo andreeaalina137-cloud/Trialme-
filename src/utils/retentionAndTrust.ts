@@ -157,8 +157,6 @@ export function getUkPriceHikeAlert(subscriptionName: string): PriceHikeAlert | 
 }
 
 const LICENSE_STORAGE_KEY = 'subcleaner_license_key';
-const AI_QUOTA_MONTHLY_LIMIT = 10;
-
 export function generateLicenseKey(plan: UserPlan): string {
   const prefix = plan === 'pro' ? 'SUB-PRO' : 'SUB-STD';
   const existing = safeStorageGet(LICENSE_STORAGE_KEY);
@@ -200,40 +198,6 @@ export function parseRestoredLicensePlan(input: string): { plan: UserPlan; licen
     return { plan: 'pro', licenseKey: key };
   }
   return null;
-}
-
-export function getAiScannerMonthlyQuota(now = new Date()): {
-  used: number;
-  limit: number;
-  remaining: number;
-  monthKey: string;
-} {
-  const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
-  const storageKey = `subcleaner_ai_scans_${monthKey}`;
-  const raw = safeStorageGet(storageKey);
-  const used = raw ? Math.max(0, parseInt(raw, 10) || 0) : 0;
-  const remaining = Math.max(0, AI_QUOTA_MONTHLY_LIMIT - used);
-  return {
-    used,
-    limit: AI_QUOTA_MONTHLY_LIMIT,
-    remaining,
-    monthKey,
-  };
-}
-
-export function incrementAiScannerMonthlyQuota(now = new Date()): {
-  used: number;
-  limit: number;
-  remaining: number;
-} {
-  const current = getAiScannerMonthlyQuota(now);
-  const nextUsed = Math.min(current.limit, current.used + 1);
-  safeStorageSet(`subcleaner_ai_scans_${current.monthKey}`, String(nextUsed));
-  return {
-    used: nextUsed,
-    limit: current.limit,
-    remaining: Math.max(0, current.limit - nextUsed),
-  };
 }
 
 export interface SubCleanerBackupPayload {
