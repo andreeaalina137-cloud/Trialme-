@@ -23,6 +23,8 @@ import type { PresetService } from '../types/database';
 import { BrandIcon } from './BrandIcon';
 import { GoldBellIcon } from './GoldBellIcon';
 import { useTranslation } from '../i18n/LanguageContext';
+import { useStatementScanner } from '../scanner/hooks/useStatementScanner';
+import { BARCLAYS_SAMPLE_LINES, REVOLUT_SAMPLE_LINES } from '../scanner/types/scanner.types';
 
 interface AiStatementScannerModalProps {
   isOpen: boolean;
@@ -59,43 +61,6 @@ function findMatchingPreset(detectedName: string): PresetService | undefined {
   });
 }
 
-const getFallbackSubscriptions = (
-  statementType: 'barclays' | 'revolut' = 'barclays',
-  currency: string
-): DetectedSubscription[] => {
-  const presets = getPresets();
-  const getPresetPrice = (query: string, fallback: number) => {
-    const match = presets.find(
-      (p) => p.name.toLowerCase().includes(query.toLowerCase()) || p.id.includes(query.toLowerCase())
-    );
-    return match ? match.monthly_price_gbp : fallback;
-  };
-
-  const subscriptions = statementType === 'revolut'
-    ? [
-        { name: 'Adobe Creative Cloud', price: getPresetPrice('adobe', 19.97), category: 'Productivity' as const },
-        { name: 'ChatGPT Plus', price: getPresetPrice('chatgpt', 19.99), category: 'AI & Tech' as const },
-        { name: 'Canva Pro', price: getPresetPrice('canva', 12.99), category: 'Productivity' as const },
-        { name: 'Amazon Prime Video UK', price: getPresetPrice('amazon', 8.99), category: 'Streaming' as const },
-        { name: 'The Guardian Digital', price: getPresetPrice('guardian', 12.00), category: 'News & Magazines' as const },
-      ]
-    : [
-        { name: 'Adobe Creative Cloud', price: getPresetPrice('adobe', 19.97), category: 'Productivity' as const },
-        { name: 'ChatGPT Plus', price: getPresetPrice('chatgpt', 19.99), category: 'AI & Tech' as const },
-        { name: 'Canva Pro', price: getPresetPrice('canva', 12.99), category: 'Productivity' as const },
-        { name: 'Netflix UK Standard', price: getPresetPrice('netflix', 12.99), category: 'Streaming' as const },
-        { name: 'Spotify Premium UK', price: getPresetPrice('spotify', 11.99), category: 'Music & Audio' as const },
-      ];
-
-  return subscriptions.map((subscription, index) => ({
-    id: `demo-${statementType}-${index + 1}`,
-    ...subscription,
-    currency,
-    frequency: 'monthly',
-    confidence: 0.98,
-    selected: true,
-  }));
-};
 
 export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = ({
   isOpen,
@@ -108,18 +73,23 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   existingSubscriptions = [],
 }) => {
   const { t } = useTranslation();
-  const [isScanning, setIsScanning] = useState(false);
+  const scanner = useStatementScanner();
+  const isScanning =
+    scanner.stage === 'ingesting' ||
+    scanner.stage === 'enhancing' ||
+    scanner.stage === 'scanning' ||
+    scanner.stage === 'cleaning' ||
+    scanner.stage === 'matching';
+
   const [detectedItems, setDetectedItems] = useState<DetectedSubscription[]>([]);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [showAllDetected, setShowAllDetected] = useState(false);
   const [quota, setQuota] = useState(() => getAiScannerMonthlyQuota());
   const [quotaWarning, setQuotaWarning] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const scanRequestIdRef = useRef(0);
 
   const resetScannerState = () => {
-    scanRequestIdRef.current += 1;
-    setIsScanning(false);
+    scanner.reset();
     setDetectedItems([]);
     setAddedIds(new Set());
     setQuotaWarning('');
@@ -129,68 +99,71 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
 
   useEffect(() => {
     resetScannerState();
-    return () => {
-      scanRequestIdRef.current += 1;
-    };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (scanner.matches.length > 0) {
+      setDetectedItems(
+        scanner.matches.map((item) => {
+          const matchedPreset = findMatchingPreset(item.serviceName);
+          const brandColor =
+            item.color ||
+            DEFAULT_SHOWCASE_DETECTED.find((d) =>
+              d.name.toLowerCase().includes(item.serviceName.toLowerCase().split(' ')[0])
+            )?.color ||
+            '#D4AF7C';
+
+          return {
+            id: item.id,
+            name: item.serviceName,
+            price: currencySymbol === '£' && matchedPreset ? matchedPreset.monthly_price_gbp : item.amountGbp,
+            currency: currencySymbol,
+            frequency: item.billingCycle === 'Annual' ? 'yearly' : 'monthly',
+            category: matchedPreset?.category || item.category,
+            confidence: item.confidence,
+            selected: item.selected,
+            color: brandColor,
+            cancelUrl: item.cancelUrl || matchedPreset?.cancel_url,
+            nextPaymentDate: item.nextBillingDate,
+            notes: item.hasCancellationTrap
+              ? `Cancellation trap detected${item.trapLabel ? `: ${item.trapLabel}` : ''}.`
+              : matchedPreset?.notes,
+            hasCancellationTrap: item.hasCancellationTrap,
+            trapLabel: item.trapLabel,
+          };
+        })
+      );
+      setAddedIds(new Set());
+    }
+  }, [scanner.matches, currencySymbol]);
 
   if (!isOpen) return null;
 
-  const scanStatement = async (
-    imageBase64: string | null,
-    mimeType: string,
-    mockStatementType?: 'barclays' | 'revolut'
-  ) => {
-    if (imageBase64 && !mockStatementType) {
-      const currentQuota = getAiScannerMonthlyQuota();
-      if (currentQuota.remaining <= 0) {
-        setQuotaWarning('Monthly fair-use limit reached (10/10 AI statement scans). Resets on the 1st of next month.');
-        return;
-      }
-      const updatedQuota = incrementAiScannerMonthlyQuota();
-      setQuota({ ...updatedQuota, monthKey: currentQuota.monthKey });
-    }
-
-    setQuotaWarning('');
-    const requestId = ++scanRequestIdRef.current;
-    setIsScanning(true);
-
-    try {
-      const response = await fetch('/api/scan-statement', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64, mimeType, mockStatementType }),
-      });
-      if (!response.ok) throw new Error('Statement scan unavailable');
-      const data = await response.json();
-      if (!data.success || !Array.isArray(data.detectedSubscriptions)) {
-        throw new Error('Invalid scan response');
-      }
-      if (requestId !== scanRequestIdRef.current) return;
-      setDetectedItems(data.detectedSubscriptions);
-      setAddedIds(new Set());
-    } catch {
-      if (requestId !== scanRequestIdRef.current) return;
-      setDetectedItems(getFallbackSubscriptions(mockStatementType, currencySymbol));
-      setAddedIds(new Set());
-    } finally {
-      if (requestId === scanRequestIdRef.current) setIsScanning(false);
-    }
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const requestId = scanRequestIdRef.current;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (requestId === scanRequestIdRef.current) {
-        void scanStatement(reader.result as string, file.type);
-      }
-    };
-    reader.readAsDataURL(file);
+    const currentQuota = getAiScannerMonthlyQuota();
+    if (currentQuota.remaining <= 0) {
+      setQuotaWarning('Monthly fair-use limit reached (10/10 AI statement scans). Resets on the 1st of next month.');
+      event.target.value = '';
+      return;
+    }
+    const updatedQuota = incrementAiScannerMonthlyQuota();
+    setQuota({ ...updatedQuota, monthKey: currentQuota.monthKey });
+    setQuotaWarning('');
+
+    await scanner.scanFile(file);
     event.target.value = '';
+  };
+
+  const handleScanSample = async (type: 'barclays' | 'revolut') => {
+    setQuotaWarning('');
+    if (type === 'barclays') {
+      await scanner.scanRawLines(BARCLAYS_SAMPLE_LINES, 'demo');
+    } else {
+      await scanner.scanRawLines(REVOLUT_SAMPLE_LINES, 'demo');
+    }
   };
 
   const handleAddSingleDetected = (item: DetectedSubscription) => {
@@ -204,6 +177,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     const matched = findMatchingPreset(item.name);
     const finalPrice = currencySymbol === '£' && matched ? matched.monthly_price_gbp : item.price;
     const matchingColor =
+      item.color ||
       DEFAULT_SHOWCASE_DETECTED.find((d) => d.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]))?.color ||
       '#D4AF7C';
 
@@ -214,11 +188,11 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         currency: item.currency || currencySymbol,
         frequency: item.frequency,
         category: matched?.category || item.category,
-        nextPaymentDate: formattedDate,
+        nextPaymentDate: item.nextPaymentDate || formattedDate,
         status: 'active',
         color: matchingColor,
-        cancelUrl: matched?.cancel_url,
-        notes: matched?.notes,
+        cancelUrl: item.cancelUrl || matched?.cancel_url,
+        notes: item.notes || matched?.notes,
         reminderDaysBefore: 3,
       },
     ]);
@@ -347,16 +321,16 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         </div>
       </div>
 
-      {quotaWarning && (
+      {(quotaWarning || (scanner.stage === 'error' && scanner.error?.message)) && (
         <div className="max-w-xl mx-auto rounded-2xl border border-[#D4AF7C]/40 bg-[#161616] px-3.5 py-2.5 text-xs text-[#D4AF7C]">
-          {quotaWarning}
+          {quotaWarning || scanner.error?.message}
         </div>
       )}
 
-      {/* Main Upload / Results Layout */}
-      <div className={detectedItems.length > 0 ? 'grid grid-cols-1 lg:grid-cols-12 gap-8 items-start' : 'max-w-xl mx-auto space-y-5'}>
-        {/* Left Column (lg:col-span-5 when items exist): Upload & Scanner Controls */}
-        <div className={`${detectedItems.length > 0 ? 'lg:col-span-5' : 'w-full'} rounded-3xl bg-[#161616] border border-white/[0.08] p-6 text-center shadow-xl space-y-4`}>
+      {/* Main Upload & Results Layout: Clean, spacious vertical stack under the magnifying glass */}
+      <div className="max-w-xl mx-auto space-y-6">
+        {/* Upload & Scanner Controls Card */}
+        <div className="w-full rounded-3xl bg-[#161616] border border-white/[0.08] p-6 text-center shadow-xl space-y-4">
           {/* Central Glowing Document + Gold Magnifying Glass Hero */}
           <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
             <div
@@ -469,6 +443,31 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
             <Lock className="w-3.5 h-3.5 text-[#D4AF7C] shrink-0" />
             <span>100% Private – Processed locally, no Open Banking login required ({quota.remaining}/{quota.limit} scans left)</span>
           </div>
+
+          {/* Quick Demo Statement Triggers */}
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[10px] uppercase tracking-wider text-[#A0A0A0] font-bold block">
+              Quick Test Samples
+            </span>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                disabled={isScanning}
+                onClick={() => void handleScanSample('barclays')}
+                className="rounded-full border border-white/10 bg-[#1F1F1F] px-3.5 py-1.5 text-[11px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Try Barclays UK Sample
+              </button>
+              <button
+                type="button"
+                disabled={isScanning}
+                onClick={() => void handleScanSample('revolut')}
+                className="rounded-full border border-white/10 bg-[#1F1F1F] px-3.5 py-1.5 text-[11px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Try Revolut Sample
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Dynamic Empty State (Show Bell / Protection Banner) */}
@@ -497,9 +496,9 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
           </div>
         )}
 
-        {/* Right Column (lg:col-span-7): Detected Subscriptions List (rendered only after a scan) */}
+        {/* Detected Subscriptions List (rendered cleanly and spaciously under upload section) */}
         {detectedItems.length > 0 && (
-          <div className="lg:col-span-7 space-y-4">
+          <div className="w-full space-y-4">
             {/* Detected Subscriptions Card */}
             <div className="luxury-panel rounded-3xl p-4 sm:p-5 border border-white/[0.08] space-y-3.5 shadow-xl bg-[#161616]">
               <div className="flex items-center justify-between px-1">
@@ -512,7 +511,10 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setDetectedItems([])}
+                    onClick={() => {
+                      setDetectedItems([]);
+                      scanner.reset();
+                    }}
                     className="text-xs font-semibold text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
                   >
                     Clear

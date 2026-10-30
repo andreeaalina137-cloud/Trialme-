@@ -73,4 +73,10 @@ export interface DetectedSubscription {
   category: SubscriptionCategory;
   confidence: number;
   selected: boolean;
+  color?: string;
+  cancelUrl?: string;
+  notes?: string;
+  nextPaymentDate?: string | null;
+  hasCancellationTrap?: boolean;
+  trapLabel?: string | null;
 }
