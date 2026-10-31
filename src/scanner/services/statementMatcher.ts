@@ -1,6 +1,10 @@
 import { getPresets } from '../../services/databaseService';
 import type { PresetService } from '../../types/database';
-import type { SubscriptionCategory } from '../../types/subscription';
+import type { SubscriptionCategory, SubscriptionFrequency } from '../../types/subscription';
+import {
+  parseLocalDateKey,
+  rollForwardPaymentDate,
+} from '../../utils/subscriptionCalculations';
 import type {
   BillingCycle,
   MatchedSubscription,
@@ -364,21 +368,25 @@ function inferBillingCycle(amount: number, monthlyPrice: number): BillingCycle {
   return 'Monthly';
 }
 
-function nextBillingDate(iso: string | null, billingDay: number | null, now = new Date()): string | null {
-  const day = billingDay ?? (iso ? Number(iso.slice(8, 10)) : now.getDate());
-  if (!day) return null;
-  let year = now.getFullYear();
-  let month = now.getMonth();
-  if (day <= now.getDate()) {
-    month += 1;
-    if (month > 11) {
-      month = 0;
-      year += 1;
-    }
-  }
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const clamped = Math.min(day, lastDay);
-  return `${year}-${String(month + 1).padStart(2, '0')}-${String(clamped).padStart(2, '0')}`;
+function frequencyForCycle(cycle: BillingCycle): SubscriptionFrequency {
+  return cycle === 'Annual' ? 'yearly' : 'monthly';
+}
+
+export function calculateNextBillingDate(
+  lastPaymentDate: string | null,
+  cycle: BillingCycle,
+  now = new Date(),
+): string | null {
+  if (!lastPaymentDate || !parseLocalDateKey(lastPaymentDate)) return null;
+  return rollForwardPaymentDate(lastPaymentDate, frequencyForCycle(cycle), now);
+}
+
+export function calculateDaysUntilNextPayment(nextPaymentDate: string | null, now = new Date()): number | null {
+  if (!nextPaymentDate) return null;
+  const parsed = parseLocalDateKey(nextPaymentDate);
+  if (!parsed) return null;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.ceil((parsed.getTime() - today.getTime()) / 86_400_000));
 }
 
 interface Candidate {
@@ -506,7 +514,12 @@ export function matchStatementTransactions(
         amountGbp: tx.amountGbp,
         billingCycle: 'Monthly',
         billingDay: tx.billingDay,
-        nextBillingDate: nextBillingDate(tx.dateIso, tx.billingDay, now),
+        lastPaymentDate: tx.dateIso,
+        nextBillingDate: calculateNextBillingDate(tx.dateIso, 'Monthly', now),
+        daysUntilNextPayment: calculateDaysUntilNextPayment(
+          calculateNextBillingDate(tx.dateIso, 'Monthly', now),
+          now,
+        ),
         confidence: occurrenceCount > 1 ? 0.78 : 0.62,
         matchTier: 3,
         isVerifiedRecurring: occurrenceCount > 1,
@@ -528,8 +541,10 @@ export function matchStatementTransactions(
         if (tx.dateIso && (!existingUnknown.latestIso || tx.dateIso >= existingUnknown.latestIso)) {
           existingUnknown.match.amountGbp = tx.amountGbp;
           existingUnknown.match.billingDay = tx.billingDay ?? existingUnknown.match.billingDay;
-          existingUnknown.match.nextBillingDate =
-            unknownPayload.nextBillingDate ?? existingUnknown.match.nextBillingDate;
+          existingUnknown.match.lastPaymentDate = tx.dateIso;
+          existingUnknown.match.nextBillingDate = unknownPayload.nextBillingDate ?? existingUnknown.match.nextBillingDate;
+          existingUnknown.match.daysUntilNextPayment =
+            unknownPayload.daysUntilNextPayment ?? existingUnknown.match.daysUntilNextPayment;
           existingUnknown.latestIso = tx.dateIso;
         }
         existingUnknown.match.isVerifiedRecurring = existingUnknown.occurrences > 1;
@@ -538,16 +553,19 @@ export function matchStatementTransactions(
     }
 
     const existing = grouped.get(candidate.preset.id);
-    const nextDate = nextBillingDate(tx.dateIso, tx.billingDay, now);
+    const billingCycle = inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp);
+    const nextDate = calculateNextBillingDate(tx.dateIso, billingCycle, now);
     const payload: MatchedSubscription = {
       id: `scan-${candidate.preset.id}`,
       presetId: candidate.preset.id,
       serviceName: displayName(candidate.preset.name),
       category: candidate.preset.category,
       amountGbp: tx.amountGbp,
-      billingCycle: inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp),
+      billingCycle,
       billingDay: tx.billingDay,
+      lastPaymentDate: tx.dateIso,
       nextBillingDate: nextDate,
+      daysUntilNextPayment: calculateDaysUntilNextPayment(nextDate, now),
       confidence: candidate.confidence,
       matchTier: candidate.tier,
       isVerifiedRecurring: false,
@@ -577,8 +595,11 @@ export function matchStatementTransactions(
     if (shouldUseTransactionAmount) {
       existing.match.amountGbp = tx.amountGbp;
       existing.match.billingDay = tx.billingDay ?? existing.match.billingDay;
+      existing.match.lastPaymentDate = tx.dateIso ?? existing.match.lastPaymentDate;
       existing.match.nextBillingDate = nextDate ?? existing.match.nextBillingDate;
-      existing.match.billingCycle = inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp);
+      existing.match.billingCycle = billingCycle;
+      existing.match.daysUntilNextPayment =
+        calculateDaysUntilNextPayment(existing.match.nextBillingDate, now);
       existing.latestIso = tx.dateIso ?? existing.latestIso;
     }
     if (candidate.confidence > existing.match.confidence) {

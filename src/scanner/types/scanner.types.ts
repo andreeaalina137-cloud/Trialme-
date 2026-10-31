@@ -43,7 +43,9 @@ export interface MatchedSubscription {
   amountGbp: number;
   billingCycle: BillingCycle;
   billingDay: number | null;
+  lastPaymentDate: string | null;
   nextBillingDate: string | null;
+  daysUntilNextPayment: number | null;
   confidence: number;
   matchTier: MatchTier;
   isVerifiedRecurring: boolean;

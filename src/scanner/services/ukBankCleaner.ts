@@ -13,6 +13,8 @@ const FX_PATTERN =
   /\b(?:FX|RATE|EXCHANGE)[:\s-]*\d+(?:\.\d+)?|\b\d+\.\d{2,6}\s*(?:USD|EUR|RON)\b/gi;
 const LTD_PATTERN = /\b(?:LIMITED|LTD\.?|PLC|INC\.?)\b/gi;
 
+// An explicit pound symbol is authoritative over bare GBP conversion values.
+const EXPLICIT_GBP_PRICE_PATTERN = /(?:Â£|\u00A3)\s*(\d{1,4}(?:,\d{3})*(?:[.,]\d{2}))/gi;
 const GBP_PRICE_PATTERN = /(?:£|GBP\s?)(\d{1,4}(?:,\d{3})*(?:\.\d{2}))/i;
 const SIGNED_GBP_PRICE_PATTERN = /[-+]?\s*(\d{1,4}(?:,\d{3})*(?:\.\d{2}))\s*GBP/i;
 const GBP_SUFFIX_PRICE_PATTERN = /[-+]?\s*(\d{1,4}(?:[,.]\d{3})*[,.]\d{2})\s*(?:£|GBP)/i;
@@ -118,6 +120,25 @@ export function extractUkDate(line: string, now = new Date()): { iso: string; bi
 }
 
 export function extractGbpAmount(line: string): number | null {
+  const poundSymbol = String.fromCharCode(0xa3);
+  const localizedGbpAmounts = Array.from(line.matchAll(/\d{1,4},\d{2}/g))
+    .map((match) => parseLocalizedAmount(match[0]))
+    .filter((amount) => Number.isFinite(amount) && amount > 0);
+  if (localizedGbpAmounts.length > 0 && (line.includes(poundSymbol) || /\bGBP\b/i.test(line))) {
+    return localizedGbpAmounts[0];
+  }
+
+  const explicitPounds = Array.from(line.matchAll(EXPLICIT_GBP_PRICE_PATTERN))
+    .map((match) => parseLocalizedAmount(match[1]))
+    .filter((amount) => Number.isFinite(amount) && amount > 0);
+  if (explicitPounds.length > 0) return explicitPounds[0];
+
+  const explicitSuffixPounds: number[] = [];
+  for (const segment of line.split(poundSymbol).slice(0, -1)) {
+    const match = segment.match(/(\d{1,4}(?:[,.]\d{3})*[,.]\d{2})\s*$/);
+    if (match) explicitSuffixPounds.push(parseLocalizedAmount(match[1]));
+  }
+  if (explicitSuffixPounds.length > 0) return explicitSuffixPounds[0];
   // 1. Explicit £ or GBP symbol
   const gbpMatch = line.match(GBP_PRICE_PATTERN);
   if (gbpMatch) {

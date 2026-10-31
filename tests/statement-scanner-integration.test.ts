@@ -3,10 +3,15 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import zlib from 'zlib';
 import { parseStatementLines, extractGbpAmount, extractUkDate } from '../src/scanner/services/ukBankCleaner';
-import { matchStatementTransactions } from '../src/scanner/services/statementMatcher';
+import {
+  calculateDaysUntilNextPayment,
+  calculateNextBillingDate,
+  matchStatementTransactions,
+} from '../src/scanner/services/statementMatcher';
 import { extractPdfText } from '../src/scanner/services/pdfTextExtractor';
 import { detectBankFormat } from '../src/scanner/services/bankFormatDetector';
 import { normalizeStatementLines } from '../src/scanner/services/statementNormalizer';
+import { buildScannerSubscriptionDraft } from '../src/scanner/services/scannerSubscriptionDraft';
 import {
   BARCLAYS_SAMPLE_LINES,
   REVOLUT_SAMPLE_LINES,
@@ -181,6 +186,116 @@ test('Offline Statement Scanner: Handles UK dashed/dotted dates and quoted CSV f
   assert.equal(parsed[0].cleanedMerchant.includes('NETFLIX'), true);
   assert.equal(parsed[0].amountGbp, 10.99);
   assert.equal(parsed[1].amountGbp, 11.99);
+});
+
+test('Offline Statement Scanner: preserves transaction anchor and rolls next payment by cycle', () => {
+  const reference = new Date('2026-10-31T12:00:00');
+  assert.equal(calculateNextBillingDate('2026-09-15', 'Monthly', reference), '2026-11-15');
+  assert.equal(calculateNextBillingDate('2025-12-15', 'Annual', reference), '2026-12-15');
+  assert.equal(calculateNextBillingDate('2026-01-31', 'Monthly', new Date('2026-02-15T12:00:00')), '2026-02-28');
+  assert.equal(calculateDaysUntilNextPayment('2026-11-15', reference), 15);
+
+  const matched = matchStatementTransactions(
+    ['15 Oct 2026 NETFLIX.COM £10.99'].map((line) => ({
+      rawLine: line,
+      cleanedMerchant: 'NETFLIX.COM',
+      amountGbp: 10.99,
+      dateIso: '2026-10-15',
+      billingDay: 15,
+      isCredit: false,
+      isHighValueTransfer: false,
+    })),
+    reference,
+  );
+  assert.equal(matched[0].lastPaymentDate, '2026-10-15');
+  assert.equal(matched[0].nextBillingDate, '2026-11-15');
+  assert.equal(matched[0].daysUntilNextPayment, 15);
+});
+
+test('Scanner preview workflow: edited category and date are persisted in the import draft', () => {
+  const draft = buildScannerSubscriptionDraft(
+    {
+      id: 'scan-netflix',
+      name: 'Netflix',
+      price: 10.99,
+      currency: '£',
+      frequency: 'monthly',
+      category: 'Utilities',
+      confidence: 0.99,
+      selected: true,
+      nextPaymentDate: '2026-11-15',
+      lastPaymentDate: '2026-10-15',
+      daysUntilNextPayment: 15,
+    },
+    undefined,
+    '£',
+    '2026-12-15',
+  );
+  assert.equal(draft.category, 'Utilities');
+  assert.equal(draft.nextPaymentDate, '2026-11-15');
+  assert.equal(draft.price, 10.99);
+});
+
+test('Scanner preview workflow: preserves annual billing and fallback date', () => {
+  const draft = buildScannerSubscriptionDraft(
+    {
+      id: 'scan-tv',
+      name: 'Annual Service',
+      price: 99,
+      currency: '£',
+      frequency: 'yearly',
+      category: 'Utilities',
+      confidence: 0.8,
+      selected: true,
+      nextPaymentDate: null,
+    },
+    undefined,
+    '£',
+    '2027-01-31',
+  );
+  assert.equal(draft.frequency, 'yearly');
+  assert.equal(draft.nextPaymentDate, '2027-01-31');
+});
+
+test('Scanner preview workflow: fallback preset data remains available for unknown price/category fields', () => {
+  const draft = buildScannerSubscriptionDraft(
+    {
+      id: 'scan-unknown-price',
+      name: 'Netflix',
+      price: 0,
+      currency: '',
+      frequency: 'monthly',
+      category: 'Streaming',
+      confidence: 0.7,
+      selected: true,
+    },
+    {
+      id: 'netflix_standard_uk',
+      name: 'Netflix UK Standard',
+      category: 'Streaming',
+      monthly_price_gbp: 13.99,
+      has_free_trial: false,
+      trial_duration_days: 0,
+      trial_type: 'none',
+      notes: 'Local preset',
+      cancel_url: 'https://www.netflix.com',
+    },
+    '£',
+    '2026-11-01',
+  );
+  assert.equal(draft.price, 13.99);
+  assert.equal(draft.cancelUrl, 'https://www.netflix.com');
+});
+
+test('Offline Statement Scanner: explicit GBP charge wins over Revolut FX values', () => {
+  assert.equal(
+    extractGbpAmount('GOOGLE ONE FX rate 1.86 GBP converted charge \u00A31.99'),
+    1.99,
+  );
+  assert.equal(
+    extractGbpAmount('GOOGLE ONE 1.86 GBP'),
+    1.86,
+  );
 });
 
 test('Offline Statement Scanner: normalizes OCR spacing and detects bank format conservatively', () => {

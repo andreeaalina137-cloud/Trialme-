@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
+  CalendarDays,
   Check,
   Crown,
   FileSpreadsheet,
@@ -14,7 +15,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import type { DetectedSubscription, Subscription, UserPlan } from '../types/subscription';
+import type { DetectedSubscription, Subscription, SubscriptionCategory, UserPlan } from '../types/subscription';
 import { addMonthsClamped, formatLocalDateKey } from '../utils/subscriptionCalculations';
 import { isDuplicateScannedSubscription } from '../utils/subscriptionIdentity';
 import { getPresets } from '../services/databaseService';
@@ -24,6 +25,7 @@ import { GoldBellIcon } from './GoldBellIcon';
 import { useTranslation } from '../i18n/LanguageContext';
 import { useStatementScanner } from '../scanner/hooks/useStatementScanner';
 import { BARCLAYS_SAMPLE_LINES, REVOLUT_SAMPLE_LINES } from '../scanner/types/scanner.types';
+import { buildScannerSubscriptionDraft } from '../scanner/services/scannerSubscriptionDraft';
 
 interface AiStatementScannerModalProps {
   isOpen: boolean;
@@ -49,6 +51,57 @@ const DEFAULT_SHOWCASE_DETECTED: Array<{
   { id: 'ai-netflix', name: 'Netflix UK', price: 10.99, category: 'Streaming', color: '#E50914' },
   { id: 'ai-spotify', name: 'Spotify Premium', price: 10.99, category: 'Music & Audio', color: '#1DB954' },
 ];
+
+const SCANNER_CATEGORIES: SubscriptionCategory[] = [
+  'Streaming',
+  'AI & Tech',
+  'Music & Audio',
+  'Fitness & Gym',
+  'Productivity',
+  'Gaming',
+  'News & Magazines',
+  'Food & Delivery',
+  'Utilities',
+  'Other',
+];
+
+function formatScannerDate(value: string | null | undefined): string {
+  if (!value) return 'Not available';
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return 'Not available';
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+function daysUntilScannerDate(value: string): number | null {
+  const target = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(target.getTime())) return null;
+  const today = new Date();
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.max(0, Math.ceil((target.getTime() - todayMidnight.getTime()) / 86_400_000));
+}
+
+function formatUkDateInput(value: string | null | undefined): string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return '';
+  const [year, month, day] = value.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+function parseUkDateInput(value: string): string | null {
+  const match = value.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return null;
+  const [, day, month, year] = match;
+  const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+  if (
+    parsed.getFullYear() !== Number(year) ||
+    parsed.getMonth() !== Number(month) - 1 ||
+    parsed.getDate() !== Number(day)
+  ) return null;
+  return `${year}-${month}-${day}`;
+}
 
 function findMatchingPreset(detectedName: string): PresetService | undefined {
   if (!detectedName) return undefined;
@@ -83,12 +136,21 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   const [detectedItems, setDetectedItems] = useState<DetectedSubscription[]>([]);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [showAllDetected, setShowAllDetected] = useState(false);
+  const [previewItem, setPreviewItem] = useState<DetectedSubscription | null>(null);
+  const [previewDate, setPreviewDate] = useState('');
+  const [previewDateInput, setPreviewDateInput] = useState('');
+  const [previewPriceInput, setPreviewPriceInput] = useState('');
+  const [previewCategory, setPreviewCategory] = useState<SubscriptionCategory>('Other');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const datePickerRef = useRef<HTMLInputElement>(null);
 
   const resetScannerState = () => {
     scanner.reset();
     setDetectedItems([]);
     setAddedIds(new Set());
+    setPreviewItem(null);
+    setPreviewDateInput('');
+    setPreviewPriceInput('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -120,6 +182,8 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
             color: brandColor,
             cancelUrl: item.cancelUrl || matchedPreset?.cancel_url,
             nextPaymentDate: item.nextBillingDate,
+            lastPaymentDate: item.lastPaymentDate,
+            daysUntilNextPayment: item.daysUntilNextPayment,
             notes: item.hasCancellationTrap
               ? `Cancellation trap detected${item.trapLabel ? `: ${item.trapLabel}` : ''}.`
               : matchedPreset?.notes,
@@ -166,21 +230,37 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
       '#D4AF7C';
 
     onImportSubscriptions([
-      {
-        name: item.name,
-        price: finalPrice,
-        currency: item.currency || currencySymbol,
-        frequency: item.frequency,
-        category: matched?.category || item.category,
-        nextPaymentDate: item.nextPaymentDate || formattedDate,
-        status: 'active',
-        color: matchingColor,
-        cancelUrl: item.cancelUrl || matched?.cancel_url,
-        notes: item.notes || matched?.notes,
-        reminderDaysBefore: 3,
-      },
+      buildScannerSubscriptionDraft(
+        { ...item, price: finalPrice, color: matchingColor },
+        matched,
+        currencySymbol,
+        formattedDate,
+      ),
     ]);
     setAddedIds((prev) => new Set(prev).add(item.id));
+  };
+
+  const openPreview = (item: DetectedSubscription) => {
+    setPreviewItem(item);
+    setPreviewDate(item.nextPaymentDate || '');
+    setPreviewDateInput(formatUkDateInput(item.nextPaymentDate));
+    setPreviewPriceInput(item.price.toFixed(2));
+    setPreviewCategory(item.category);
+  };
+
+  const handleAddFromPreview = () => {
+    if (!previewItem) return;
+    const updatedItem: DetectedSubscription = {
+      ...previewItem,
+      price: Number.isFinite(Number(previewPriceInput.replace(',', '.')))
+        ? Math.max(0, Number(previewPriceInput.replace(',', '.')))
+        : previewItem.price,
+      category: previewCategory,
+      nextPaymentDate: previewDate || previewItem.nextPaymentDate,
+    };
+    handleAddSingleDetected(updatedItem);
+    setDetectedItems((current) => current.filter((item) => item.id !== previewItem.id));
+    setPreviewItem(null);
   };
 
   const handleDismissItem = (id: string) => {
@@ -196,25 +276,15 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     );
     if (selectedItems.length === 0) return;
 
-    const nextPaymentDate = addMonthsClamped(new Date(), 1);
-    const formattedDate = formatLocalDateKey(nextPaymentDate);
-
     onImportSubscriptions(
       selectedItems.map((item) => {
         const matched = findMatchingPreset(item.name);
-        return {
-          name: item.name,
-          price: item.price > 0 ? item.price : matched?.monthly_price_gbp || 0,
-          currency: item.currency || currencySymbol,
-          frequency: item.frequency,
-          category: matched?.category || item.category,
-          nextPaymentDate: formattedDate,
-          status: 'active',
-          color: '#D4AF7C',
-          cancelUrl: matched?.cancel_url,
-          notes: matched?.notes,
-          reminderDaysBefore: 3,
-        };
+        return buildScannerSubscriptionDraft(
+          item,
+          matched,
+          currencySymbol,
+          formatLocalDateKey(addMonthsClamped(new Date(), 1)),
+        );
       })
     );
     resetScannerState();
@@ -526,6 +596,15 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                   return (
                     <div
                       key={item.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openPreview(item)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          openPreview(item);
+                        }
+                      }}
                       className="flex items-center justify-between gap-3.5 rounded-2xl bg-[#1F1F1F] border border-white/[0.08] p-3 sm:p-3.5 hover:border-[#D4AF7C]/40 transition-all min-h-[68px]"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -546,7 +625,10 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                         <button
                           type="button"
                           disabled={isAdded}
-                          onClick={() => handleAddSingleDetected(item)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleAddSingleDetected(item);
+                          }}
                           className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 flex items-center gap-1 active:scale-[0.97] transition-all cursor-pointer ${
                             isAdded
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
@@ -567,7 +649,10 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDismissItem(item.id)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleDismissItem(item.id);
+                          }}
                           className="h-8 w-8 rounded-full flex items-center justify-center text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-white/5 transition-colors cursor-pointer"
                           aria-label={`Dismiss ${item.name}`}
                         >
@@ -597,10 +682,148 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     </div>
   );
 
+  const scannerPreview = previewItem ? (
+    <div
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-[#0A0A0A]/90 p-4 backdrop-blur-md sm:items-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="scanner-preview-title"
+      onClick={() => setPreviewItem(null)}
+    >
+      <div
+        className="w-full max-w-md rounded-3xl border border-[#D4AF37]/35 bg-[#0A0A0A] p-5 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <BrandIcon name={previewItem.name} category={previewCategory} color={previewItem.color || '#D4AF37'} size="preset" />
+            <div className="min-w-0">
+              <h3 id="scanner-preview-title" className="truncate text-base font-extrabold text-[#F5F5F5]">
+                {previewItem.name}
+              </h3>
+              <p className="font-mono text-sm font-semibold text-[#D4AF37]">
+                {currencySymbol}{(Number(previewPriceInput.replace(',', '.')) || previewItem.price).toFixed(2)}/{previewItem.frequency === 'yearly' ? 'yr' : 'mo'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setPreviewItem(null)}
+            className="h-8 w-8 shrink-0 rounded-full text-[#A0A0A0] hover:bg-white/5 hover:text-[#F5F5F5]"
+            aria-label="Close subscription preview"
+          >
+            <X className="mx-auto h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-4 text-sm">
+          <div className="rounded-2xl border border-white/10 bg-[#161616] p-3">
+            <div className="flex items-center gap-2 text-[#A0A0A0]">
+              <CalendarDays className="h-4 w-4 text-[#D4AF37]" />
+              <span>Payment dates</span>
+            </div>
+            <p className="mt-2 text-[#F5F5F5]">Last payment: {formatScannerDate(previewItem.lastPaymentDate)}</p>
+            <label className="mt-1 block text-[#D4AF37]" htmlFor="scanner-preview-date">
+              Next payment date
+            </label>
+            <div className="mt-1 flex gap-2">
+              <input
+                id="scanner-preview-date"
+                type="text"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="DD/MM/YYYY"
+                value={previewDateInput}
+                onChange={(event) => {
+                  const nextInput = event.target.value.replace(/[^\d/]/g, '').slice(0, 10);
+                  setPreviewDateInput(nextInput);
+                  const parsed = parseUkDateInput(nextInput);
+                  if (parsed) setPreviewDate(parsed);
+                }}
+                aria-label="Next payment date in UK format"
+                className="w-full rounded-xl border border-white/10 bg-[#1F1F1F] px-3 py-2 text-[#F5F5F5] outline-none focus:border-[#D4AF37]"
+              />
+              <button
+                type="button"
+                aria-label="Open date picker"
+                onClick={() => {
+                  const picker = datePickerRef.current;
+                  if (!picker) return;
+                  if ('showPicker' in picker && typeof picker.showPicker === 'function') picker.showPicker();
+                  else picker.click();
+                }}
+                className="rounded-xl border border-white/10 bg-[#1F1F1F] px-3 text-[#D4AF37] hover:border-[#D4AF37]"
+              >
+                <CalendarDays className="h-4 w-4" />
+              </button>
+              <input
+                ref={datePickerRef}
+                type="date"
+                value={previewDate}
+                onChange={(event) => {
+                  setPreviewDate(event.target.value);
+                  setPreviewDateInput(formatUkDateInput(event.target.value));
+                }}
+                tabIndex={-1}
+                aria-hidden="true"
+                className="sr-only"
+              />
+            </div>
+            <p className="mt-1 text-xs text-[#A0A0A0]">
+              {previewDate
+                ? `Next payment: ${formatScannerDate(previewDate)} (${daysUntilScannerDate(previewDate) ?? 0} days)`
+                : 'Choose a date to confirm the next payment.'}
+            </p>
+          </div>
+
+          <label className="block text-[#A0A0A0]" htmlFor="scanner-preview-category">
+            Category
+            <select
+              id="scanner-preview-category"
+              value={previewCategory}
+              onChange={(event) => setPreviewCategory(event.target.value as SubscriptionCategory)}
+              className="mt-1 w-full rounded-xl border border-white/10 bg-[#161616] px-3 py-2 text-[#F5F5F5] outline-none focus:border-[#D4AF37]"
+            >
+              {SCANNER_CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
+            </select>
+          </label>
+
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block text-[#A0A0A0]" htmlFor="scanner-preview-price">
+              Amount (£)
+              <input
+                id="scanner-preview-price"
+                type="text"
+                inputMode="decimal"
+                value={previewPriceInput}
+                onChange={(event) => setPreviewPriceInput(event.target.value.replace(/[^\d.,]/g, ''))}
+                className="mt-1 w-full rounded-xl border border-white/10 bg-[#161616] px-3 py-2 text-[#F5F5F5] outline-none focus:border-[#D4AF37]"
+              />
+            </label>
+            <div className="flex flex-col justify-end rounded-xl border border-white/10 bg-[#161616] px-3 py-2">
+              <span className="text-xs text-[#A0A0A0]">Billing cycle</span>
+              <span className="font-bold text-[#F5F5F5]">{previewItem.frequency === 'yearly' ? 'Yearly' : 'Monthly'}</span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddFromPreview}
+          className="mt-5 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-sm font-black text-[#0A0A0A] shadow-lg"
+        >
+          <Plus className="h-4 w-4" />
+          Add Subscription
+        </button>
+      </div>
+    </div>
+  ) : null;
+
   if (mode === 'screen') {
     return (
       <div className="min-h-full flex flex-col bg-[#0A0A0A]">
         <div className="px-4 pt-3 pb-28">{scannerBody}</div>
+        {scannerPreview}
       </div>
     );
   }
@@ -619,6 +842,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         />
         {scannerBody}
       </section>
+      {scannerPreview}
     </div>
   );
 };

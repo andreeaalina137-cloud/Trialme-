@@ -77,6 +77,8 @@ export interface DetectedSubscription {
   cancelUrl?: string;
   notes?: string;
   nextPaymentDate?: string | null;
+  lastPaymentDate?: string | null;
+  daysUntilNextPayment?: number | null;
   hasCancellationTrap?: boolean;
   trapLabel?: string | null;
 }

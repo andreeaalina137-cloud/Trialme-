@@ -16,6 +16,7 @@ export { parseStatementLines, cleanMerchantName, extractGbpAmount, extractUkDate
 export { matchStatementTransactions } from './services/statementMatcher';
 export { normalizeStatementLine, normalizeStatementLines, repairCommonMerchantSpacing } from './services/statementNormalizer';
 export { detectBankFormat } from './services/bankFormatDetector';
+export { buildScannerSubscriptionDraft } from './services/scannerSubscriptionDraft';
 export type { BankFormatDetection, SupportedBankFormat } from './services/bankFormatDetector';
 export type {
   BillingCycle,
