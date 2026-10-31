@@ -3,6 +3,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
+import {
+  classifyLegacyScanError,
+  isAuthorizedLegacyScanRequest,
+  isLegacyAiScanEnabled,
+} from './src/services/legacyScanSecurity.ts';
 
 dotenv.config();
 
@@ -11,6 +16,16 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const legacyAiScanEnabled = isLegacyAiScanEnabled(process.env);
+const legacyAiScanSecret = process.env.LEGACY_AI_SCAN_SHARED_SECRET;
+
+app.disable('x-powered-by');
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
 
 // Body parsing with generous limit for screenshot uploads
 app.use(express.json({ limit: '20mb' }));
@@ -53,6 +68,16 @@ function checkRateLimit(ip: string): boolean {
  */
 app.post('/api/scan-statement', async (req: Request, res: Response) => {
   try {
+    // The deterministic browser scanner is the supported production path.
+    // Keep this legacy route dark unless an operator explicitly enables it
+    // with a strong shared secret for a controlled migration environment.
+    if (!legacyAiScanEnabled) {
+      return res.status(404).json({ success: false, error: 'Not found' });
+    }
+    if (!isAuthorizedLegacyScanRequest(req.header('authorization'), legacyAiScanSecret)) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
     const { imageBase64, mimeType = 'image/jpeg', mockStatementType } = req.body;
 
     // If demo sample requested or no image provided, return realistic UK parsed statement data
@@ -164,15 +189,9 @@ app.post('/api/scan-statement', async (req: Request, res: Response) => {
       note: 'Analysed with AI vision parser fallback mode.',
     });
   } catch (error: any) {
-    console.error('Error scanning statement:', error);
-    const isServiceUnavailable =
-      error?.status === 503 ||
-      error?.statusCode === 503 ||
-      (typeof error?.message === 'string' &&
-        (error.message.includes('503') ||
-          error.message.toLowerCase().includes('unavailable') ||
-          error.message.toLowerCase().includes('overloaded') ||
-          error.message.toLowerCase().includes('resource exhausted')));
+    const errorClass = classifyLegacyScanError(error);
+    console.error('[legacy-scan] request failed', { errorClass });
+    const isServiceUnavailable = errorClass === 'service_unavailable';
 
     const userFriendlyMessage = isServiceUnavailable
       ? 'The AI analysis service is temporarily busy. Please retry in a moment.'
@@ -205,7 +224,7 @@ async function startServer() {
   }
 
   app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log(`SubCleaner server running on http://localhost:${PORT}`);
+    console.log(`Monetry server running on http://localhost:${PORT}`);
   });
 }
 

@@ -235,7 +235,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <header className="h-14 backdrop-blur-xl bg-[#0A0A0A]/90 sticky top-0 z-30 flex items-center justify-between px-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
           <span className="text-[22px] font-extrabold tracking-tight text-[#D4AF7C]">
-            TrialMe
+            Monetry
           </span>
           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30 uppercase">
             UK
@@ -1010,7 +1010,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">TrialMe</span>
+                          <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">Monetry</span>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
                             {days}d left
                           </span>

@@ -43,6 +43,12 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
         return '/year';
       case 'weekly':
         return '/week';
+      case 'fortnightly':
+        return '/fortnight';
+      case 'quarterly':
+        return '/quarter';
+      case 'half-yearly':
+        return '/half-year';
       case 'monthly':
       default:
         return '/month';

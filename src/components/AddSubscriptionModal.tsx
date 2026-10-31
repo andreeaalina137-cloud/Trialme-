@@ -1178,6 +1178,9 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                     <option value="weekly">Weekly</option>
+                    <option value="fortnightly">Fortnightly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="half-yearly">Half-yearly</option>
                   </select>
                 </div>
               </div>

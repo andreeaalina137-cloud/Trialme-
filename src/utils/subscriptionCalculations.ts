@@ -50,15 +50,20 @@ export function formatLocalDateKey(date: Date): string {
 
 /**
  * Normalises price to a monthly equivalent.
- * Weekly: price × 52 / 12 · Quarterly: price / 3 · Yearly: price / 12.
+ * Weekly: price × 52 / 12 · Fortnightly: price × 26 / 12 · Quarterly: price / 3
+ * · Half-yearly: price / 6 · Yearly: price / 12.
  */
 export function convertFrequencyToMonthly(price: number, frequency: SubscriptionFrequency): number {
   if (!Number.isFinite(price) || price <= 0) return 0;
   switch (frequency) {
     case 'weekly':
       return (price * 52) / 12;
+    case 'fortnightly':
+      return (price * 26) / 12;
     case 'quarterly':
       return price / 3;
+    case 'half-yearly':
+      return price / 6;
     case 'yearly':
       return price / 12;
     case 'monthly':
@@ -75,10 +80,14 @@ export function convertFrequencyToAnnual(price: number, frequency: SubscriptionF
   switch (frequency) {
     case 'weekly':
       return price * 52;
+    case 'fortnightly':
+      return price * 26;
     case 'monthly':
       return price * 12;
     case 'quarterly':
       return price * 4;
+    case 'half-yearly':
+      return price * 2;
     case 'yearly':
     default:
       return price;
@@ -177,8 +186,14 @@ export function addBillingCycles(anchor: Date, frequency: SubscriptionFrequency,
       const result = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + cycles * 7);
       return result;
     }
+    case 'fortnightly': {
+      const result = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + cycles * 14);
+      return result;
+    }
     case 'quarterly':
       return addMonthsClamped(anchor, cycles * 3);
+    case 'half-yearly':
+      return addMonthsClamped(anchor, cycles * 6);
     case 'yearly':
       return addYearsClamped(anchor, cycles);
     case 'monthly':

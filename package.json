@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test tests/e2e-qa-audit.test.ts tests/persona-simulation.test.ts src/utils/inviteSystem.test.ts src/components/ConfirmTrialActivationModal.test.ts tests/statement-scanner-integration.test.ts tests/ukCorpusScanner.test.ts"
+    "test": "tsx --test tests/e2e-qa-audit.test.ts tests/persona-simulation.test.ts src/utils/inviteSystem.test.ts src/components/ConfirmTrialActivationModal.test.ts tests/statement-scanner-integration.test.ts tests/ukCorpusScanner.test.ts src/data/cheaperAlternatives.test.ts src/utils/calendarReminder.test.ts src/utils/subscriptionCalculations.test.ts src/utils/subscriptionIdentity.test.ts src/services/legacyScanSecurity.test.ts"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.3",

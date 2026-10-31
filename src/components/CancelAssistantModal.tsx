@@ -294,7 +294,7 @@ ${accountName || '[Your Full Name]'}`;
             className="w-full py-4 px-5 rounded-full font-black text-sm bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
           >
             <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
-            <span>{t('cancel.confirmCancellation')} (Add to Savings)</span>
+            <span>{t('cancel.confirmCancellation')}</span>
           </button>
           <p className="text-[11px] text-center text-[#A0A0A0]">
             {t('cancel.confirmSubtitle', {

@@ -71,7 +71,7 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
                 {/* Header Row: App Name + Timestamp + Close */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">TrialMe</span>
+                    <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">Monetry</span>
                     <span className="text-[10px] text-[#A0A0A0]/50">·</span>
                     <span className="text-[11px] text-[#A0A0A0]">{t('notifications.now')}</span>
                   </div>

@@ -97,8 +97,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'TrialMe · SubCleaner — British Fintech Subscription Optimiser',
-          text: 'I stopped throwing money away on forgotten subscriptions with TrialMe! Pay once, keep forever.',
+          title: 'Monetry — British Fintech Subscription Optimiser',
+          text: 'I stopped throwing money away on forgotten subscriptions with Monetry! Pay once, keep forever.',
           url: window.location.href,
         });
       } catch {
@@ -117,7 +117,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     }
     const monthly = calculateMonthlyTotal(subscriptions);
     const savings = calculateTotalSavings(subscriptions);
-    const reportContent = `SUBCLEANER FINANCIAL STATEMENT & SUBSCRIPTION AUDIT
+    const reportContent = `MONETRY FINANCIAL STATEMENT & SUBSCRIPTION AUDIT
 Generated: ${new Date().toLocaleDateString('en-GB')}
 Plan Level: ${userPlan.toUpperCase()}
 License Key: ${activeLicenseKey || 'N/A'}
@@ -136,7 +136,7 @@ ${subscriptions
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `SubCleaner_Statement_${new Date().toISOString().split('T')[0]}.txt`;
+    link.download = `Monetry_Statement_${new Date().toISOString().split('T')[0]}.txt`;
     link.click();
     showToast('Financial statement downloaded!');
   };
@@ -147,7 +147,7 @@ ${subscriptions
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `SubCleaner_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `Monetry_Backup_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     showToast('Full JSON backup saved to your device!');
@@ -622,7 +622,7 @@ ${subscriptions
               </button>
             </div>
             <p className="text-xs text-[#A0A0A0] leading-relaxed">
-              Enter your SubCleaner License Key (e.g. <code className="text-[#D4AF7C]">SUB-PRO-XXXX</code>) or the email address used at checkout:
+              Enter your Monetry License Key (e.g. <code className="text-[#D4AF7C]">SUB-PRO-XXXX</code>) or the email address used at checkout:
             </p>
             <input
               type="text"
@@ -649,7 +649,7 @@ ${subscriptions
               <Star className="w-6 h-6 fill-[#D4AF7C]" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-[#F5F5F5]">Enjoying TrialMe · SubCleaner?</h3>
+              <h3 className="font-bold text-base text-[#F5F5F5]">Enjoying Monetry?</h3>
               <p className="text-xs text-[#A0A0A0] mt-1">
                 Your rating helps Brits save millions on forgotten app renewals and zombie subscriptions.
               </p>
@@ -709,7 +709,7 @@ ${subscriptions
               {showLegalModal === 'privacy' ? (
                 <>
                   <p>
-                    <strong>Your financial records remain local.</strong> SubCleaner stores subscription records securely in local device storage. We do not sell or broker your personal financial records.
+                    <strong>Your financial records remain local.</strong> Monetry stores subscription records securely in local device storage. We do not sell or broker your personal financial records.
                   </p>
                   <p>
                     When using the AI Statement Scanner, the statement image is processed strictly for merchant and amount detection and is never archived.
@@ -718,10 +718,10 @@ ${subscriptions
               ) : (
                 <>
                   <p>
-                    <strong>Lifetime Purchase Agreement.</strong> SubCleaner Lifetime purchases grant indefinite access to Standard or Pro features without recurring developer subscription fees.
+                    <strong>Lifetime Purchase Agreement.</strong> Monetry Lifetime purchases grant indefinite access to Standard or Pro features without recurring developer subscription fees.
                   </p>
                   <p>
-                    SubCleaner provides self-help cancellation assistants, guidance, and legal templates. Final contract termination with each service provider remains the user’s responsibility.
+                    Monetry provides self-help cancellation assistants, guidance, and legal templates. Final contract termination with each service provider remains the user’s responsibility.
                   </p>
                 </>
               )}

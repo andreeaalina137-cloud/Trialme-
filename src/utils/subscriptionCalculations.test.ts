@@ -120,6 +120,25 @@ test('rollForwardPaymentDate safely advances overdue dates to next billing cycle
   assert.equal(rolledLeap, '2029-02-28');
 });
 
+test('supports every billing frequency with exact annual and monthly equivalents', () => {
+  assert.equal(convertFrequencyToAnnual(10, 'weekly'), 520);
+  assert.equal(convertFrequencyToMonthly(10, 'weekly'), 520 / 12);
+  assert.equal(convertFrequencyToAnnual(10, 'fortnightly'), 260);
+  assert.equal(convertFrequencyToMonthly(10, 'fortnightly'), 260 / 12);
+  assert.equal(convertFrequencyToAnnual(30, 'quarterly'), 120);
+  assert.equal(convertFrequencyToMonthly(30, 'quarterly'), 10);
+  assert.equal(convertFrequencyToAnnual(60, 'half-yearly'), 120);
+  assert.equal(convertFrequencyToMonthly(60, 'half-yearly'), 10);
+  assert.equal(convertFrequencyToAnnual(120, 'yearly'), 120);
+  assert.equal(convertFrequencyToMonthly(120, 'yearly'), 10);
+});
+
+test('rolls fortnightly and half-yearly billing dates from the original anchor', () => {
+  const reference = new Date(2026, 10, 1);
+  assert.equal(rollForwardPaymentDate('2026-10-03', 'fortnightly', reference), '2026-11-14');
+  assert.equal(rollForwardPaymentDate('2026-02-28', 'half-yearly', reference), '2027-02-28');
+});
+
 test('getDaysUntilNextPayment calculates exact calendar days diff', () => {
   const diff = getDaysUntilNextPayment('2026-10-20', '2026-10-15');
   assert.equal(diff, 5);

@@ -146,7 +146,7 @@ export function getInviteShareDetails(code?: string): { url: string; title: stri
 
   return {
     url: inviteUrl,
-    title: 'TrialMe SubCleaner · Free Slot Gift',
-    text: `Join me on TrialMe to track free trials and cancel before paying! Use my invite link to unlock +1 free subscription slot: ${inviteUrl}`,
+    title: 'Monetry · Free Slot Gift',
+    text: `Join me on Monetry to track free trials and cancel before paying! Use my invite link to unlock +1 free subscription slot: ${inviteUrl}`,
   };
 }

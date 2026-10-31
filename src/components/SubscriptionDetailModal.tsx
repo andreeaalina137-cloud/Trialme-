@@ -49,6 +49,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   onOpenPaywall,
 }) => {
   const { t } = useTranslation();
+  const { findPresetByNameOrAlias } = useMonetryData();
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [calendarSyncedNotice, setCalendarSyncedNotice] = useState<'ics' | 'gcal' | null>(null);
@@ -78,7 +79,6 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   const annualCost = convertFrequencyToAnnual(subscription.price, subscription.frequency);
   const isCancelled = subscription.status === 'cancelled';
   const isTrial = subscription.status === 'trial';
-  const { findPresetByNameOrAlias } = useMonetryData();
   const matchedPreset = findPresetByNameOrAlias(subscription.name);
   const affiliateOffer = getAffiliateOffer(subscription.name);
   const priceHikeAlert = !isCancelled ? getUkPriceHikeAlert(subscription.name) : null;

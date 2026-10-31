@@ -85,7 +85,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onStartTrial
       <header className="relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm font-black text-[#D4AF7C] tracking-tight">
-            TrialMe
+            Monetry
           </span>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30 uppercase">
             UK

@@ -181,7 +181,7 @@ export function createSubscriptionReminderIcs(
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//SubCleaner//Payment Reminder//EN',
+    'PRODID:-//Monetry//Payment Reminder//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
@@ -251,7 +251,7 @@ export function downloadSubscriptionReminderIcs(
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${fileName.replace(/[\\/:*?"<>|]/g, '-').trim() || 'SubCleaner-Reminder'}.ics`;
+  link.download = `${fileName.replace(/[\\/:*?"<>|]/g, '-').trim() || 'Monetry-Reminder'}.ics`;
   link.style.display = 'none';
   document.body.append(link);
   link.click();
@@ -286,9 +286,9 @@ export function createGoogleCalendarReminderUrl(
   const alertEnd = new Date(alertStart.getTime() + 30 * 60 * 1000);
 
   const priceAfter = `${subscription.currency || '£'}${subscription.price.toFixed(2)}/${subscription.frequency}`;
-  const title = summary || `🛡️ Cancel ${subscription.name} (${priceAfter}) — SubCleaner Auto-Alarm`;
+  const title = summary || `🛡️ Cancel ${subscription.name} (${priceAfter}) — Monetry Auto-Alarm`;
   const details = [
-    description || `SubCleaner Financial Shield Alert for ${subscription.name}.`,
+    description || `Monetry Financial Shield Alert for ${subscription.name}.`,
     `Price after trial/renewal: ${priceAfter}`,
     `Expiry / Billing Date: ${date}${subscription.trialExpiresAt ? ` (${formatArmedAlarmDateTime(subscription.trialExpiresAt)})` : ''}`,
     subscription.cancelUrl ? `Direct Cancellation Portal: ${subscription.cancelUrl}` : '',
@@ -316,13 +316,13 @@ export function downloadMonthlyPaydayAuditIcs(
   const nextMonthFirst = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
   const nextMonthSecond = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 2));
   const timestamp = formatCalendarUtcDateTime(now);
-  const summary = `🛡️ SubCleaner Monthly Payday Check-in (${monthlyTotalFormatted}/mo)`;
+  const summary = `🛡️ Monetry Monthly Payday Check-in (${monthlyTotalFormatted}/mo)`;
   const description = `Monthly 60-second subscription audit: Review your ${activeCount} active UK subscriptions (${monthlyTotalFormatted}/mo) and cancel any unused services before billing.`;
 
   const contents = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//SubCleaner//Monthly Payday Shield//EN',
+    'PRODID:-//Monetry//Monthly Payday Shield//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
@@ -347,7 +347,7 @@ export function downloadMonthlyPaydayAuditIcs(
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'SubCleaner-Monthly-Payday-Shield.ics';
+  link.download = 'Monetry-Monthly-Payday-Shield.ics';
   link.style.display = 'none';
   document.body.append(link);
   link.click();

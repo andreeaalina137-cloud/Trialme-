@@ -79,7 +79,14 @@ export function sanitizeCurrency(raw: unknown): AppCurrency {
   return 'GBP';
 }
 
-const VALID_FREQUENCIES = new Set<SubscriptionFrequency>(['monthly', 'yearly', 'weekly', 'quarterly']);
+const VALID_FREQUENCIES = new Set<SubscriptionFrequency>([
+  'monthly',
+  'yearly',
+  'weekly',
+  'fortnightly',
+  'quarterly',
+  'half-yearly',
+]);
 const VALID_STATUSES = new Set<SubscriptionStatus>(['active', 'trial', 'cancelled']);
 const VALID_CATEGORIES = new Set<SubscriptionCategory>([
   'Streaming',

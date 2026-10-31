@@ -42,7 +42,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
     }
 
-    return text;
+    // Keep translation keys and persisted compatibility identifiers stable while
+    // presenting the current Monetry brand in every supported locale.
+    return text.replace(/TrialMe|SubCleaner/g, 'Monetry');
   };
 
   return (

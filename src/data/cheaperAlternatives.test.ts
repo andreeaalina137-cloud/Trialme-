@@ -29,8 +29,8 @@ test('suggestions match gym and music categories', () => {
   const gym = getCheaperAlternative(makeSubscription('PureGym Membership', 'Fitness & Gym', 19.99), []);
   const music = getCheaperAlternative(makeSubscription('Spotify Premium UK', 'Music & Audio', 11.99), []);
 
-  assert.equal(gym?.name, 'The Gym Group');
-  assert.equal(music?.name, 'Pandora (UK Podcast/Music)');
+  assert.equal(gym?.name, 'The Gym Group (Off-Peak)');
+  assert.equal(music?.name, 'Apple Music Individual');
 });
 
 test('food delivery memberships can suggest a cheaper delivery alternative', () => {
@@ -38,7 +38,7 @@ test('food delivery memberships can suggest a cheaper delivery alternative', () 
     makeSubscription('Deliveroo Plus Premium', 'Food & Delivery', 8.99),
     []
   );
-  assert.equal(alternative?.name, 'Deliveroo (Standalone)');
+  assert.equal(alternative?.name, 'Deliveroo Plus (Silver)');
 });
 
 test('streaming alternatives are ranked for the provider being cancelled', () => {
@@ -52,8 +52,8 @@ test('streaming alternatives are ranked for the provider being cancelled', () =>
 test('active alternatives are skipped and cheaper same-category options are offered', () => {
   const netflix = makeSubscription('Netflix UK Standard', 'Streaming', 10.99);
   const trackedNow = makeSubscription('NOW TV Entertainment', 'Streaming', 9.99, 'active');
-  assert.equal(getCheaperAlternative(netflix, [trackedNow])?.name, 'Disney+ UK');
-  assert.equal(getCheaperAlternative(makeSubscription('Disney+ UK', 'Streaming', 7.99), [])?.name, 'Crunchyroll (Anime)');
+  assert.equal(getCheaperAlternative(netflix, [trackedNow])?.name, 'Disney+ UK (With Ads)');
+  assert.equal(getCheaperAlternative(makeSubscription('Disney+ UK', 'Streaming', 7.99), [])?.name, 'Disney+ UK (With Ads)');
   assert.equal(getCheaperAlternative(makeSubscription('Netflix Annual', 'Streaming', 120), [] )?.name, 'NOW TV Entertainment');
 });
 
@@ -70,5 +70,5 @@ test('PureGym trial offer uses the UK join flow', () => {
 
 test('cancellation alternatives never cross subscription categories', () => {
   assert.equal(getCheaperAlternative(makeSubscription('Unlisted service', 'Other', 99), []), null);
-  assert.equal(getCheaperAlternative(makeSubscription('NordVPN', 'AI & Tech', 10), [])?.name, 'Surfshark VPN');
+  assert.equal(getCheaperAlternative(makeSubscription('NordVPN', 'AI & Tech', 10), [])?.name, 'Proton VPN (Free Tier)');
 });

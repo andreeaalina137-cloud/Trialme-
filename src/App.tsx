@@ -318,7 +318,7 @@ function AppContent() {
       setTimeout(() => {
         setActiveNotification({
           id: 'welcome',
-          title: 'Welcome to TrialMe · SubCleaner!',
+        title: 'Welcome to Monetry!',
           message: 'Track your free trials and cancel unwanted subscriptions before you pay.',
           date: new Date().toISOString(),
           read: false,
