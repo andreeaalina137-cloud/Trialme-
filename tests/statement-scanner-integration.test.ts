@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import zlib from 'zlib';
-import { parseStatementLines, extractGbpAmount } from '../src/scanner/services/ukBankCleaner';
+import { parseStatementLines, extractGbpAmount, extractUkDate } from '../src/scanner/services/ukBankCleaner';
 import { matchStatementTransactions } from '../src/scanner/services/statementMatcher';
 import { extractPdfText } from '../src/scanner/services/pdfTextExtractor';
+import { detectBankFormat } from '../src/scanner/services/bankFormatDetector';
+import { normalizeStatementLines } from '../src/scanner/services/statementNormalizer';
 import {
   BARCLAYS_SAMPLE_LINES,
   REVOLUT_SAMPLE_LINES,
@@ -63,6 +66,138 @@ test('Offline Statement Scanner: Detects all 7 core UK subscriptions with 100% p
   const google = nameMap.get('google_one_ai_uk');
   assert.ok(google, 'Google One must be detected');
   assert.equal(google.amountGbp, 1.99);
+});
+
+test('Offline Statement Scanner: Preserves extracted prices across multi-line PDF transactions', () => {
+  const pdfRows = [
+    '03 Oct | Monthly subscription',
+    'NETFLIX.COM',
+    '£10.99',
+    '05 Oct | SPOTIFY UK - Premium plan | £11.99',
+    '08 Oct | AMAZON PRIME Membership | £8.99',
+    '12 Oct | DISNEY PLUS - Monthly plan | £7.99',
+    '16 Oct | YOUTUBE PREMIUM - Individual | £12.99',
+    '20 Oct | MICROSOFT 365 - Personal',
+    '£5.99',
+    '24 Oct | GOOGLE ONE 100 GB plan',
+    '£1.99',
+  ];
+
+  const parsed = parseStatementLines(pdfRows, new Date('2026-10-30T12:00:00Z'));
+  const matched = matchStatementTransactions(parsed);
+  const amounts = new Map(matched.map((item) => [item.presetId, item.amountGbp]));
+
+  assert.equal(matched.length, 7, 'All 7 PDF transactions should be matched');
+  assert.equal(amounts.get('netflix_standard_uk'), 10.99);
+  assert.equal(amounts.get('spotify_premium_uk'), 11.99);
+  assert.equal(amounts.get('amazon_prime_uk'), 8.99);
+  assert.equal(amounts.get('disney_plus_uk'), 7.99);
+  assert.equal(amounts.get('youtube_premium_uk'), 12.99);
+  assert.equal(amounts.get('microsoft_365_personal_uk'), 5.99);
+  assert.equal(amounts.get('google_one_ai_uk'), 1.99);
+});
+
+test('Offline Statement Scanner: Matches Google and Microsoft bank aliases without treating plan numbers as amounts', () => {
+  const parsed = parseStatementLines([
+    '01/10/2026 GOOGLE*GOOGLE ONE £1.99',
+    '02/10/2026 GOOGLE ONE £1.99',
+    '03/10/2026 GOOGLE *SERVICES £1.99',
+    '04/10/2026 G.CO/HELPAY# £1.99',
+    '05/10/2026 MICROSOFT 365 £5.99',
+    '06/10/2026 MSFT * £5.99',
+    '07/10/2026 MICROSOFT* £5.99',
+    '08/10/2026 OFFICE 365 £5.99',
+  ]);
+
+  const matched = matchStatementTransactions(parsed);
+  assert.ok(matched.some((item) => item.presetId === 'google_one_ai_uk'));
+  assert.ok(matched.some((item) => item.presetId === 'microsoft_365_personal_uk'));
+  assert.ok(parsed.every((item) => item.amountGbp < 10), 'Plan numbers must not become transaction amounts');
+});
+
+test('Offline Statement Scanner: Processes the generated UK CSV statement end-to-end', () => {
+  const csvLines = readFileSync('tests/fixtures/uk-bank-statement-sample.csv', 'utf8')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const parsed = parseStatementLines(csvLines, new Date('2026-10-30T12:00:00Z'));
+  const matched = matchStatementTransactions(parsed);
+
+  assert.equal(parsed.length, 20);
+  assert.equal(matched.length, 20);
+  assert.equal(matched.find((item) => item.presetId === 'google_one_ai_uk')?.amountGbp, 1.99);
+  assert.equal(matched.find((item) => item.presetId === 'microsoft_365_personal_uk')?.amountGbp, 5.99);
+  assert.equal(matched.find((item) => item.presetId === 'netflix_standard_uk')?.amountGbp, 13.99);
+});
+
+test('Offline Statement Scanner: Recovers abbreviated OCR merchants and exposes new recurring merchants', () => {
+  const parsed = parseStatementLines([
+    '01/10/2026 NTFLIX 10.99',
+    '02/10/2026 SPTFY 11.99',
+    '03/10/2026 MCRSFT 365 5.99',
+    '04/10/2026 NEWVIDEOCO MEMBERSHIP 4.50',
+    '04/11/2026 NEWVIDEOCO MEMBERSHIP 4.50',
+  ]);
+  const matched = matchStatementTransactions(parsed);
+
+  assert.ok(matched.some((item) => item.presetId === 'netflix_standard_uk'));
+  assert.ok(matched.some((item) => item.presetId === 'spotify_premium_uk'));
+  assert.ok(matched.some((item) => item.presetId === 'microsoft_365_personal_uk'));
+  const unknown = matched.find((item) => item.presetId.startsWith('unknown-'));
+  assert.ok(unknown, 'New recurring merchants should be offered as importable matches');
+  assert.equal(unknown?.amountGbp, 4.5);
+  assert.equal(unknown?.isVerifiedRecurring, true);
+});
+
+test('Offline Statement Scanner: Handles ISO CSV dates, credits, and foreign currencies safely', () => {
+  const parsed = parseStatementLines([
+    'Date,Description,Amount,Currency,Type',
+    '2026-10-01,NETFLIX.COM,10.99,GBP,Debit',
+    '2026-10-02,REFUND FROM STORE,5.00,GBP,Credit',
+    '2026-10-03,REVOLUT EUR CARD PAYMENT,12.50,EUR,Debit',
+  ]);
+
+  assert.equal(parsed.length, 1);
+  assert.equal(parsed[0].amountGbp, 10.99);
+  assert.equal(parsed[0].dateIso, '2026-10-01');
+});
+
+test('Offline Statement Scanner: Handles UK dashed/dotted dates and quoted CSV fields', () => {
+  assert.deepEqual(extractUkDate('15-10-2026 NETFLIX 10.99'), {
+    iso: '2026-10-15',
+    billingDay: 15,
+  });
+  assert.deepEqual(extractUkDate('15.10.2026 SPOTIFY 11.99'), {
+    iso: '2026-10-15',
+    billingDay: 15,
+  });
+
+  const parsed = parseStatementLines([
+    'Date,Description,Amount,Currency,Notes',
+    '15-10-2026,"NETFLIX.COM, UK",10.99,GBP,"Monthly plan"',
+    '16.10.2026;"SPOTIFY UK; PREMIUM";11.99;GBP;Monthly',
+  ]);
+  assert.equal(parsed.length, 2);
+  assert.equal(parsed[0].cleanedMerchant.includes('NETFLIX'), true);
+  assert.equal(parsed[0].amountGbp, 10.99);
+  assert.equal(parsed[1].amountGbp, 11.99);
+});
+
+test('Offline Statement Scanner: normalizes OCR spacing and detects bank format conservatively', () => {
+  const normalized = normalizeStatementLines([
+    '15 Oct 2026  N E T F L I X . C O M  £10.99',
+    'S P O T I F Y  £11.99',
+  ]);
+  assert.equal(normalized[0].includes('NETFLIX.COM'), true);
+  assert.equal(normalized[1].includes('SPOTIFY'), true);
+
+  const revolut = detectBankFormat(['Revolut', 'Card Payment', 'GOOGLE *Google One £1.99']);
+  assert.equal(revolut.format, 'revolut');
+  assert.equal(revolut.requiresReview, false);
+
+  const unknown = detectBankFormat(['Date Description Amount', 'NETFLIX.COM £10.99']);
+  assert.equal(unknown.format, 'generic');
+  assert.equal(unknown.requiresReview, true);
 });
 
 test('Offline Statement Scanner: Detects subscriptions from FlateDecode compressed PDF', async () => {

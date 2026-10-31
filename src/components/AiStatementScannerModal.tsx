@@ -111,7 +111,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
           return {
             id: item.id,
             name: item.serviceName,
-            price: currencySymbol === '£' && matchedPreset ? matchedPreset.monthly_price_gbp : item.amountGbp,
+            price: item.amountGbp > 0 ? item.amountGbp : matchedPreset?.monthly_price_gbp || 0,
             currency: currencySymbol,
             frequency: item.billingCycle === 'Annual' ? 'yearly' : 'monthly',
             category: matchedPreset?.category || item.category,
@@ -159,7 +159,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     const nextPaymentDate = addMonthsClamped(new Date(), 1);
     const formattedDate = formatLocalDateKey(nextPaymentDate);
     const matched = findMatchingPreset(item.name);
-    const finalPrice = currencySymbol === '£' && matched ? matched.monthly_price_gbp : item.price;
+    const finalPrice = item.price > 0 ? item.price : matched?.monthly_price_gbp || 0;
     const matchingColor =
       item.color ||
       DEFAULT_SHOWCASE_DETECTED.find((d) => d.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]))?.color ||
@@ -204,7 +204,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         const matched = findMatchingPreset(item.name);
         return {
           name: item.name,
-          price: currencySymbol === '£' && matched ? matched.monthly_price_gbp : item.price,
+          price: item.price > 0 ? item.price : matched?.monthly_price_gbp || 0,
           currency: item.currency || currencySymbol,
           frequency: item.frequency,
           category: matched?.category || item.category,

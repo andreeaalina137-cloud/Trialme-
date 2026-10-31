@@ -347,7 +347,14 @@
       "trial_duration_days": 30,
       "trial_type": "free_trial",
       "cancel_url": "https://one.google.com/settings",
-      "notes": "30-day free trial on Google One AI Premium (£18.99/mo); Standard 2TB is £7.99/mo. Cancel online in Google One membership settings."
+      "notes": "30-day free trial on Google One AI Premium (£18.99/mo); Standard 2TB is £7.99/mo. Cancel online in Google One membership settings.",
+      "ocr_aliases": [
+        "GOOGLE ONE",
+        "GOOGLE*GOOGLE ONE",
+        "GOOGLE *SERVICES",
+        "GOOGLE STORAGE",
+        "G.CO/HELPAY#"
+      ]
     },
     {
       "id": "microsoft_365_personal_uk",
@@ -358,7 +365,13 @@
       "trial_duration_days": 30,
       "trial_type": "free_trial",
       "cancel_url": "https://account.microsoft.com/services",
-      "notes": "30-day free trial. £8.49/mo (£84.99/yr) includes Word, Excel, 1TB OneDrive & Copilot AI. Warning: Free trial automatically defaults to £84.99 annual billing if not cancelled."
+      "notes": "30-day free trial. £8.49/mo (£84.99/yr) includes Word, Excel, 1TB OneDrive & Copilot AI. Warning: Free trial automatically defaults to £84.99 annual billing if not cancelled.",
+      "ocr_aliases": [
+        "MICROSOFT 365",
+        "MSFT",
+        "MICROSOFT*",
+        "OFFICE 365"
+      ]
     },
     {
       "id": "nordvpn_uk",

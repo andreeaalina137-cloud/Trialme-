@@ -535,7 +535,8 @@ function AppContent() {
   };
 
   const handleImportAiSubscriptions = (
-    newSubs: Omit<Subscription, 'id' | 'createdAt' | 'paymentHistory'>[]
+    newSubs: Omit<Subscription, 'id' | 'createdAt' | 'paymentHistory'>[],
+    updateExistingFromStatement = false
   ) => {
     const seenActiveNames = new Set<string>();
     const deduplicatedSubscriptions = subscriptions.filter((subscription) => {
@@ -553,7 +554,22 @@ function AppContent() {
     let hitLimit = false;
 
     newSubs.forEach((subData, index) => {
-      if (existingAndImported.some((existing) => isDuplicateScannedSubscription(subData, existing))) {
+      const duplicate = existingAndImported.find((existing) => isDuplicateScannedSubscription(subData, existing));
+      if (duplicate) {
+        if (updateExistingFromStatement && Number.isFinite(subData.price) && subData.price > 0) {
+          const updated = {
+            ...duplicate,
+            price: roundCurrency(subData.price),
+            currency: subData.currency || duplicate.currency,
+            frequency: subData.frequency || duplicate.frequency,
+          };
+          const importedIndex = existingAndImported.indexOf(duplicate);
+          if (importedIndex >= 0) existingAndImported[importedIndex] = updated;
+          const persistedIndex = deduplicatedSubscriptions.indexOf(duplicate);
+          if (persistedIndex >= 0) deduplicatedSubscriptions[persistedIndex] = updated;
+          const formattedIndex = formatted.indexOf(duplicate);
+          if (formattedIndex >= 0) formatted[formattedIndex] = updated;
+        }
         duplicateCount += 1;
         return;
       }
@@ -889,7 +905,7 @@ function AppContent() {
                   setCurrentTab('home');
                   setActiveSection('dashboard');
                 }}
-                onImportSubscriptions={handleImportAiSubscriptions}
+                onImportSubscriptions={(items) => handleImportAiSubscriptions(items, true)}
                 userPlan={userPlan}
                 currencySymbol={currencySymbol}
                 onOpenPaywall={() => setIsPaywallOpen(true)}
@@ -1042,7 +1058,7 @@ function AppContent() {
           <AiStatementScannerModal
             isOpen={isAiScannerOpen}
             onClose={() => setIsAiScannerOpen(false)}
-            onImportSubscriptions={handleImportAiSubscriptions}
+            onImportSubscriptions={(items) => handleImportAiSubscriptions(items, true)}
             userPlan={userPlan}
             currencySymbol={currencySymbol}
             onOpenPaywall={() => setIsPaywallOpen(true)}

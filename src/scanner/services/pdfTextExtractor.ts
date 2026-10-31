@@ -64,6 +64,41 @@ function decodeHexPdfString(hex: string): string {
   return result;
 }
 
+const PDF_GBP_AMOUNT_PATTERN = /(?:£|GBP\s?)\d{1,4}(?:,\d{3})*(?:\.\d{2})|\d{1,4}(?:[,.]\d{3})*[,.]\d{2}\s*(?:£|GBP)/i;
+
+/**
+ * PDF text layers can split one visual transaction over several extracted
+ * rows. Coalesce rows until the first explicit GBP amount so downstream
+ * parsing receives one logical transaction block.
+ */
+function coalescePdfLines(lines: string[]): string[] {
+  const result: string[] = [];
+  let pending: string[] = [];
+
+  const isContinuation = (line: string): boolean =>
+    /^(?:Către|Catre|To|From|De la|Card|Referință|Referinta|Cursul)\s*:?/i.test(line);
+
+  const flush = () => {
+    const joined = pending.join(' ').replace(/\s+/g, ' ').trim();
+    if (joined) result.push(joined);
+    pending = [];
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/[Â\xa0]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!line) continue;
+    if (isContinuation(line) && pending.length === 0 && result.length > 0) {
+      result[result.length - 1] = `${result[result.length - 1]} ${line}`;
+      continue;
+    }
+    pending.push(line);
+    if (PDF_GBP_AMOUNT_PATTERN.test(line)) flush();
+  }
+
+  flush();
+  return result;
+}
+
 async function decompressFlate(bytes: Uint8Array): Promise<string | null> {
   // Web Standard DecompressionStream
   for (const fmt of ['deflate', 'deflate-raw'] as const) {
@@ -222,7 +257,8 @@ async function extractWithPdfJs(buffer: ArrayBuffer): Promise<string[] | null> {
     const pdf = await loadingTask.promise;
     const allLines: string[] = [];
 
-    for (let i = 1; i <= pdf.numPages; i++) {
+    try {
+      for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
 
@@ -262,9 +298,18 @@ async function extractWithPdfJs(buffer: ArrayBuffer): Promise<string[] | null> {
         const joined = currentLine.join(' ').replace(/\s+/g, ' ').trim();
         if (joined.length >= 3) allLines.push(joined);
       }
-    }
+      }
 
-    return allLines.length > 0 ? allLines : null;
+      const logicalLines = coalescePdfLines(allLines);
+      return logicalLines.length > 0 ? logicalLines : null;
+    } finally {
+      try {
+        const destroy = (pdf as unknown as { destroy?: () => Promise<void> }).destroy;
+        if (typeof destroy === 'function') await destroy.call(pdf);
+      } catch {
+        // Ignore cleanup failures; extraction result is still usable.
+      }
+    }
   } catch (err) {
     console.warn('[pdfTextExtractor] pdfjs-dist extraction fallback to native:', err);
     return null;
@@ -284,11 +329,48 @@ export async function extractPdfText(file: File | Blob): Promise<PdfExtractionRe
   // 2. Comprehensive native PDF stream extractor (decompresses Flate streams)
   const nativeLines = await extractNativePdfLines(buffer);
   if (nativeLines.length > 0) {
-    const text = nativeLines.join('\n');
-    return { text, lines: nativeLines, usedOcrFallback: false, engine: 'native' };
+    const logicalLines = coalescePdfLines(nativeLines);
+    const text = logicalLines.join('\n');
+    return { text, lines: logicalLines, usedOcrFallback: false, engine: 'native' };
   }
 
   return { text: '', lines: [], usedOcrFallback: true, engine: 'none' };
+}
+
+/** Render image-only PDF pages locally so the scanner can reuse its OCR path. */
+export async function renderPdfPagesForOcr(file: File | Blob): Promise<Blob[]> {
+  if (typeof window === 'undefined') return [];
+  await initPdfWorker();
+
+  try {
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(await file.arrayBuffer()),
+      useWorkerFetch: false,
+      useSystemFonts: true,
+    });
+    const pdf = await loadingTask.promise;
+    const pages: Blob[] = [];
+    try {
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        const context = canvas.getContext('2d');
+        if (!context) continue;
+        await page.render({ canvas, canvasContext: context, viewport }).promise;
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+        if (blob) pages.push(blob);
+      }
+    } finally {
+      const destroy = (pdf as unknown as { destroy?: () => Promise<void> }).destroy;
+      if (typeof destroy === 'function') await destroy.call(pdf);
+    }
+    return pages;
+  } catch {
+    return [];
+  }
 }
 
 export function looksLikePdf(file: File): boolean {

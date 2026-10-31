@@ -16,6 +16,8 @@ const OCR_ALIASES: Record<string, string[]> = {
   netflix_standard_uk: [
     'NETFLIX.COM',
     'NETFLIX',
+    'NTFLIX',
+    'NETFLX',
     'NFLX',
     'NETFLIX UK',
     'NETFLIX COM',
@@ -23,6 +25,8 @@ const OCR_ALIASES: Record<string, string[]> = {
   ],
   spotify_premium_uk: [
     'SPOTIFY',
+    'SPTFY',
+    'SPOTFY',
     'SPOTIFY UK',
     'SPOTIFYUK',
     'SPOTIFY P',
@@ -41,6 +45,7 @@ const OCR_ALIASES: Record<string, string[]> = {
     'DISNEY MEDIA',
     'THE WALT DISNEY',
     'DISNEY',
+    'DISNY',
   ],
   amazon_prime_uk: [
     'AMAZON PRIME',
@@ -57,12 +62,12 @@ const OCR_ALIASES: Record<string, string[]> = {
     'AMZN',
   ],
   apple_tv_plus_uk: [
-    'APPLE.COM/BILL',
     'APPLE TV',
     'APPLE TV+',
     'TV.APPLE',
     'APPLE.COM BILL',
     'APPLE SERVICES',
+    'APPL TV',
   ],
   now_tv_uk: ['NOW TV', 'NOWTV', 'NOW TV UK', 'NOW DIGITAL'],
   sky_stream_uk: [
@@ -72,7 +77,6 @@ const OCR_ALIASES: Record<string, string[]> = {
     'SKY UK',
     'SKY STREAM',
     'SKY TV',
-    'SKY',
   ],
   youtube_premium_uk: [
     'YOUTUBE PREMIUM',
@@ -85,6 +89,8 @@ const OCR_ALIASES: Record<string, string[]> = {
     'YOUTUBE MEMBER',
     'GOOGLE YOUTUBE PREMIUM',
     'YOUTUBE UK',
+    'YOUTBE',
+    'YT PREMIUM',
   ],
   audible_uk: ['AUDIBLE', 'AUDIBLEUK', 'AUDIBLE UK', 'AMAZON AUDIBLE'],
   bbc_tv_licence: ['TV LICENSING', 'TV LICENCE', 'BBC TV', 'BBC TV LICENCE'],
@@ -111,25 +117,32 @@ const OCR_ALIASES: Record<string, string[]> = {
   playstation_plus_uk: ['PLAYSTATION PLUS', 'PLAYSTATION', 'SONY INTERACTIVE', 'PSN'],
   xbox_game_pass_ultimate_uk: ['GAME PASS', 'XBOX', 'MICROSOFT XBOX'],
   nintendo_switch_online_uk: ['NINTENDO SWITCH', 'NINTENDO'],
-  chatgpt_plus_uk: ['OPENAI CHATGPT', 'CHATGPT', 'OPENAI', 'CHATGPT PLUS'],
+  chatgpt_plus_uk: ['OPENAI CHATGPT', 'CHATGPT', 'CHATGPT PLUS'],
   claude_pro_uk: ['ANTHROPIC', 'CLAUDE.AI', 'CLAUDE', 'CLAUDE PRO'],
   apple_icloud_200gb_uk: ['ICLOUD', 'APPLE ICLOUD'],
   google_one_ai_uk: [
     'GOOGLE ONE',
     'GOOGLE*ONE',
     'GOOGLE *GOOGLE ONE',
+    'GOOGLE*GOOGLE ONE',
+    'GOOGLE *SERVICES',
     'GOOGLE STORAGE',
+    'G.CO/HELPAY#',
     'GOOGLE*CLOUD',
     'GOOGLE PLAY*GOOGLE ONE',
     'GOOGLE PLAY*ONE',
     'GOOGLE ONE UK',
     'GOOGLEONE',
+    'GGL ONE',
+    'GOOGLE SERVICES',
   ],
   microsoft_365_personal_uk: [
     'MICROSOFT 365',
     'MSFT 365',
+    'MSFT *',
     'MSFT *365',
     'MICROSOFT*365',
+    'MICROSOFT*',
     'OFFICE 365',
     'MSFT*OFFICE',
     'MICROSOFT*OFFICE',
@@ -138,6 +151,7 @@ const OCR_ALIASES: Record<string, string[]> = {
     'MICROSOFT CORP',
     'MICROSOFT',
     'MSFT',
+    'MCRSFT',
   ],
   nordvpn_uk: ['NORDVPN', 'NORD VPN'],
   expressvpn_uk: ['EXPRESSVPN', 'EXPRESS VPN'],
@@ -155,7 +169,13 @@ const OCR_ALIASES: Record<string, string[]> = {
   clearscore_protect_uk: ['CLEARSCORE'],
   equifax_uk: ['EQUIFAX'],
   monzo_perks_uk: ['MONZO PERKS', 'MONZO PLUS'],
-  revolut_premium_uk: ['REVOLUT PREMIUM', 'REVOLUT*PREMIUM'],
+  revolut_premium_uk: [
+    'REVOLUT PREMIUM',
+    'REVOLUT*PREMIUM',
+    'TAXA PLAN METAL',
+    'TAX PLAN METAL',
+    'METAL PLAN FEE',
+  ],
 };
 
 const TRAP_PRESET_IDS = new Set([
@@ -225,6 +245,56 @@ const PRESET_COLORS: Record<string, string> = {
 
 function alphanum(value: string): string {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function consonantSkeleton(value: string): string {
+  return alphanum(value).replace(/[AEIOU]/g, '');
+}
+
+function isConsonantMatch(left: string, right: string): boolean {
+  const a = consonantSkeleton(left);
+  const b = consonantSkeleton(right);
+  if (a.length < 5 || b.length < 5) return false;
+  if (a === b) return true;
+  const shorter = a.length <= b.length ? a : b;
+  const longer = a.length <= b.length ? b : a;
+  return longer.includes(shorter) && shorter.length / longer.length >= 0.65;
+}
+
+const GENERIC_SUBSCRIPTION_PATTERN =
+  /\b(?:SUBSCRIPTION|MEMBERSHIP|PREMIUM|MONTHLY|ANNUAL|RECURRING|PLAN|PASS)\b/i;
+
+// Merchant names that are common one-off UK purchases. These must never become
+// subscriptions merely because a broad preset alias contains the same brand.
+const NON_SUBSCRIPTION_MERCHANT_PATTERN =
+  /\b(?:TESCO\s+(?:STORES?|SUPERMARKET|SUPERMARKETS)|SAINSBUR(?:Y|YS|IES)|ASDA(?:\s+SUPERSTORE)?|LIDL(?:\s+GB)?|ALDI(?:\s+STORES?)?|GREGGS|TFL(?:\.GOV\.UK)?|TRANSPORT\s+FOR\s+LONDON|UBER\s*\*?\s*TRIP|DELIVEROO(?!\s+PLUS)|JUST\s*EAT(?!\s*\+|\s+PLUS)|COSTA\s+COFFEE|JD\s+WETHERSPOON|POST\s+OFFICE\s+COUNTER|FASTER\s+PAYMENT|TRANSFER|DE\s+LA|PLAT(?:A|Ă)\s+DE\s+LA)\b/i;
+
+function isOneOffMerchant(tx: ScannedTransaction): boolean {
+  const value = `${tx.cleanedMerchant} ${tx.rawLine}`;
+  return NON_SUBSCRIPTION_MERCHANT_PATTERN.test(value);
+}
+
+function inferUnknownCategory(merchant: string): SubscriptionCategory {
+  const value = merchant.toUpperCase();
+  if (/NETFLIX|DISNEY|YOUTUBE|STREAM|TV|VIDEO|DAZN|PARAMOUNT/.test(value)) return 'Streaming';
+  if (/SPOTIFY|AUDIBLE|MUSIC|AUDIO/.test(value)) return 'Music & Audio';
+  if (/GYM|FITNESS|STRAVA|HEALTH/.test(value)) return 'Fitness & Gym';
+  if (/MICROSOFT|GOOGLE|ADOBE|CANVA|SOFTWARE|CLOUD|AI/.test(value)) return 'Productivity';
+  return 'Other';
+}
+
+function unknownMerchantKey(merchant: string, rawLine = ''): string {
+  if (/GOOGLE\s*PLAY[\s\S]{0,80}PASS|PLAY\s*PASS/i.test(`${merchant} ${rawLine}`)) {
+    return 'unknown-GOOGLEPLAYPASS';
+  }
+  return `unknown-${alphanum(merchant).slice(0, 48)}`;
+}
+
+function unknownMerchantDisplay(merchant: string, rawLine: string): string {
+  if (/GOOGLE\s*PLAY[\s\S]{0,80}PASS|PLAY\s*PASS/i.test(`${merchant} ${rawLine}`)) {
+    return 'Google Play Pass';
+  }
+  return merchant;
 }
 
 function brandToken(name: string): string {
@@ -318,6 +388,7 @@ interface Candidate {
 }
 
 function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): Candidate | null {
+  if (isOneOffMerchant(tx)) return null;
   const haystack = tx.cleanedMerchant.toUpperCase();
   const rawUpper = tx.rawLine.toUpperCase();
   const hayAlnum = alphanum(tx.cleanedMerchant);
@@ -327,6 +398,11 @@ function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): C
   let best: Candidate | null = null;
 
   for (const preset of presets) {
+    // Apple.com/bill is shared by Apple services. Explicit iCloud or Apple TV
+    // tokens must override catalogue iteration order.
+    if (preset.id === 'apple_tv_plus_uk' && /ICLOUD/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'apple_icloud_200gb_uk' && /APPLE\s*(?:TV|TV\+)|TV\.APPLE/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'google_one_ai_uk' && /PLAY\s*PASS/i.test(`${haystack} ${rawUpper}`)) continue;
     const aliases = readAliases(preset);
     for (const alias of aliases) {
       const aliasUpper = alias.toUpperCase();
@@ -334,7 +410,8 @@ function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): C
 
       if (
         (aliasUpper.length >= 3 && (haystack.includes(aliasUpper) || rawUpper.includes(aliasUpper))) ||
-        (aliasAlnum.length >= 4 && (hayAlnum.includes(aliasAlnum) || rawAlnum.includes(aliasAlnum)))
+        (aliasAlnum.length >= 4 && (hayAlnum.includes(aliasAlnum) || rawAlnum.includes(aliasAlnum))) ||
+        isConsonantMatch(alias, tx.cleanedMerchant)
       ) {
         const candidate: Candidate = { preset, confidence: 0.99, tier: 1 };
         if (!best || candidate.confidence > best.confidence) best = candidate;
@@ -372,6 +449,16 @@ function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): C
   return best;
 }
 
+function isPotentialUnknownSubscription(tx: ScannedTransaction): boolean {
+  const merchant = tx.cleanedMerchant.trim();
+  if (merchant.length < 3) return false;
+  if (isOneOffMerchant(tx)) return false;
+  // Repeated grocery, transport and retail payments are common in statements.
+  // Surface a new merchant only when the statement contains an explicit
+  // subscription signal; known catalogue presets are matched above.
+  return GENERIC_SUBSCRIPTION_PATTERN.test(`${merchant} ${tx.rawLine}`);
+}
+
 function toStatementPreset(preset: PresetService): StatementPreset {
   const maybeAliases = (preset as PresetService & { ocr_aliases?: unknown }).ocr_aliases;
   return {
@@ -396,10 +483,59 @@ export function matchStatementTransactions(
     string,
     { match: MatchedSubscription; occurrences: number; latestIso: string | null }
   >();
+  const occurrenceCounts = new Map<string, number>();
+  for (const tx of transactions) {
+    const merchantKey = alphanum(tx.cleanedMerchant);
+    occurrenceCounts.set(merchantKey, (occurrenceCounts.get(merchantKey) ?? 0) + 1);
+  }
 
   for (const tx of transactions) {
     const candidate = matchTransaction(tx, presets);
-    if (!candidate) continue;
+    if (!candidate) {
+      const merchantKey = alphanum(tx.cleanedMerchant);
+      const occurrenceCount = occurrenceCounts.get(merchantKey) ?? 0;
+      if (!isPotentialUnknownSubscription(tx)) continue;
+
+      const unknownId = unknownMerchantKey(tx.cleanedMerchant, tx.rawLine);
+      const existingUnknown = grouped.get(unknownId);
+      const unknownPayload: MatchedSubscription = {
+        id: `scan-${unknownId}`,
+        presetId: unknownId,
+        serviceName: unknownMerchantDisplay(tx.cleanedMerchant, tx.rawLine),
+        category: inferUnknownCategory(tx.cleanedMerchant),
+        amountGbp: tx.amountGbp,
+        billingCycle: 'Monthly',
+        billingDay: tx.billingDay,
+        nextBillingDate: nextBillingDate(tx.dateIso, tx.billingDay, now),
+        confidence: occurrenceCount > 1 ? 0.78 : 0.62,
+        matchTier: 3,
+        isVerifiedRecurring: occurrenceCount > 1,
+        hasCancellationTrap: false,
+        trapLabel: null,
+        color: '#D4AF37',
+        cancelUrl: '',
+        selected: true,
+      };
+
+      if (!existingUnknown) {
+        grouped.set(unknownId, {
+          match: unknownPayload,
+          occurrences: 1,
+          latestIso: tx.dateIso,
+        });
+      } else {
+        existingUnknown.occurrences += 1;
+        if (tx.dateIso && (!existingUnknown.latestIso || tx.dateIso >= existingUnknown.latestIso)) {
+          existingUnknown.match.amountGbp = tx.amountGbp;
+          existingUnknown.match.billingDay = tx.billingDay ?? existingUnknown.match.billingDay;
+          existingUnknown.match.nextBillingDate =
+            unknownPayload.nextBillingDate ?? existingUnknown.match.nextBillingDate;
+          existingUnknown.latestIso = tx.dateIso;
+        }
+        existingUnknown.match.isVerifiedRecurring = existingUnknown.occurrences > 1;
+      }
+      continue;
+    }
 
     const existing = grouped.get(candidate.preset.id);
     const nextDate = nextBillingDate(tx.dateIso, tx.billingDay, now);
@@ -431,8 +567,14 @@ export function matchStatementTransactions(
       continue;
     }
 
-    const isNewer = Boolean(tx.dateIso && (!existing.latestIso || tx.dateIso >= existing.latestIso));
-    if (isNewer || !existing.latestIso) {
+    // Dated transaction rows are authoritative over undated summary rows.
+    // If both rows are dated, keep the latest transaction amount; if neither
+    // has a date, preserve the first extracted amount instead of letting a
+    // summary page overwrite it.
+    const shouldUseTransactionAmount =
+      (Boolean(tx.dateIso) && !existing.latestIso) ||
+      (Boolean(tx.dateIso && existing.latestIso) && tx.dateIso! >= existing.latestIso!);
+    if (shouldUseTransactionAmount) {
       existing.match.amountGbp = tx.amountGbp;
       existing.match.billingDay = tx.billingDay ?? existing.match.billingDay;
       existing.match.nextBillingDate = nextDate ?? existing.match.nextBillingDate;

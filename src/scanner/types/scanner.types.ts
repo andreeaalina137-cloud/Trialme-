@@ -1,4 +1,5 @@
 import type { SubscriptionCategory } from '../../types/subscription';
+import type { BankFormatDetection } from '../services/bankFormatDetector';
 
 export type ScannerStage =
   | 'idle'
@@ -11,7 +12,7 @@ export type ScannerStage =
   | 'empty'
   | 'error';
 
-export type ScannerSource = 'pdf' | 'image' | 'demo';
+export type ScannerSource = 'pdf' | 'csv' | 'image' | 'demo';
 
 export type MatchTier = 1 | 2 | 3;
 
@@ -64,6 +65,7 @@ export interface ScannerResult {
   processedLineCount: number;
   source: ScannerSource;
   durationMs: number;
+  bankFormat?: BankFormatDetection;
 }
 
 export interface ScannerError {

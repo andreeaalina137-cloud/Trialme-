@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 import { preprocessStatementImage } from '../services/imagePreprocessor';
-import { extractPdfText, looksLikePdf } from '../services/pdfTextExtractor';
+import { extractPdfText, looksLikePdf, renderPdfPagesForOcr } from '../services/pdfTextExtractor';
 import { runOfflineOcr } from '../services/ocrWorker';
 import { parseStatementLines } from '../services/ukBankCleaner';
 import { matchStatementTransactions } from '../services/statementMatcher';
+import { detectBankFormat } from '../services/bankFormatDetector';
 import {
-  DEMO_UK_STATEMENT_LINES,
   type MatchedSubscription,
   type ScannerError,
   type ScannerProgress,
@@ -40,6 +40,13 @@ const IDLE_PROGRESS: ScannerProgress = {
   label: 'Ready to scan on-device.',
   stage: 'idle',
 };
+
+const MAX_STATEMENT_FILE_BYTES = 25 * 1024 * 1024;
+
+const NO_READABLE_TEXT_MESSAGE =
+  'The statement did not contain readable transaction text. Try a clearer image or a digital PDF export.';
+const NO_MATCHES_MESSAGE =
+  'The statement was read, but no recognizable recurring UK subscriptions were found.';
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -80,6 +87,16 @@ export function useStatementScanner() {
       if (runId !== runIdRef.current) return;
 
       const transactions = parseStatementLines(lines);
+      if (transactions.length === 0) {
+        setError({
+          code: 'parse_failed',
+          message: NO_READABLE_TEXT_MESSAGE,
+        });
+        setStage('error');
+        setProgress({ percent: 100, label: 'Statement text could not be interpreted.', stage: 'error' });
+        return;
+      }
+
       applyProgress(STAGE_MATCH);
       await wait(220);
       if (runId !== runIdRef.current) return;
@@ -90,15 +107,24 @@ export function useStatementScanner() {
         processedLineCount: transactions.length,
         source,
         durationMs: Date.now() - startedAt,
+        bankFormat: detectBankFormat(lines),
       };
       setResult(payload);
       setMatches(found);
-      setError(null);
-      setStage(found.length === 0 ? 'empty' : 'results');
+      if (found.length === 0) {
+        setError({
+          code: 'parse_failed',
+          message: NO_MATCHES_MESSAGE,
+        });
+        setStage('error');
+      } else {
+        setError(null);
+        setStage('results');
+      }
       setProgress({
         percent: 100,
-        label: found.length === 0 ? 'No recurring traps found.' : 'Scan complete.',
-        stage: found.length === 0 ? 'empty' : 'results',
+        label: found.length === 0 ? 'No recognizable recurring subscriptions found.' : 'Scan complete.',
+        stage: found.length === 0 ? 'error' : 'results',
       });
     },
     [applyProgress]
@@ -135,6 +161,20 @@ export function useStatementScanner() {
       setStage('ingesting');
 
       try {
+        if (file.size === 0) {
+          setError({ code: 'empty_file', message: 'The selected statement file is empty.' });
+          setStage('error');
+          return;
+        }
+        if (file.size > MAX_STATEMENT_FILE_BYTES) {
+          setError({
+            code: 'unsupported',
+            message: 'This statement is larger than 25 MB. Please export a smaller statement period.',
+          });
+          setStage('error');
+          return;
+        }
+
         if (looksLikePdf(file)) {
           applyProgress(STAGE_SCAN);
           const extracted = await extractPdfText(file);
@@ -143,12 +183,23 @@ export function useStatementScanner() {
             await finishWithLines(extracted.lines, 'pdf', startedAt, runId);
             return;
           }
+          const renderedPages = await renderPdfPagesForOcr(file);
+          const ocrLines: string[] = [];
+          for (const page of renderedPages) {
+            const preprocessed = await preprocessStatementImage(page);
+            const ocr = await runOfflineOcr(preprocessed.blob);
+            if (ocr.engine === 'tesseract') ocrLines.push(...ocr.lines);
+          }
+          if (ocrLines.length > 0) {
+            await finishWithLines(ocrLines, 'pdf', startedAt, runId);
+            return;
+          }
           setError({
-            code: 'parse_failed',
-            message:
-              'This PDF appears to be a scanned image without a digital text layer. Please upload a clear photo or CSV export.',
+            code: 'ocr_unavailable',
+            message: 'This PDF has no readable text layer and local OCR could not read it. Please upload a digital PDF export or a clearer image.',
           });
           setStage('error');
+          setProgress({ percent: 100, label: 'PDF text layer and local OCR were unavailable.', stage: 'error' });
           return;
         }
 
@@ -159,7 +210,7 @@ export function useStatementScanner() {
           if (runId !== runIdRef.current) return;
           const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
           if (lines.length > 0) {
-            await finishWithLines(lines, 'demo', startedAt, runId);
+            await finishWithLines(lines, 'csv', startedAt, runId);
             return;
           }
         }
@@ -182,29 +233,29 @@ export function useStatementScanner() {
         if (runId !== runIdRef.current) return;
 
         if (ocr.engine === 'unavailable') {
-          // On-device OCR not bundled; gracefully run offline statement matcher on realistic UK statement lines
-          await finishWithLines(DEMO_UK_STATEMENT_LINES, 'image', startedAt, runId);
+          setError({
+            code: 'ocr_unavailable',
+            message: 'On-device OCR is unavailable. Please upload a digital PDF, CSV export, or try another image.',
+          });
+          setStage('error');
+          setProgress({ percent: 100, label: 'On-device OCR is unavailable.', stage: 'error' });
           return;
         }
 
         if (ocr.lines.length === 0) {
-          setStage('empty');
-          setResult({
-            matches: [],
-            processedLineCount: 0,
-            source: 'image',
-            durationMs: Date.now() - startedAt,
-          });
-          setMatches([]);
+          setError({ code: 'parse_failed', message: NO_READABLE_TEXT_MESSAGE });
+          setStage('error');
+          setProgress({ percent: 100, label: 'Statement text could not be read.', stage: 'error' });
           return;
         }
 
         await finishWithLines(ocr.lines, 'image', startedAt, runId);
-      } catch {
+      } catch (cause) {
         if (runId !== runIdRef.current) return;
+        const detail = cause instanceof Error && cause.message ? ` ${cause.message}` : '';
         setError({
           code: 'unknown',
-          message: 'The statement could not be read on this device. Try a clearer photo or the demo file.',
+          message: `The statement could not be read on this device.${detail} Try a clearer photo or the demo file.`,
         });
         setStage('error');
       }

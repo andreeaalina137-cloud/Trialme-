@@ -10,10 +10,13 @@ export { DetectedSubCard } from './components/DetectedSubCard';
 export { BatchActionFooter } from './components/BatchActionFooter';
 export { useStatementScanner } from './hooks/useStatementScanner';
 export { preprocessStatementImage } from './services/imagePreprocessor';
-export { extractPdfText, looksLikePdf } from './services/pdfTextExtractor';
+export { extractPdfText, looksLikePdf, renderPdfPagesForOcr } from './services/pdfTextExtractor';
 export { runOfflineOcr } from './services/ocrWorker';
 export { parseStatementLines, cleanMerchantName, extractGbpAmount, extractUkDate } from './services/ukBankCleaner';
 export { matchStatementTransactions } from './services/statementMatcher';
+export { normalizeStatementLine, normalizeStatementLines, repairCommonMerchantSpacing } from './services/statementNormalizer';
+export { detectBankFormat } from './services/bankFormatDetector';
+export type { BankFormatDetection, SupportedBankFormat } from './services/bankFormatDetector';
 export type {
   BillingCycle,
   MatchedSubscription,

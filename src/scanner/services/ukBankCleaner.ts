@@ -1,7 +1,8 @@
 import type { ScannedTransaction } from '../types/scanner.types';
+import { normalizeStatementLine, repairCommonMerchantSpacing } from './statementNormalizer';
 
 const PREFIX_PATTERN =
-  /\b(?:CARD\s+PAYMENT\s+TO|DIRECT\s+DEBIT\s+TO|DIRECT\s+DEBIT|FASTER\s+PAYMENT(?:\s+TO)?|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|STANDING\s+ORDER|BILL\s+PAYMENT|POS|BACS|VIS|DD)\b/gi;
+  /\b(?:CARD\s+PAYMENT\s+TO|DIRECT\s+DEBIT\s+TO|DIRECT\s+DEBIT|FASTER\s+PAYMENT(?:\s+TO)?|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|STANDING\s+ORDER|BILL\s+PAYMENT|POS|BACS|VIS|DD|CĂTRE|CATRE|CARD|REFERINȚĂ|REFERINTA|CURSUL)\b/gi;
 
 const COUNTRY_PATTERN = /\b(?:GBR|LUX|IRL|USA|ESP|FRA|DEU|NLD|ITA|GBP|GB)\b/gi;
 const CITY_PATTERN = /\bLONDON\b/gi;
@@ -13,14 +14,19 @@ const FX_PATTERN =
 const LTD_PATTERN = /\b(?:LIMITED|LTD\.?|PLC|INC\.?)\b/gi;
 
 const GBP_PRICE_PATTERN = /(?:£|GBP\s?)(\d{1,4}(?:,\d{3})*(?:\.\d{2}))/i;
-const TRAILING_DEBIT_PATTERN = /(\d{1,3}(?:,\d{3})?(?:\.\d{2}))\s*-?$/;
+const SIGNED_GBP_PRICE_PATTERN = /[-+]?\s*(\d{1,4}(?:,\d{3})*(?:\.\d{2}))\s*GBP/i;
+const GBP_SUFFIX_PRICE_PATTERN = /[-+]?\s*(\d{1,4}(?:[,.]\d{3})*[,.]\d{2})\s*(?:£|GBP)/i;
+const FOREIGN_CURRENCY_AMOUNT_PATTERN = /(?:€|EUR|USD|\$|CHF|CAD|AUD)\s*-?\d{1,4}(?:,\d{3})*(?:\.\d{2})|[-+]?\s*\d{1,4}(?:[,.]\d{3})*[,.]\d{2}\s*(?:€|EUR|USD|\$|CHF|CAD|AUD)/i;
+const TRAILING_DEBIT_PATTERN = /(\d{1,3}(?:,\d{3})?(?:\.\d{2}))\s*(?:-|DR|CR)$/i;
 
 // Only match credit indicators (+ before digits, CR suffix/prefix, CREDIT), NOT a '+' inside service names like Disney+
 const CREDIT_HINT_PATTERN = /(?:(?:^|\s)\+\s*(?:£|GBP)?\s*\d|^\s*CR\b|\bCR\s*$|\bCREDIT(?:\s+IN)?\b)/i;
 
 const ISO_DATE = /(\d{2})\/(\d{2})\/(\d{4})/;
-const LONG_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})/i;
-const SHORT_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*(?:\s|$)/i;
+const UK_DASH_DATE = /(\d{1,2})[-.](\d{1,2})[-.](\d{4})/;
+const ISO_DATE_DASHED = /(\d{4})-(\d{2})-(\d{2})/;
+const LONG_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{4})/i;
+const SHORT_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?(?:\s|$)/i;
 
 const MONTHS: Record<string, number> = {
   jan: 0,
@@ -32,6 +38,7 @@ const MONTHS: Record<string, number> = {
   jul: 6,
   aug: 7,
   sep: 8,
+  sept: 8,
   oct: 9,
   nov: 10,
   dec: 11,
@@ -39,8 +46,18 @@ const MONTHS: Record<string, number> = {
 
 const HIGH_VALUE_TRANSFER_GBP = 500;
 
+const STATEMENT_NOISE_PATTERN =
+  /^(?:date\s*,|statement\s+notes?|expected\s+scanner\s+result|testing\s+checklist|scanner\s+result|test\s+checklist)\b/i;
+
 function pad(value: number): string {
   return String(value).padStart(2, '0');
+}
+
+function parseLocalizedAmount(value: string): number {
+  const normalized = value.includes(',')
+    ? value.replace(/\./g, '').replace(',', '.')
+    : value.replace(/,/g, '');
+  return Number(normalized);
 }
 
 function toIso(year: number, monthIndex: number, day: number): string | null {
@@ -53,11 +70,29 @@ function toIso(year: number, monthIndex: number, day: number): string | null {
 }
 
 export function extractUkDate(line: string, now = new Date()): { iso: string; billingDay: number } | null {
+  const isoDashedMatch = line.match(ISO_DATE_DASHED);
+  if (isoDashedMatch) {
+    const year = Number(isoDashedMatch[1]);
+    const month = Number(isoDashedMatch[2]) - 1;
+    const day = Number(isoDashedMatch[3]);
+    const iso = toIso(year, month, day);
+    return iso ? { iso, billingDay: day } : null;
+  }
+
   const isoMatch = line.match(ISO_DATE);
   if (isoMatch) {
     const day = Number(isoMatch[1]);
     const month = Number(isoMatch[2]) - 1;
     const year = Number(isoMatch[3]);
+    const iso = toIso(year, month, day);
+    return iso ? { iso, billingDay: day } : null;
+  }
+
+  const ukDashedMatch = line.match(UK_DASH_DATE);
+  if (ukDashedMatch) {
+    const day = Number(ukDashedMatch[1]);
+    const month = Number(ukDashedMatch[2]) - 1;
+    const year = Number(ukDashedMatch[3]);
     const iso = toIso(year, month, day);
     return iso ? { iso, billingDay: day } : null;
   }
@@ -86,8 +121,21 @@ export function extractGbpAmount(line: string): number | null {
   // 1. Explicit £ or GBP symbol
   const gbpMatch = line.match(GBP_PRICE_PATTERN);
   if (gbpMatch) {
-    return Number(gbpMatch[1].replace(/,/g, ''));
+    return parseLocalizedAmount(gbpMatch[1]);
   }
+
+  const signedGbpMatch = line.match(SIGNED_GBP_PRICE_PATTERN);
+  if (signedGbpMatch) {
+    return parseLocalizedAmount(signedGbpMatch[1]);
+  }
+
+  const gbpSuffixMatch = line.match(GBP_SUFFIX_PRICE_PATTERN);
+  if (gbpSuffixMatch) {
+    return parseLocalizedAmount(gbpSuffixMatch[1]);
+  }
+
+  // Do not interpret a foreign-currency amount as GBP on Revolut/multi-currency statements.
+  if (FOREIGN_CURRENCY_AMOUNT_PATTERN.test(line)) return null;
 
   // 2. Strip date patterns and country codes before extracting decimal amounts
   const stripped = line
@@ -115,7 +163,9 @@ export function extractGbpAmount(line: string): number | null {
   }
 
   // 3. Fallback: trailing debit pattern if no dot decimals found (e.g. whole numbers or atypical format)
-  const trailing = stripped.match(/(?:^|\s)(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)\s*-?$/);
+  // Do not treat product/plan numbers such as 365, 100 or 24 as money.
+  // Whole-number amounts are accepted only with an explicit debit marker.
+  const trailing = stripped.match(/(?:^|\s)(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)\s*(?:-|DR|CR)$/i);
   if (trailing) {
     const val = Number(trailing[1].replace(/,/g, ''));
     if (Number.isFinite(val) && val > 0) return val;
@@ -127,9 +177,13 @@ export function extractGbpAmount(line: string): number | null {
 export function cleanMerchantName(line: string): string {
   let cleaned = line;
   cleaned = cleaned.replace(ISO_DATE, ' ');
+  cleaned = cleaned.replace(UK_DASH_DATE, ' ');
+  cleaned = cleaned.replace(ISO_DATE_DASHED, ' ');
   cleaned = cleaned.replace(LONG_UK_DATE, ' ');
   cleaned = cleaned.replace(SHORT_UK_DATE, ' ');
   cleaned = cleaned.replace(GBP_PRICE_PATTERN, ' ');
+  cleaned = cleaned.replace(SIGNED_GBP_PRICE_PATTERN, ' ');
+  cleaned = cleaned.replace(GBP_SUFFIX_PRICE_PATTERN, ' ');
   cleaned = cleaned.replace(TRAILING_DEBIT_PATTERN, ' ');
   cleaned = cleaned.replace(PREFIX_PATTERN, ' ');
   cleaned = cleaned.replace(COUNTRY_PATTERN, ' ');
@@ -140,17 +194,122 @@ export function cleanMerchantName(line: string): string {
   cleaned = cleaned.replace(FX_PATTERN, ' ');
   cleaned = cleaned.replace(LTD_PATTERN, ' ');
   cleaned = cleaned.replace(/[£$€]/g, ' ');
-  cleaned = cleaned.replace(/\b\d{1,4}(?:,\d{3})*\.\d{2}\b/g, ' ');
+  cleaned = cleaned.replace(/\b\d{1,4}(?:[,.]\d{3})*[,.]\d{2}\b/g, ' ');
   // Retain letters, digits, spaces, plus sign (for Disney+), and common punctuation
   cleaned = cleaned.replace(/[^\w\s.&/'+\-]/g, ' ');
   return cleaned.replace(/\s+/g, ' ').trim();
 }
 
+function isStatementNoise(line: string): boolean {
+  return STATEMENT_NOISE_PATTERN.test(line.trim());
+}
+
+function parseDelimitedFields(line: string): string[] {
+  const delimiter = line.split(';').length > line.split(',').length ? ';' : ',';
+  const fields: string[] = [];
+  let current = '';
+  let quoted = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const character = line[i];
+    if (character === '"') {
+      if (quoted && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === delimiter && !quoted) {
+      fields.push(current.trim());
+      current = '';
+    } else {
+      current += character;
+    }
+  }
+  fields.push(current.trim());
+  return fields;
+}
+
+function normalizeCsvStatementLine(line: string): string {
+  const fields = parseDelimitedFields(line);
+  if (
+    fields.length < 3 ||
+    !/^(?:\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{4}-\d{2}-\d{2})$/.test(fields[0])
+  ) {
+    return line;
+  }
+
+  const amountIndex = fields.findIndex((field, index) => {
+    if (index < 2) return false;
+    const normalized = field.replace(/\s/g, '');
+    return /^[£€$]?[-+]?\d{1,4}(?:[,.]\d{3})*[,.]\d{2}(?:£|GBP)?$/i.test(normalized)
+      || /^GBP[-+]?\d{1,4}(?:[,.]\d{3})*[,.]\d{2}$/i.test(normalized);
+  });
+  if (amountIndex < 2) return line;
+
+  const isMonzoExport = /^\d{1,2}:\d{2}(?::\d{2})?$/.test(fields[1] ?? '') && fields.length >= 8;
+  const description = isMonzoExport ? fields[3] : fields.slice(1, amountIndex).join(' ');
+  const rawAmount = fields[amountIndex]
+    .replace(/^GBP\s*/i, '')
+    .replace(/\s*GBP$/i, '')
+    .replace(/\s*£$/, '');
+  const amount = rawAmount.replace(/^[+-]/, '');
+  const trailingFields = fields.slice(amountIndex + 1).join(' ');
+  const currencyField = fields[amountIndex + 1] ?? '';
+  if (currencyField && !/^(?:GBP|£)$/i.test(currencyField)) {
+    return `${fields[0]} ${description} ${currencyField} ${amount}`;
+  }
+  const isCredit = /^[+]/.test(rawAmount) || /\b(?:CREDIT|REFUND|MONEY\s+IN|INFLOW)\b/i.test(trailingFields);
+  return `${fields[0]} ${description} ${isCredit ? '+ ' : ''}£${amount}`;
+}
+
+/**
+ * PDF text extraction often puts the date/description and the merchant/amount
+ * on separate visual rows. Keep every row up to the first amount together so
+ * the parser sees one transaction block and can recover the real amount.
+ */
+function groupStatementLines(lines: string[]): string[] {
+  const logicalLines: string[] = [];
+  let pending: string[] = [];
+
+  const isContinuation = (line: string): boolean =>
+    /^(?:Către|Catre|To|From|De la|Card|Referință|Referinta|Cursul)\s*:?/i.test(line);
+
+  const flushPending = () => {
+    const joined = pending.join(' ').replace(/\s+/g, ' ').trim();
+    if (joined) logicalLines.push(joined);
+    pending = [];
+  };
+
+  for (const rawLine of lines) {
+    const line = normalizeCsvStatementLine(repairCommonMerchantSpacing(normalizeStatementLine(rawLine)));
+    if (!line) continue;
+    if (isStatementNoise(line)) {
+      flushPending();
+      continue;
+    }
+
+    // Revolut places merchant details on the row immediately after the
+    // amount. Attach them to the transaction so aliases such as Google One
+    // are not lost behind a generic display label such as "Google".
+    if (isContinuation(line) && pending.length === 0 && logicalLines.length > 0) {
+      logicalLines[logicalLines.length - 1] = `${logicalLines[logicalLines.length - 1]} ${line}`;
+      continue;
+    }
+
+    pending.push(line);
+    if (extractGbpAmount(line) !== null) {
+      flushPending();
+    }
+  }
+
+  flushPending();
+  return logicalLines;
+}
+
 export function parseStatementLines(lines: string[], now = new Date()): ScannedTransaction[] {
   const transactions: ScannedTransaction[] = [];
-  const cleanedLines = lines
-    .map((l) => l.replace(/[Â\xa0]/g, ' ').replace(/\s+/g, ' ').trim())
-    .filter(Boolean);
+  const cleanedLines = groupStatementLines(lines);
 
   const matchedIndices = new Set<number>();
 
