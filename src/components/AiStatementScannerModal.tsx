@@ -26,6 +26,10 @@ import { useTranslation } from '../i18n/LanguageContext';
 import { useStatementScanner } from '../scanner/hooks/useStatementScanner';
 import { BARCLAYS_SAMPLE_LINES, REVOLUT_SAMPLE_LINES } from '../scanner/types/scanner.types';
 import { buildScannerSubscriptionDraft } from '../scanner/services/scannerSubscriptionDraft';
+import {
+  recordConfirmedScannerLearning,
+  recordDismissedScannerLearning,
+} from '../scanner/services/scannerLearningMemory';
 
 interface AiStatementScannerModalProps {
   isOpen: boolean;
@@ -215,14 +219,24 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   };
 
   const handleAddSingleDetected = (item: DetectedSubscription) => {
+    const matched = findMatchingPreset(item.name);
     if (existingSubscriptions.some((s) => isDuplicateScannedSubscription({ name: item.name }, s))) {
+      recordConfirmedScannerLearning({
+        merchantLabel: item.name,
+        serviceName: item.name,
+        presetId: matched?.id,
+        category: item.category,
+        frequency: item.frequency,
+        amountGbp: item.price,
+        cancelUrl: item.cancelUrl || matched?.cancel_url,
+        color: item.color,
+      });
       setAddedIds((prev) => new Set(prev).add(item.id));
       return;
     }
 
-    const nextPaymentDate = addMonthsClamped(new Date(), 1);
-    const formattedDate = formatLocalDateKey(nextPaymentDate);
-    const matched = findMatchingPreset(item.name);
+    const fallbackDate = formatLocalDateKey(addMonthsClamped(new Date(), 1));
+    const formattedDate = item.nextPaymentDate || fallbackDate;
     const finalPrice = item.price > 0 ? item.price : matched?.monthly_price_gbp || 0;
     const matchingColor =
       item.color ||
@@ -237,6 +251,16 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         formattedDate,
       ),
     ]);
+    recordConfirmedScannerLearning({
+      merchantLabel: item.name,
+      serviceName: item.name,
+      presetId: matched?.id,
+      category: item.category,
+      frequency: item.frequency,
+      amountGbp: finalPrice,
+      cancelUrl: item.cancelUrl || matched?.cancel_url,
+      color: matchingColor,
+    });
     setAddedIds((prev) => new Set(prev).add(item.id));
   };
 
@@ -264,6 +288,20 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   };
 
   const handleDismissItem = (id: string) => {
+    const item = detectedItems.find((candidate) => candidate.id === id);
+    if (item) {
+      const matched = findMatchingPreset(item.name);
+      recordDismissedScannerLearning({
+        merchantLabel: item.name,
+        serviceName: item.name,
+        presetId: matched?.id,
+        category: item.category,
+        frequency: item.frequency,
+        amountGbp: item.price,
+        cancelUrl: item.cancelUrl || matched?.cancel_url,
+        color: item.color,
+      });
+    }
     setDetectedItems((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -283,10 +321,23 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
           item,
           matched,
           currencySymbol,
-          formatLocalDateKey(addMonthsClamped(new Date(), 1)),
+          item.nextPaymentDate || formatLocalDateKey(addMonthsClamped(new Date(), 1)),
         );
       })
     );
+    selectedItems.forEach((item) => {
+      const matched = findMatchingPreset(item.name);
+      recordConfirmedScannerLearning({
+        merchantLabel: item.name,
+        serviceName: item.name,
+        presetId: matched?.id,
+        category: item.category,
+        frequency: item.frequency,
+        amountGbp: item.price,
+        cancelUrl: item.cancelUrl || matched?.cancel_url,
+        color: item.color,
+      });
+    });
     resetScannerState();
     onClose();
   };

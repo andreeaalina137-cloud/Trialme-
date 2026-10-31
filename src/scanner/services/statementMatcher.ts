@@ -12,6 +12,7 @@ import type {
   ScannedTransaction,
   StatementPreset,
 } from '../types/scanner.types';
+import { getScannerLearning } from './scannerLearningMemory';
 
 const FUZZY_MIN_SIMILARITY = 0.75;
 const FUZZY_MAX_EDITS = 2;
@@ -69,8 +70,6 @@ const OCR_ALIASES: Record<string, string[]> = {
     'APPLE TV',
     'APPLE TV+',
     'TV.APPLE',
-    'APPLE.COM BILL',
-    'APPLE SERVICES',
     'APPL TV',
   ],
   now_tv_uk: ['NOW TV', 'NOWTV', 'NOW TV UK', 'NOW DIGITAL'],
@@ -176,10 +175,17 @@ const OCR_ALIASES: Record<string, string[]> = {
   revolut_premium_uk: [
     'REVOLUT PREMIUM',
     'REVOLUT*PREMIUM',
+    'PREMIUM PLAN FEE',
+    'PREMIUM PLAN',
     'TAXA PLAN METAL',
     'TAX PLAN METAL',
     'METAL PLAN FEE',
   ],
+  three_uk: ['H3G', 'THREE', 'THREE UK', '3 MOBILE', 'THREE MOBILE'],
+  vodafone_uk: ['VODAFONE', 'VODAFONE LTD', 'VODAFONE UK'],
+  talktalk_uk: ['TALKTALK', 'TALK TALK', 'TALKTALK TELECOM'],
+  lebara_uk: ['LEBARA', 'LEBARA MOBILE'],
+  curve_uk: ['CURVE', 'CURVE SUBSCRIPTION', 'CURVE CARD'],
 };
 
 const TRAP_PRESET_IDS = new Set([
@@ -247,6 +253,18 @@ const PRESET_COLORS: Record<string, string> = {
   revolut_premium_uk: '#38BDF8',
 };
 
+// Bank statements regularly contain UK providers that are not part of the
+// commercial catalogue. These scanner-only records allow deterministic
+// classification without inventing a catalogue price; the amount always
+// comes from the statement.
+const BANK_PROVIDER_PRESETS: StatementPreset[] = [
+  { id: 'three_uk', name: 'Three UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'vodafone_uk', name: 'Vodafone UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'talktalk_uk', name: 'TalkTalk UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'lebara_uk', name: 'Lebara UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'curve_uk', name: 'Curve', category: 'Productivity', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+];
+
 function alphanum(value: string): string {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
@@ -268,6 +286,9 @@ function isConsonantMatch(left: string, right: string): boolean {
 const GENERIC_SUBSCRIPTION_PATTERN =
   /\b(?:SUBSCRIPTION|MEMBERSHIP|PREMIUM|MONTHLY|ANNUAL|RECURRING|PLAN|PASS)\b/i;
 
+const GAMBLING_MERCHANT_PATTERN =
+  /\b(?:BET365|BETFRED|LADBROKES|WILLIAM\s+HILL|CORAL|PADDY\s+POWER|SKY\s*BET|GAMBLING|CASINO)\b/i;
+
 // Merchant names that are common one-off UK purchases. These must never become
 // subscriptions merely because a broad preset alias contains the same brand.
 const NON_SUBSCRIPTION_MERCHANT_PATTERN =
@@ -275,7 +296,7 @@ const NON_SUBSCRIPTION_MERCHANT_PATTERN =
 
 function isOneOffMerchant(tx: ScannedTransaction): boolean {
   const value = `${tx.cleanedMerchant} ${tx.rawLine}`;
-  return NON_SUBSCRIPTION_MERCHANT_PATTERN.test(value);
+  return NON_SUBSCRIPTION_MERCHANT_PATTERN.test(value) || GAMBLING_MERCHANT_PATTERN.test(value);
 }
 
 function inferUnknownCategory(merchant: string): SubscriptionCategory {
@@ -363,6 +384,7 @@ function trapLabel(preset: StatementPreset): string | null {
 }
 
 function inferBillingCycle(amount: number, monthlyPrice: number): BillingCycle {
+  if (monthlyPrice <= 0) return 'Monthly';
   if (monthlyPrice > 0 && amount >= monthlyPrice * 8) return 'Annual';
   if (amount >= 80 && amount % 1 !== 0 && amount > monthlyPrice * 6) return 'Annual';
   return 'Monthly';
@@ -393,6 +415,7 @@ interface Candidate {
   preset: StatementPreset;
   confidence: number;
   tier: MatchTier;
+  learned?: boolean;
 }
 
 function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): Candidate | null {
@@ -486,7 +509,7 @@ export function matchStatementTransactions(
   transactions: ScannedTransaction[],
   now = new Date()
 ): MatchedSubscription[] {
-  const presets = getPresets().map(toStatementPreset);
+  const presets = [...getPresets().map(toStatementPreset), ...BANK_PROVIDER_PRESETS];
   const grouped = new Map<
     string,
     { match: MatchedSubscription; occurrences: number; latestIso: string | null }
@@ -498,7 +521,29 @@ export function matchStatementTransactions(
   }
 
   for (const tx of transactions) {
-    const candidate = matchTransaction(tx, presets);
+    const learning = getScannerLearning(tx.cleanedMerchant);
+    if (learning?.decision === 'dismissed') continue;
+
+    let candidate = matchTransaction(tx, presets);
+    // A confirmed local decision may teach an exact merchant that is not in
+    // the catalogue. It is deliberately exact-key only and is never allowed
+    // to bypass one-off/transfer protection or replace a stronger catalogue
+    // match.
+    if (!candidate && learning?.decision === 'confirmed' && !isOneOffMerchant(tx)) {
+      candidate = {
+        learned: true,
+        confidence: 0.93,
+        tier: 1,
+        preset: {
+          id: learning.presetId || `learned-${learning.merchantKey}`,
+          name: learning.serviceName,
+          category: learning.category,
+          monthly_price_gbp: learning.amountGbp || tx.amountGbp,
+          notes: 'Confirmed locally by the user.',
+          cancel_url: learning.cancelUrl || '',
+        },
+      };
+    }
     if (!candidate) {
       const merchantKey = alphanum(tx.cleanedMerchant);
       const occurrenceCount = occurrenceCounts.get(merchantKey) ?? 0;
@@ -553,7 +598,9 @@ export function matchStatementTransactions(
     }
 
     const existing = grouped.get(candidate.preset.id);
-    const billingCycle = inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp);
+    const billingCycle = candidate.learned && candidate.preset.monthly_price_gbp > 0
+      ? (learning?.frequency === 'yearly' ? 'Annual' : 'Monthly')
+      : inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp);
     const nextDate = calculateNextBillingDate(tx.dateIso, billingCycle, now);
     const payload: MatchedSubscription = {
       id: `scan-${candidate.preset.id}`,

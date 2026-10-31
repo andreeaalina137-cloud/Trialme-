@@ -1,5 +1,9 @@
 import type { ScannedTransaction } from '../types/scanner.types';
-import { normalizeStatementLine, repairCommonMerchantSpacing } from './statementNormalizer';
+import {
+  normalizeStatementLine,
+  repairBankMerchantAbbreviations,
+  repairCommonMerchantSpacing,
+} from './statementNormalizer';
 
 const PREFIX_PATTERN =
   /\b(?:CARD\s+PAYMENT\s+TO|DIRECT\s+DEBIT\s+TO|DIRECT\s+DEBIT|FASTER\s+PAYMENT(?:\s+TO)?|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|STANDING\s+ORDER|BILL\s+PAYMENT|POS|BACS|VIS|DD|CĂTRE|CATRE|CARD|REFERINȚĂ|REFERINTA|CURSUL)\b/gi;
@@ -28,6 +32,7 @@ const ISO_DATE = /(\d{2})\/(\d{2})\/(\d{4})/;
 const UK_DASH_DATE = /(\d{1,2})[-.](\d{1,2})[-.](\d{4})/;
 const ISO_DATE_DASHED = /(\d{4})-(\d{2})-(\d{2})/;
 const LONG_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{4})/i;
+const SHORT_UK_DATE_WITH_YEAR = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{2})(?:\s|$)/i;
 const SHORT_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?(?:\s|$)/i;
 
 const MONTHS: Record<string, number> = {
@@ -108,6 +113,16 @@ export function extractUkDate(line: string, now = new Date()): { iso: string; bi
     return iso ? { iso, billingDay: day } : null;
   }
 
+  const shortWithYearMatch = line.match(SHORT_UK_DATE_WITH_YEAR);
+  if (shortWithYearMatch) {
+    const day = Number(shortWithYearMatch[1]);
+    const month = MONTHS[shortWithYearMatch[2].slice(0, 3).toLowerCase()];
+    const shortYear = Number(shortWithYearMatch[3]);
+    const year = shortYear >= 70 ? 1900 + shortYear : 2000 + shortYear;
+    const iso = toIso(year, month, day);
+    return iso ? { iso, billingDay: day } : null;
+  }
+
   const shortMatch = line.match(SHORT_UK_DATE);
   if (shortMatch) {
     const day = Number(shortMatch[1]);
@@ -158,6 +173,15 @@ export function extractGbpAmount(line: string): number | null {
   // Do not interpret a foreign-currency amount as GBP on Revolut/multi-currency statements.
   if (FOREIGN_CURRENCY_AMOUNT_PATTERN.test(line)) return null;
 
+  // Monzo and some PDF exports omit the GBP symbol and encode debits as
+  // `GBR-15.08` or `-15.08`. Running balances normally follow the debit;
+  // prefer the explicit signed debit and leave credits to the credit filter.
+  const signedDebit = line.match(/(?:^|\s|(?:GBR|GBP))[-−]\s*(\d{1,4}(?:,\d{3})*[,.]\d{2})\b/i);
+  if (signedDebit) {
+    const amount = parseLocalizedAmount(signedDebit[1]);
+    if (Number.isFinite(amount) && amount > 0) return amount;
+  }
+
   // 2. Strip date patterns and country codes before extracting decimal amounts
   const stripped = line
     .replace(/\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b/g, ' ')
@@ -201,6 +225,7 @@ export function cleanMerchantName(line: string): string {
   cleaned = cleaned.replace(UK_DASH_DATE, ' ');
   cleaned = cleaned.replace(ISO_DATE_DASHED, ' ');
   cleaned = cleaned.replace(LONG_UK_DATE, ' ');
+  cleaned = cleaned.replace(SHORT_UK_DATE_WITH_YEAR, ' ');
   cleaned = cleaned.replace(SHORT_UK_DATE, ' ');
   cleaned = cleaned.replace(GBP_PRICE_PATTERN, ' ');
   cleaned = cleaned.replace(SIGNED_GBP_PRICE_PATTERN, ' ');
@@ -218,7 +243,17 @@ export function cleanMerchantName(line: string): string {
   cleaned = cleaned.replace(/\b\d{1,4}(?:[,.]\d{3})*[,.]\d{2}\b/g, ' ');
   // Retain letters, digits, spaces, plus sign (for Disney+), and common punctuation
   cleaned = cleaned.replace(/[^\w\s.&/'+\-]/g, ' ');
-  return cleaned.replace(/\s+/g, ' ').trim();
+  const normalized = cleaned.replace(/\s+/g, ' ').trim();
+  // Generic Apple billing rows do not identify Apple TV or iCloud. Collapse
+  // only those ambiguous rows so they can be learned as one merchant, while
+  // preserving explicit Apple TV/iCloud/Music service names.
+  if (
+    /APPLE(?:\.COM\/BILL| APP STORE| SERVICES?)/i.test(normalized) &&
+    !/APPLE\s*(?:TV|MUSIC|ARCADE)|ICLOUD/i.test(normalized)
+  ) {
+    return 'APPLE BILLING';
+  }
+  return normalized;
 }
 
 function isStatementNoise(line: string): boolean {
@@ -303,7 +338,9 @@ function groupStatementLines(lines: string[]): string[] {
   };
 
   for (const rawLine of lines) {
-    const line = normalizeCsvStatementLine(repairCommonMerchantSpacing(normalizeStatementLine(rawLine)));
+    const line = normalizeCsvStatementLine(
+      repairBankMerchantAbbreviations(repairCommonMerchantSpacing(normalizeStatementLine(rawLine))),
+    );
     if (!line) continue;
     if (isStatementNoise(line)) {
       flushPending();

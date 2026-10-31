@@ -22,8 +22,18 @@ export function repairCommonMerchantSpacing(value: string): string {
     .replace(/M\s*I\s*C\s*R\s*O\s*S\s*O\s*F\s*T\s+365/gi, 'MICROSOFT 365');
 }
 
+/** Repairs common bank/OCR abbreviations without guessing at arbitrary words. */
+export function repairBankMerchantAbbreviations(value: string): string {
+  return value
+    .replace(/\bH\s*3\s*G\b/gi, 'THREE')
+    .replace(/\bVODAFON[E3]\b/gi, 'VODAFONE')
+    .replace(/\bTALK\s*[- ]?TALK\b/gi, 'TALKTALK')
+    .replace(/\bLEBARA\s+MOBILE\s+LIMITED\b/gi, 'LEBARA')
+    .replace(/\bAPPLE\.COM\/BIL[L1]\b/gi, 'APPLE.COM/BILL');
+}
+
 export function normalizeStatementLines(lines: string[]): string[] {
   return lines
-    .map((line) => repairCommonMerchantSpacing(normalizeStatementLine(line)))
+    .map((line) => repairBankMerchantAbbreviations(repairCommonMerchantSpacing(normalizeStatementLine(line))))
     .filter(Boolean);
 }

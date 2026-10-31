@@ -15,6 +15,14 @@ export { runOfflineOcr } from './services/ocrWorker';
 export { parseStatementLines, cleanMerchantName, extractGbpAmount, extractUkDate } from './services/ukBankCleaner';
 export { matchStatementTransactions } from './services/statementMatcher';
 export { normalizeStatementLine, normalizeStatementLines, repairCommonMerchantSpacing } from './services/statementNormalizer';
+export {
+  getScannerLearning,
+  getScannerLearningRecords,
+  normalizeLearningMerchant,
+  recordConfirmedScannerLearning,
+  recordDismissedScannerLearning,
+  undoScannerLearning,
+} from './services/scannerLearningMemory';
 export { detectBankFormat } from './services/bankFormatDetector';
 export { buildScannerSubscriptionDraft } from './services/scannerSubscriptionDraft';
 export type { BankFormatDetection, SupportedBankFormat } from './services/bankFormatDetector';
