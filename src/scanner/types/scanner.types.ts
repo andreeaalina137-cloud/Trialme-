@@ -25,6 +25,26 @@ export type ScannerErrorCode =
   | 'parse_failed'
   | 'unknown';
 
+export type StatementTableState = 'IN_TABLE' | 'OUT_OF_TABLE';
+
+export type ScannerReasonCode =
+  | 'VALID_DEBIT'
+  | 'BALANCE_REJECTED'
+  | 'INFO_BLOCK_REJECTED'
+  | 'ALIAS_MATCH'
+  | 'OCR_ALIAS'
+  | 'DD_MARKER'
+  | 'INTERVAL_CONFIRMED'
+  | 'RETURNED_PAYMENT_REJECTED'
+  | 'BRAND_ONLY_REJECTED'
+  | 'INSUFFICIENT_EVIDENCE';
+
+export interface ScannerGateScores {
+  validity: 0 | 1 | 2 | 3;
+  identity: 0 | 1 | 2 | 3;
+  recurrence: 0 | 1 | 2 | 3;
+}
+
 export interface ScannedTransaction {
   rawLine: string;
   cleanedMerchant: string;
@@ -33,6 +53,12 @@ export interface ScannedTransaction {
   billingDay: number | null;
   isCredit: boolean;
   isHighValueTransfer: boolean;
+  tableState?: StatementTableState;
+  validityScore?: 0 | 1 | 2 | 3;
+  hasStrongRecurringMarker?: boolean;
+  isReversalOrFailed?: boolean;
+  referenceToken?: string | null;
+  reasonCodes?: ScannerReasonCode[];
 }
 
 export interface MatchedSubscription {
@@ -54,6 +80,9 @@ export interface MatchedSubscription {
   color: string;
   cancelUrl: string;
   selected: boolean;
+  requiresReview?: boolean;
+  gateScores?: ScannerGateScores;
+  reasonCodes?: ScannerReasonCode[];
 }
 
 export interface ScannerProgress {

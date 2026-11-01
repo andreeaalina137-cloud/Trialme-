@@ -26,6 +26,7 @@ export interface ScannerLearningRecord {
 interface ScannerLearningState {
   version: number;
   records: ScannerLearningRecord[];
+  history?: ScannerLearningRecord[][];
 }
 
 const VALID_CATEGORIES = new Set<SubscriptionCategory>([
@@ -59,7 +60,7 @@ export function normalizeLearningMerchant(value: string): string {
 }
 
 function emptyState(): ScannerLearningState {
-  return { version: LEARNING_VERSION, records: [] };
+  return { version: LEARNING_VERSION, records: [], history: [] };
 }
 
 function isRecord(value: unknown): value is ScannerLearningRecord {
@@ -82,11 +83,18 @@ function readState(): ScannerLearningState {
   const raw = safeStorageGet(SCANNER_LEARNING_STORAGE_KEY);
   if (!raw) return emptyState();
   try {
-    const parsed = JSON.parse(raw) as { version?: unknown; records?: unknown };
+    const parsed = JSON.parse(raw) as { version?: unknown; records?: unknown; history?: unknown };
     if (parsed.version !== LEARNING_VERSION || !Array.isArray(parsed.records)) return emptyState();
+    const history = Array.isArray(parsed.history)
+      ? parsed.history
+          .filter((snap): snap is unknown[] => Array.isArray(snap))
+          .map((snap) => snap.filter(isRecord))
+          .slice(-50)
+      : [];
     return {
       version: LEARNING_VERSION,
       records: parsed.records.filter(isRecord).slice(-MAX_RECORDS),
+      history,
     };
   } catch {
     return emptyState();
@@ -96,7 +104,11 @@ function readState(): ScannerLearningState {
 function writeState(state: ScannerLearningState): boolean {
   return safeStorageSet(
     SCANNER_LEARNING_STORAGE_KEY,
-    JSON.stringify({ version: LEARNING_VERSION, records: state.records.slice(-MAX_RECORDS) }),
+    JSON.stringify({
+      version: LEARNING_VERSION,
+      records: state.records.slice(-MAX_RECORDS),
+      history: (state.history ?? []).slice(-50),
+    }),
   );
 }
 
@@ -104,6 +116,7 @@ function upsertRecord(record: Omit<ScannerLearningRecord, 'id' | 'merchantKey' |
   const merchantKey = normalizeLearningMerchant(record.merchantLabel);
   if (!merchantKey || !record.serviceName.trim()) return null;
   const state = readState();
+  const snapshot = state.records.map((item) => ({ ...item }));
   const existing = state.records.find((item) => item.merchantKey === merchantKey);
   const now = new Date().toISOString();
   const next: ScannerLearningRecord = {
@@ -113,6 +126,7 @@ function upsertRecord(record: Omit<ScannerLearningRecord, 'id' | 'merchantKey' |
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };
+  state.history = [...(state.history ?? []), snapshot].slice(-50);
   state.records = existing
     ? state.records.map((item) => (item.merchantKey === merchantKey ? next : item))
     : [...state.records, next];
@@ -144,13 +158,37 @@ export function getScannerLearning(merchantLabel: string): ScannerLearningRecord
   return readState().records.find((item) => item.merchantKey === key) ?? null;
 }
 
-/** Removes a decision so an incorrect confirmation or dismissal can be relearned. */
+/** Restores the previous snapshot from the history stack so an incorrect confirmation or dismissal can be undone. */
 export function undoScannerLearning(merchantLabel: string): boolean {
   const key = normalizeLearningMerchant(merchantLabel);
   if (!key) return false;
   const state = readState();
+  const currentHasKey = state.records.some((item) => item.merchantKey === key);
+  const history = [...(state.history ?? [])];
+
+  if (history.length > 0) {
+    for (let i = history.length - 1; i >= 0; i -= 1) {
+      const snap = history[i];
+      const currentRecord = state.records.find((item) => item.merchantKey === key);
+      const snapRecord = snap.find((item) => item.merchantKey === key);
+      const changed =
+        Boolean(currentRecord) !== Boolean(snapRecord) ||
+        currentRecord?.decision !== snapRecord?.decision ||
+        currentRecord?.amountGbp !== snapRecord?.amountGbp ||
+        currentRecord?.serviceName !== snapRecord?.serviceName;
+      if (changed) {
+        const nextRecords = snapRecord
+          ? state.records.map((item) => (item.merchantKey === key ? snapRecord : item))
+          : state.records.filter((item) => item.merchantKey !== key);
+        const nextHistory = history.slice(0, i);
+        return writeState({ ...state, records: nextRecords, history: nextHistory });
+      }
+    }
+  }
+
+  if (!currentHasKey) return false;
   const nextRecords = state.records.filter((item) => item.merchantKey !== key);
-  return nextRecords.length !== state.records.length && writeState({ ...state, records: nextRecords });
+  return writeState({ ...state, records: nextRecords, history });
 }
 
 export function getScannerLearningRecords(): ScannerLearningRecord[] {

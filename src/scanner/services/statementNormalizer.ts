@@ -25,11 +25,12 @@ export function repairCommonMerchantSpacing(value: string): string {
 /** Repairs common bank/OCR abbreviations without guessing at arbitrary words. */
 export function repairBankMerchantAbbreviations(value: string): string {
   return value
-    .replace(/\bH\s*3\s*G\b/gi, 'THREE')
+    .replace(/\bH\s*3\s*G(?:\s+\d{3,12})?\b/gi, 'THREE')
     .replace(/\bVODAFON[E3]\b/gi, 'VODAFONE')
-    .replace(/\bTALK\s*[- ]?TALK\b/gi, 'TALKTALK')
-    .replace(/\bLEBARA\s+MOBILE\s+LIMITED\b/gi, 'LEBARA')
-    .replace(/\bAPPLE\.COM\/BIL[L1]\b/gi, 'APPLE.COM/BILL');
+    .replace(/\bTALK\s*[- ]?TALK(?:\s+TELECOM\s*T?)?\b/gi, 'TALKTALK')
+    .replace(/\bLEBARA(?:\s+MOBILE)?(?:\s+(?:LIMITED|LTD|UK))?\b/gi, 'LEBARA')
+    .replace(/\b(?:DIRECT\s+DEBIT\s+|D\/D\s+|DD\s+)02\b/gi, 'DIRECT DEBIT O2')
+    .replace(/\bAPPL?[IE1][E1]?\.COM\/BI[L1]{1,2}\b/gi, 'APPLE.COM/BILL');
 }
 
 export function normalizeStatementLines(lines: string[]): string[] {

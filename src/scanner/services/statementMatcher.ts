@@ -10,6 +10,8 @@ import type {
   MatchedSubscription,
   MatchTier,
   ScannedTransaction,
+  ScannerGateScores,
+  ScannerReasonCode,
   StatementPreset,
 } from '../types/scanner.types';
 import { getScannerLearning } from './scannerLearningMemory';
@@ -72,6 +74,8 @@ const OCR_ALIASES: Record<string, string[]> = {
     'TV.APPLE',
     'APPL TV',
   ],
+  apple_music_uk: ['APPLE MUSIC', 'APPLE.COM/BILL APPLE MUSIC'],
+  apple_one_uk: ['APPLE ONE', 'APPLE.COM/BILL APPLE ONE'],
   now_tv_uk: ['NOW TV', 'NOWTV', 'NOW TV UK', 'NOW DIGITAL'],
   sky_stream_uk: [
     'SKY DIGITAL',
@@ -166,12 +170,13 @@ const OCR_ALIASES: Record<string, string[]> = {
   hellofresh_uk: ['HELLOFRESH', 'HELLO FRESH'],
   gousto_uk: ['GOUSTO'],
   club_pret_uk: ['PRET A MANGER', 'CLUB PRET', 'PRET'],
-  tesco_clubcard_plus_uk: ['TESCO CLUBCARD', 'CLUBCARD PLUS', 'TESCO'],
+  tesco_clubcard_plus_uk: ['TESCO CLUBCARD', 'CLUBCARD PLUS'],
+  tesco_mobile_uk: ['TESCO MOBILE'],
   asos_premier_uk: ['ASOS PREMIER', 'ASOS'],
   experian_creditexpert_uk: ['EXPERIAN', 'CREDITEXPERT'],
   clearscore_protect_uk: ['CLEARSCORE'],
   equifax_uk: ['EQUIFAX'],
-  monzo_perks_uk: ['MONZO PERKS', 'MONZO PLUS'],
+  monzo_perks_uk: ['MONZO PERKS', 'MONZO PLUS', 'MONZO MAX'],
   revolut_premium_uk: [
     'REVOLUT PREMIUM',
     'REVOLUT*PREMIUM',
@@ -182,10 +187,23 @@ const OCR_ALIASES: Record<string, string[]> = {
     'METAL PLAN FEE',
   ],
   three_uk: ['H3G', 'THREE', 'THREE UK', '3 MOBILE', 'THREE MOBILE'],
+  o2_uk: ['O2', 'O2 UK', 'O2 MOBILE', 'TELEFONICA O2'],
   vodafone_uk: ['VODAFONE', 'VODAFONE LTD', 'VODAFONE UK'],
-  talktalk_uk: ['TALKTALK', 'TALK TALK', 'TALKTALK TELECOM'],
+  talktalk_uk: ['TALKTALK', 'TALK TALK', 'TALKTALK TELECOM', 'TALKTALK TELECOMT'],
   lebara_uk: ['LEBARA', 'LEBARA MOBILE'],
   curve_uk: ['CURVE', 'CURVE SUBSCRIPTION', 'CURVE CARD'],
+  lloyds_silver_account_uk: ['SILVER ACCOUNT', 'SILVER ACCOUNT FEE', 'LLOYDS SILVER ACCOUNT'],
+  lloyds_account_fee_uk: [
+    'ACCOUNT FEE',
+    'MONTHLY ACCOUNT FEE',
+    'PLATINUM ACCOUNT FEE',
+    'CLUB LLOYDS FEE',
+    'ULTIMATE REWARD ACCOUNT',
+    'ULTIMATE REWARD FEE',
+    'HALIFAX ULTIMATE REWARD',
+    'REWARD ACCOUNT FEE',
+  ],
+  chase_monthly_service_fee_uk: ['MONTHLY SERVICE FEE'],
 };
 
 const TRAP_PRESET_IDS = new Set([
@@ -258,11 +276,18 @@ const PRESET_COLORS: Record<string, string> = {
 // classification without inventing a catalogue price; the amount always
 // comes from the statement.
 const BANK_PROVIDER_PRESETS: StatementPreset[] = [
+  { id: 'apple_music_uk', name: 'Apple Music', category: 'Music & Audio', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'apple_one_uk', name: 'Apple One', category: 'Streaming', monthly_price_gbp: 0, notes: '', cancel_url: '' },
   { id: 'three_uk', name: 'Three UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'o2_uk', name: 'O2 UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
   { id: 'vodafone_uk', name: 'Vodafone UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
   { id: 'talktalk_uk', name: 'TalkTalk UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
   { id: 'lebara_uk', name: 'Lebara UK', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'tesco_mobile_uk', name: 'Tesco Mobile', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
   { id: 'curve_uk', name: 'Curve', category: 'Productivity', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'lloyds_silver_account_uk', name: 'Lloyds Silver Account', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'lloyds_account_fee_uk', name: 'Account Fee', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
+  { id: 'chase_monthly_service_fee_uk', name: 'Monthly Service Fee', category: 'Utilities', monthly_price_gbp: 0, notes: '', cancel_url: '' },
 ];
 
 function alphanum(value: string): string {
@@ -283,20 +308,51 @@ function isConsonantMatch(left: string, right: string): boolean {
   return longer.includes(shorter) && shorter.length / longer.length >= 0.65;
 }
 
-const GENERIC_SUBSCRIPTION_PATTERN =
-  /\b(?:SUBSCRIPTION|MEMBERSHIP|PREMIUM|MONTHLY|ANNUAL|RECURRING|PLAN|PASS)\b/i;
-
 const GAMBLING_MERCHANT_PATTERN =
-  /\b(?:BET365|BETFRED|LADBROKES|WILLIAM\s+HILL|CORAL|PADDY\s+POWER|SKY\s*BET|GAMBLING|CASINO)\b/i;
+  /\b(?:BET365|BETFRED|LADBROKES|WILLIAM\s+HILL|CORAL|PADDY\s+POWER|SKY\s*BET|SKILL\s+ON\s+NET|GALA\s+BINGO|PROGRESSPLAY|888\b|LC\s+INTERNATIONAL|GAMBLING|CASINO)\b/i;
 
-// Merchant names that are common one-off UK purchases. These must never become
+// Merchant names that are common one-off UK purchases or transfers. These must never become
 // subscriptions merely because a broad preset alias contains the same brand.
 const NON_SUBSCRIPTION_MERCHANT_PATTERN =
-  /\b(?:TESCO\s+(?:STORES?|SUPERMARKET|SUPERMARKETS)|SAINSBUR(?:Y|YS|IES)|ASDA(?:\s+SUPERSTORE)?|LIDL(?:\s+GB)?|ALDI(?:\s+STORES?)?|GREGGS|TFL(?:\.GOV\.UK)?|TRANSPORT\s+FOR\s+LONDON|UBER\s*\*?\s*TRIP|DELIVEROO(?!\s+PLUS)|JUST\s*EAT(?!\s*\+|\s+PLUS)|COSTA\s+COFFEE|JD\s+WETHERSPOON|POST\s+OFFICE\s+COUNTER|FASTER\s+PAYMENT|TRANSFER|DE\s+LA|PLAT(?:A|Ă)\s+DE\s+LA)\b/i;
+  /\b(?:TESCO\s+(?:STORES?|SUPERMARKET|SUPERMARKETS)|SAINSBUR(?:Y|YS|IES)|ASDA(?:\s+SUPERSTORE)?|LIDL(?:\s+GB)?|ALDI(?:\s+STORES?)?|GREGGS|STAPLES(?:\s+UK)?|IKEA(?:\s+LIMITED|\s+LTD)?|SCREWFIX(?:\s+DIRECT)?|B&Q|ARGOS|CURRYS|EBAY(?:\s+UK)?|VINTED|ETSY|DEPOP|TFL(?:\.GOV\.UK)?|TRANSPORT\s+FOR\s+LONDON|STAGECOACH(?:\s+SERVICES?)?|ARRIVA|FIRST\s+BUS|NATIONAL\s+EXPRESS|FLIX\b|UBER\s*\*?\s*TRIP|DELIVEROO(?!\s+PLUS)|JUST\s*EAT(?!\s*\+|\s+PLUS)|COSTA\s+COFFEE|JD\s+WETHERSPOON|POST\s+OFFICE\s+COUNTER|FASTER\s+PAYMENTS?|BACS\s+(?:PAYMENT|CREDIT)|PAYROLL|SALARY|TRANSFER|POT\s+TRANSFER|MONZO\s+POT|SAVINGS\s+POT|SPACE\s+TRANSFER|SAVING\s+SPACE|TRANSFER\s+TO\s+SPACE|ROUND[- ]?UP|COIN\s+JAR|CASHBACK(?:\s+REWARD|\s+EARNED)?|GROSS\s+INTEREST|NET\s+INTEREST|INTEREST\s+PAID|INSTANT\s+SAVINGS|M\s+PLUS\s+SAVER|VIRGIN\s+MONEY\s+(?:SAVER|SAVINGS|TRANSFER|ISA)|SAVINGS\s+ACCOUNT|COMMSAVE\s+CU|CREDIT\s+UNION|VAULT\s+TRANSFER|PERSONAL\s+VAULT|SAVINGS\s+VAULT|POCKET\s+TRANSFER|EXCHANGED\s+TO|CURRENCY\s+EXCHANGE|GENERAL\s+CURRENCY\s+CONVERSION|GENERAL\s+(?:CREDIT\s+)?CARD\s+DEPOSIT|GENERAL\s+WITHDRAWAL|USER\s+INITIATED\s+WITHDRAWAL|BANK\s+DEPOSIT\s+TO\s+PP|WITHDRAWAL\s+TO\s+BANK|EXPRESS\s+CHECKOUT\s+PAYMENT|PAYPAL\s+PAYMENT|NATWEST\s+BNPL|\bBNPL\b|POSTOFFICE\s+MONEY|FIRSTCENTRAL\w*|DVLA[-\sA-Z0-9]*|NHSBSA\b|NDCS\b|ANGLIAN\s+WATER|THAMES\s+WATER|SEVERN\s+TRENT|UNITED\s+UTILITIES|YORKSHIRE\s+WATER|SOUTHERN\s+WATER|OCTOPUS\s+ENERGY|BRITISH\s+GAS|EDF\s+ENERGY|OVO\s+ENERGY|SCOTTISH\s+POWER|HMRC\b|ATM\s+WITHDRAWAL|CASH\s+WITHDRAWAL|METRO\s+CASH\s+WITHDRAWAL|CASHWITHDRAW\w*|NOTEMACHINE|ATM\s+OWNER\s+FEE|CASHLINE|CARD\s+DELIVERY(?:\s+FEE)?|SPARE\s+CARD\s+FEE|DE\s+LA|PLAT(?:A|Ă)\s+DE\s+LA|SAVETHECHANGE|TAPTAP\s+SEND|WORLDREMIT|WESTERN\s+UNION|ZELLE\s+PAYMENT|SENT\s+FROM\s+REVOLUT|TO:\s+[^,]+,\s*\d{8}\s*\(GB\))\b/i;
+
+// Priority override 3: MOB, CPT, FEE, FPI, FPO, TFR, BGC, C/L and BACS must only match as whole leading tokens.
+const LEADING_TRANSFER_TOKEN_PATTERN = /^(?:MOB|FPI|FPO|TFR|BGC|CPT|C\/L|BACS?)\b/i;
+
+function isTransferOrOneOffRow(tx: ScannedTransaction): boolean {
+  const value = `${tx.cleanedMerchant} ${tx.rawLine}`;
+  if (NON_SUBSCRIPTION_MERCHANT_PATTERN.test(value) || GAMBLING_MERCHANT_PATTERN.test(value)) {
+    return true;
+  }
+  const stripped = tx.rawLine
+    .replace(/^(?:\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+[A-Za-z]{3,9}\.?(?:\s+\d{2,4})?)\s*(?:\|\s*)?/i, '')
+    .trim();
+  if (LEADING_TRANSFER_TOKEN_PATTERN.test(stripped)) {
+    // Allow CPT only when paired with an explicit known streaming/subscription preset in legacy Barclays format
+    if (/^CPT\b/i.test(stripped) && /\b(?:DISNEY|NETFLIX|SPOTIFY|AMAZON\s+PRIME)\b/i.test(stripped)) {
+      return false;
+    }
+    return true;
+  }
+  // Plain TESCO without MOBILE or CLUBCARD is a grocery store purchase
+  if (/\bTESCO\b/i.test(value) && !/\b(?:MOBILE|CLUBCARD)\b/i.test(value)) {
+    return true;
+  }
+  return false;
+}
 
 function isOneOffMerchant(tx: ScannedTransaction): boolean {
-  const value = `${tx.cleanedMerchant} ${tx.rawLine}`;
-  return NON_SUBSCRIPTION_MERCHANT_PATTERN.test(value) || GAMBLING_MERCHANT_PATTERN.test(value);
+  return isTransferOrOneOffRow(tx);
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function hasWholePhraseBoundary(haystack: string, phrase: string): boolean {
+  const escaped = escapeRegex(phrase.trim()).replace(/\s+/g, '[\\s*._/-]+');
+  const pattern = new RegExp(`(?:^|[^A-Z0-9])${escaped}(?:$|[^A-Z0-9])`, 'i');
+  return pattern.test(haystack);
 }
 
 function inferUnknownCategory(merchant: string): SubscriptionCategory {
@@ -308,9 +364,13 @@ function inferUnknownCategory(merchant: string): SubscriptionCategory {
   return 'Other';
 }
 
-function unknownMerchantKey(merchant: string, rawLine = ''): string {
+function unknownMerchantKey(merchant: string, rawLine = '', amountGbp?: number): string {
   if (/GOOGLE\s*PLAY[\s\S]{0,80}PASS|PLAY\s*PASS/i.test(`${merchant} ${rawLine}`)) {
     return 'unknown-GOOGLEPLAYPASS';
+  }
+  if (/^APPLE\s+BILLING$/i.test(merchant) && Number.isFinite(amountGbp)) {
+    const pence = Math.round((amountGbp ?? 0) * 100);
+    return `unknown-APPLEBILLING-${pence}`;
   }
   return `unknown-${alphanum(merchant).slice(0, 48)}`;
 }
@@ -318,6 +378,9 @@ function unknownMerchantKey(merchant: string, rawLine = ''): string {
 function unknownMerchantDisplay(merchant: string, rawLine: string): string {
   if (/GOOGLE\s*PLAY[\s\S]{0,80}PASS|PLAY\s*PASS/i.test(`${merchant} ${rawLine}`)) {
     return 'Google Play Pass';
+  }
+  if (/^APPLE\s+BILLING$/i.test(merchant)) {
+    return 'Apple Services';
   }
   return merchant;
 }
@@ -416,6 +479,8 @@ interface Candidate {
   confidence: number;
   tier: MatchTier;
   learned?: boolean;
+  identityScore: 0 | 1 | 2 | 3;
+  reasonCode: ScannerReasonCode;
 }
 
 function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): Candidate | null {
@@ -431,20 +496,55 @@ function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): C
   for (const preset of presets) {
     // Apple.com/bill is shared by Apple services. Explicit iCloud or Apple TV
     // tokens must override catalogue iteration order.
-    if (preset.id === 'apple_tv_plus_uk' && /ICLOUD/i.test(`${haystack} ${rawUpper}`)) continue;
-    if (preset.id === 'apple_icloud_200gb_uk' && /APPLE\s*(?:TV|TV\+)|TV\.APPLE/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'apple_tv_plus_uk' && /ICLOUD|APPLE\s*(?:MUSIC|ONE)/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'apple_icloud_200gb_uk' && /APPLE\s*(?:TV|TV\+|MUSIC|ONE)|TV\.APPLE/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'apple_music_uk' && !/APPLE\s*MUSIC/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'apple_one_uk' && !/APPLE\s*ONE/i.test(`${haystack} ${rawUpper}`)) continue;
     if (preset.id === 'google_one_ai_uk' && /PLAY\s*PASS/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'lloyds_account_fee_uk' && /\bSILVER\s+ACCOUNT\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'amazon_prime_uk' && !/\b(?:PRIME|VIDEO|MEMBERSHIP)\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'club_pret_uk' && !/\bCLUB\s+PRET\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'asos_premier_uk' && !/\bPREMIER\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'deliveroo_plus_uk' && !/\bPLUS\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'just_eat_plus_uk' && !/\b(?:PLUS|JUST\s*EAT\s*\+)\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'monzo_perks_uk' && !/\bMONZO\s+(?:PERKS|PLUS|MAX|PREMIUM)\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'virgin_active_uk' && !/\bVIRGIN\s+ACTIVE\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (preset.id === 'claude_pro_uk' && !/\b(?:CLAUDE|ANTHROPIC)\b/i.test(`${haystack} ${rawUpper}`)) continue;
+    if (
+      preset.id === 'revolut_premium_uk' &&
+      !/\b(?:PREMIUM\s+PLAN(?:\s+FEE)?|METAL\s+PLAN(?:\s+FEE)?|TAX[AĂ]?\s+PLAN\s+METAL|REVOLUT\s*\*?\s*(?:PREMIUM|METAL)|ULTRA\s+PLAN(?:\s+FEE)?|PLUS\s+PLAN\s+FEE)\b/i.test(
+        `${haystack} ${rawUpper}`,
+      )
+    ) {
+      continue;
+    }
     const aliases = readAliases(preset);
     for (const alias of aliases) {
       const aliasUpper = alias.toUpperCase();
       const aliasAlnum = alphanum(alias);
 
-      if (
-        (aliasUpper.length >= 3 && (haystack.includes(aliasUpper) || rawUpper.includes(aliasUpper))) ||
-        (aliasAlnum.length >= 4 && (hayAlnum.includes(aliasAlnum) || rawAlnum.includes(aliasAlnum))) ||
-        isConsonantMatch(alias, tx.cleanedMerchant)
-      ) {
-        const candidate: Candidate = { preset, confidence: 0.99, tier: 1 };
+      const isShortBoundaryMatch =
+        aliasUpper.length >= 2 &&
+        aliasUpper.length < 3 &&
+        (hasWholePhraseBoundary(haystack, aliasUpper) || hasWholePhraseBoundary(rawUpper, aliasUpper));
+
+      const isStandardAliasMatch =
+        isShortBoundaryMatch ||
+        (aliasUpper.length >= 3 &&
+          (hasWholePhraseBoundary(haystack, aliasUpper) ||
+            hasWholePhraseBoundary(rawUpper, aliasUpper) ||
+            (aliasAlnum.length >= 4 && (hayAlnum === aliasAlnum || hayAlnum.includes(aliasAlnum)))));
+
+      const isOcrConsonant = !isStandardAliasMatch && isConsonantMatch(alias, tx.cleanedMerchant);
+
+      if (isStandardAliasMatch || isOcrConsonant) {
+        const candidate: Candidate = {
+          preset,
+          confidence: 0.99,
+          tier: 1,
+          identityScore: 3,
+          reasonCode: isOcrConsonant ? 'OCR_ALIAS' : 'ALIAS_MATCH',
+        };
         if (!best || candidate.confidence > best.confidence) best = candidate;
       }
     }
@@ -454,24 +554,38 @@ function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): C
     if (
       hayAlnum === nameAlnum ||
       rawAlnum.includes(nameAlnum) ||
-      (token.length >= 5 && (hayAlnum === token || hayAlnum.includes(token) || rawAlnum.includes(token)))
+      (token.length >= 5 && (hayAlnum === token || hasWholePhraseBoundary(haystack, preset.name)))
     ) {
-      const candidate: Candidate = { preset, confidence: 0.9, tier: 2 };
+      const candidate: Candidate = {
+        preset,
+        confidence: 0.9,
+        tier: 2,
+        identityScore: 2,
+        reasonCode: 'ALIAS_MATCH',
+      };
       if (!best || candidate.confidence > best.confidence) best = candidate;
     }
 
     if (hayAlnum.length >= 4) {
       let fuzzy = 0;
-      if (token.length >= 4) fuzzy = Math.max(fuzzy, similarity(hayAlnum, token));
+      if (token.length >= 4 && Math.abs(hayAlnum.length - token.length) <= FUZZY_MAX_EDITS) {
+        fuzzy = Math.max(fuzzy, similarity(hayAlnum, token));
+      }
       for (const alias of aliases) {
         const aliasAlnum = alphanum(alias);
-        if (aliasAlnum.length < 4) continue;
+        if (aliasAlnum.length < 4 || Math.abs(hayAlnum.length - aliasAlnum.length) > FUZZY_MAX_EDITS) continue;
         fuzzy = Math.max(fuzzy, similarity(hayAlnum, aliasAlnum));
       }
       const edits = token.length >= 4 ? levenshtein(hayAlnum, token) : FUZZY_MAX_EDITS + 1;
       if (fuzzy >= FUZZY_MIN_SIMILARITY && fuzzy < 0.9 && edits <= FUZZY_MAX_EDITS) {
         const confidence = Math.min(0.89, Math.max(0.75, fuzzy));
-        const candidate: Candidate = { preset, confidence, tier: 3 };
+        const candidate: Candidate = {
+          preset,
+          confidence,
+          tier: 3,
+          identityScore: 2,
+          reasonCode: 'OCR_ALIAS',
+        };
         if (!best || candidate.confidence > best.confidence) best = candidate;
       }
     }
@@ -480,14 +594,62 @@ function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): C
   return best;
 }
 
-function isPotentialUnknownSubscription(tx: ScannedTransaction): boolean {
+const EXPLICIT_UNKNOWN_SUBSCRIPTION_SIGNAL =
+  /\b(?:CARD\s+SUBSCRIPTION|RECURRING\s+CARD\s+PURCHASE|PREAPPROVED\s+PAYMENT|BILL\s+USER\s+PAYMENT|AUTOMATIC\s+PAYMENT|RECURRING\s+PAYMENT|SUBSCRIPTION\s+PAYMENT|DIRECT\s+DEBIT|D\/D|DDR|DD)\b/i;
+
+function computeIntervalRecurrence(dates: string[]): { confirmed: boolean; cycle: BillingCycle | null } {
+  const uniqueTimestamps = Array.from(
+    new Set(
+      dates
+        .filter(Boolean)
+        .map((iso) => Date.parse(`${iso}T00:00:00Z`))
+        .filter((ts) => Number.isFinite(ts)),
+    ),
+  ).sort((a, b) => a - b);
+
+  if (uniqueTimestamps.length < 2) return { confirmed: false, cycle: null };
+  const intervals: number[] = [];
+  for (let i = 1; i < uniqueTimestamps.length; i += 1) {
+    intervals.push(Math.round((uniqueTimestamps[i] - uniqueTimestamps[i - 1]) / 86_400_000));
+  }
+  intervals.sort((a, b) => a - b);
+  const median = intervals[Math.floor(intervals.length / 2)];
+  // Monthly: 26–35 days, Weekly: 6–8 days, Yearly: 350–380 days
+  if (median >= 350 && median <= 380) return { confirmed: true, cycle: 'Annual' };
+  if ((median >= 26 && median <= 35) || (median >= 6 && median <= 8)) {
+    return { confirmed: true, cycle: 'Monthly' };
+  }
+  return { confirmed: false, cycle: null };
+}
+
+function isPotentialUnknownSubscription(
+  tx: ScannedTransaction,
+  occurrenceCount = 1,
+  intervalConfirmed = false,
+): boolean {
+  if ((tx.validityScore ?? 3) < 3 || tx.tableState === 'OUT_OF_TABLE') return false;
   const merchant = tx.cleanedMerchant.trim();
   if (merchant.length < 3) return false;
   if (isOneOffMerchant(tx)) return false;
-  // Repeated grocery, transport and retail payments are common in statements.
-  // Surface a new merchant only when the statement contains an explicit
-  // subscription signal; known catalogue presets are matched above.
-  return GENERIC_SUBSCRIPTION_PATTERN.test(`${merchant} ${tx.rawLine}`);
+
+  // Generic Apple billing or Google Play Pass requires an explicit recurring signal
+  // or multiple recurring occurrences with a confirmed billing interval.
+  if (/^APPLE\s+BILLING$/i.test(merchant)) {
+    return Boolean(tx.hasStrongRecurringMarker) || (occurrenceCount > 1 && intervalConfirmed);
+  }
+  if (/GOOGLE\s*PLAY[\s\S]{0,80}PASS|PLAY\s*PASS/i.test(`${merchant} ${tx.rawLine}`)) {
+    return true;
+  }
+
+  // Unknown merchants cannot automatically become subscriptions from words such as
+  // PREMIUM, MONTHLY, PLAN or SUBSCRIPTION alone without either a bank-level
+  // recurring payment marker (Direct Debit / Card Subscription / Recurring Card Purchase)
+  // or validated recurring payment intervals across multiple transactions (Gate 2 & Gate 3).
+  if (!tx.dateIso) return false;
+  if (occurrenceCount > 1 && intervalConfirmed) {
+    return true;
+  }
+  return EXPLICIT_UNKNOWN_SUBSCRIPTION_SIGNAL.test(tx.rawLine);
 }
 
 function toStatementPreset(preset: PresetService): StatementPreset {
@@ -515,25 +677,39 @@ export function matchStatementTransactions(
     { match: MatchedSubscription; occurrences: number; latestIso: string | null }
   >();
   const occurrenceCounts = new Map<string, number>();
+  const datesByMerchantKey = new Map<string, string[]>();
   for (const tx of transactions) {
-    const merchantKey = alphanum(tx.cleanedMerchant);
+    const merchantKey =
+      /^APPLE\s+BILLING$/i.test(tx.cleanedMerchant)
+        ? `APPLEBILLING-${Math.round(tx.amountGbp * 100)}`
+        : alphanum(tx.cleanedMerchant);
     occurrenceCounts.set(merchantKey, (occurrenceCounts.get(merchantKey) ?? 0) + 1);
+    if (tx.dateIso) {
+      const list = datesByMerchantKey.get(merchantKey) ?? [];
+      list.push(tx.dateIso);
+      datesByMerchantKey.set(merchantKey, list);
+    }
   }
 
   for (const tx of transactions) {
+    // Gate 1 enforcement: never allow any transaction with validityScore < 3 or OUT_OF_TABLE to enter matching.
+    const validityScore: 0 | 1 | 2 | 3 = tx.validityScore ?? (tx.amountGbp > 0 && !tx.isCredit ? 3 : 0);
+    if (validityScore < 3 || tx.tableState === 'OUT_OF_TABLE') continue;
+
     const learning = getScannerLearning(tx.cleanedMerchant);
     if (learning?.decision === 'dismissed') continue;
 
     let candidate = matchTransaction(tx, presets);
     // A confirmed local decision may teach an exact merchant that is not in
     // the catalogue. It is deliberately exact-key only and is never allowed
-    // to bypass one-off/transfer protection or replace a stronger catalogue
-    // match.
+    // to bypass Gate 1 or one-off/transfer protection or replace a stronger catalogue match.
     if (!candidate && learning?.decision === 'confirmed' && !isOneOffMerchant(tx)) {
       candidate = {
         learned: true,
         confidence: 0.93,
         tier: 1,
+        identityScore: 3,
+        reasonCode: 'ALIAS_MATCH',
         preset: {
           id: learning.presetId || `learned-${learning.merchantKey}`,
           name: learning.serviceName,
@@ -545,34 +721,58 @@ export function matchStatementTransactions(
       };
     }
     if (!candidate) {
-      const merchantKey = alphanum(tx.cleanedMerchant);
+      const merchantKey =
+        /^APPLE\s+BILLING$/i.test(tx.cleanedMerchant)
+          ? `APPLEBILLING-${Math.round(tx.amountGbp * 100)}`
+          : alphanum(tx.cleanedMerchant);
       const occurrenceCount = occurrenceCounts.get(merchantKey) ?? 0;
-      if (!isPotentialUnknownSubscription(tx)) continue;
+      const intervalCheck = computeIntervalRecurrence(datesByMerchantKey.get(merchantKey) ?? []);
+      if (!isPotentialUnknownSubscription(tx, occurrenceCount, intervalCheck.confirmed)) continue;
 
-      const unknownId = unknownMerchantKey(tx.cleanedMerchant, tx.rawLine);
+      const recurrenceScore: 0 | 1 | 2 | 3 =
+        intervalCheck.confirmed || tx.hasStrongRecurringMarker ? 3 : 2;
+      const gateScores: ScannerGateScores = {
+        validity: validityScore,
+        identity: 2,
+        recurrence: recurrenceScore,
+      };
+      if (gateScores.validity < 3 || gateScores.identity < 2 || gateScores.recurrence < 2) continue;
+
+      const reasonCodes: ScannerReasonCode[] = [...(tx.reasonCodes ?? ['VALID_DEBIT'])];
+      if (intervalCheck.confirmed && !reasonCodes.includes('INTERVAL_CONFIRMED')) {
+        reasonCodes.push('INTERVAL_CONFIRMED');
+      }
+
+      const datedCount = (datesByMerchantKey.get(merchantKey) ?? []).length;
+      const verifiedUnknown = datedCount >= 2 ? intervalCheck.confirmed : occurrenceCount > 1;
+      const unknownId = unknownMerchantKey(tx.cleanedMerchant, tx.rawLine, tx.amountGbp);
       const existingUnknown = grouped.get(unknownId);
+      const cycle: BillingCycle = intervalCheck.cycle ?? 'Monthly';
       const unknownPayload: MatchedSubscription = {
         id: `scan-${unknownId}`,
         presetId: unknownId,
         serviceName: unknownMerchantDisplay(tx.cleanedMerchant, tx.rawLine),
         category: inferUnknownCategory(tx.cleanedMerchant),
         amountGbp: tx.amountGbp,
-        billingCycle: 'Monthly',
+        billingCycle: cycle,
         billingDay: tx.billingDay,
         lastPaymentDate: tx.dateIso,
-        nextBillingDate: calculateNextBillingDate(tx.dateIso, 'Monthly', now),
+        nextBillingDate: calculateNextBillingDate(tx.dateIso, cycle, now),
         daysUntilNextPayment: calculateDaysUntilNextPayment(
-          calculateNextBillingDate(tx.dateIso, 'Monthly', now),
+          calculateNextBillingDate(tx.dateIso, cycle, now),
           now,
         ),
-        confidence: occurrenceCount > 1 ? 0.78 : 0.62,
+        confidence: verifiedUnknown ? 0.78 : 0.62,
         matchTier: 3,
-        isVerifiedRecurring: occurrenceCount > 1,
+        isVerifiedRecurring: verifiedUnknown,
         hasCancellationTrap: false,
         trapLabel: null,
         color: '#D4AF37',
         cancelUrl: '',
         selected: true,
+        requiresReview: true,
+        gateScores,
+        reasonCodes,
       };
 
       if (!existingUnknown) {
@@ -592,18 +792,42 @@ export function matchStatementTransactions(
             unknownPayload.daysUntilNextPayment ?? existingUnknown.match.daysUntilNextPayment;
           existingUnknown.latestIso = tx.dateIso;
         }
-        existingUnknown.match.isVerifiedRecurring = existingUnknown.occurrences > 1;
+        existingUnknown.match.isVerifiedRecurring = verifiedUnknown;
+        existingUnknown.match.confidence = verifiedUnknown ? 0.78 : 0.62;
       }
       continue;
     }
 
-    const existing = grouped.get(candidate.preset.id);
+    const isAppleTvPreset = candidate.preset.id === 'apple_tv_plus_uk';
+    const groupKey = isAppleTvPreset
+      ? `${candidate.preset.id}-${Math.round(tx.amountGbp * 100)}`
+      : candidate.preset.id;
+    const merchantKey = alphanum(tx.cleanedMerchant);
+    const intervalCheck = computeIntervalRecurrence(datesByMerchantKey.get(merchantKey) ?? []);
+    const recurrenceScore: 0 | 1 | 2 | 3 =
+      intervalCheck.confirmed || tx.hasStrongRecurringMarker ? 3 : 2;
+    const gateScores: ScannerGateScores = {
+      validity: validityScore,
+      identity: candidate.identityScore,
+      recurrence: recurrenceScore,
+    };
+    if (gateScores.validity < 3 || gateScores.identity < 2 || gateScores.recurrence < 2) continue;
+
+    const reasonCodes: ScannerReasonCode[] = [
+      ...(tx.reasonCodes ?? ['VALID_DEBIT']),
+      candidate.reasonCode,
+    ];
+    if (intervalCheck.confirmed && !reasonCodes.includes('INTERVAL_CONFIRMED')) {
+      reasonCodes.push('INTERVAL_CONFIRMED');
+    }
+
+    const existing = grouped.get(groupKey);
     const billingCycle = candidate.learned && candidate.preset.monthly_price_gbp > 0
       ? (learning?.frequency === 'yearly' ? 'Annual' : 'Monthly')
-      : inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp);
+      : (intervalCheck.cycle ?? inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp));
     const nextDate = calculateNextBillingDate(tx.dateIso, billingCycle, now);
     const payload: MatchedSubscription = {
-      id: `scan-${candidate.preset.id}`,
+      id: `scan-${groupKey}`,
       presetId: candidate.preset.id,
       serviceName: displayName(candidate.preset.name),
       category: candidate.preset.category,
@@ -615,16 +839,18 @@ export function matchStatementTransactions(
       daysUntilNextPayment: calculateDaysUntilNextPayment(nextDate, now),
       confidence: candidate.confidence,
       matchTier: candidate.tier,
-      isVerifiedRecurring: false,
+      isVerifiedRecurring: intervalCheck.confirmed,
       hasCancellationTrap: isTrap(candidate.preset),
       trapLabel: trapLabel(candidate.preset),
       color: PRESET_COLORS[candidate.preset.id] ?? '#D4AF37',
       cancelUrl: candidate.preset.cancel_url,
       selected: true,
+      gateScores,
+      reasonCodes,
     };
 
     if (!existing) {
-      grouped.set(candidate.preset.id, {
+      grouped.set(groupKey, {
         match: payload,
         occurrences: 1,
         latestIso: tx.dateIso,
@@ -654,10 +880,45 @@ export function matchStatementTransactions(
       existing.match.matchTier = candidate.tier;
     }
     existing.occurrences += 1;
-    existing.match.isVerifiedRecurring = existing.occurrences > 1;
+    existing.match.isVerifiedRecurring = existing.occurrences > 1 || intervalCheck.confirmed;
   }
 
-  return Array.from(grouped.values())
-    .map((entry) => entry.match)
-    .sort((a, b) => b.amountGbp - a.amountGbp);
+  const allEntries = Array.from(grouped.values());
+  const catalogueMatches = allEntries
+    .filter((entry) => !entry.match.presetId.startsWith('unknown-'))
+    .map((entry) => ({ ...entry.match, requiresReview: false }));
+
+  // Catalogue-First Policy: keep explicit Apple/plan-labelled recurring descriptors,
+  // and cap general unlabelled unknown Direct Debit candidates at maximum 2 per scan.
+  const EXPLICIT_PLAN_LABEL_PATTERN = /\b(?:MONTHLY|ANNUAL|YEARLY|PLAN|SUBSCRIPTION|MEMBERSHIP|PASS)\b/i;
+  const isExplicitPlanOrAppleUnknown = (entry: { match: MatchedSubscription }) =>
+    entry.match.presetId.startsWith('unknown-APPLEBILLING') ||
+    entry.match.presetId === 'unknown-GOOGLEPLAYPASS' ||
+    EXPLICIT_PLAN_LABEL_PATTERN.test(entry.match.serviceName);
+
+  const explicitPlanUnknowns = allEntries
+    .filter((entry) => entry.match.presetId.startsWith('unknown-') && isExplicitPlanOrAppleUnknown(entry))
+    .map((entry) => ({ ...entry.match, requiresReview: true }));
+
+  const MAX_UNKNOWN_CANDIDATES_PER_SCAN = 2;
+  const generalUnknowns = allEntries
+    .filter((entry) => entry.match.presetId.startsWith('unknown-') && !isExplicitPlanOrAppleUnknown(entry))
+    .sort((a, b) => {
+      if (a.match.isVerifiedRecurring !== b.match.isVerifiedRecurring) {
+        return a.match.isVerifiedRecurring ? -1 : 1;
+      }
+      if (b.match.confidence !== a.match.confidence) {
+        return b.match.confidence - a.match.confidence;
+      }
+      if (b.occurrences !== a.occurrences) {
+        return b.occurrences - a.occurrences;
+      }
+      return b.match.amountGbp - a.match.amountGbp;
+    })
+    .slice(0, MAX_UNKNOWN_CANDIDATES_PER_SCAN)
+    .map((entry) => ({ ...entry.match, requiresReview: true }));
+
+  return [...catalogueMatches, ...explicitPlanUnknowns, ...generalUnknowns].sort(
+    (a, b) => b.amountGbp - a.amountGbp,
+  );
 }

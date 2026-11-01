@@ -35,9 +35,12 @@ export type {
   ScannedTransaction,
   ScannerError,
   ScannerErrorCode,
+  ScannerGateScores,
   ScannerProgress,
+  ScannerReasonCode,
   ScannerResult,
   ScannerSource,
   ScannerStage,
   StatementPreset,
+  StatementTableState,
 } from './types/scanner.types';
