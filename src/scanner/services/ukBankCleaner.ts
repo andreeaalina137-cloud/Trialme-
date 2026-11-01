@@ -2,12 +2,66 @@ import type {
   ScannedTransaction,
   ScannerReasonCode,
   StatementTableState,
+  UKPaymentType,
+} from '../types/scanner.types';
+import {
+  FLAG_SUMMARY_ROW,
+  FLAG_INVALID_DATE,
+  FLAG_DUPLICATE,
+  FLAG_FX_CONVERSION,
+  FLAG_REVOLUT_NOISE,
+  FLAG_VALID_BANK_SUB,
+  FLAG_TRANSFER_OR_CASH,
+  FLAG_RENT_OR_FIXED_TRANSFER,
+  FLAG_REFUNDED_PAIR,
 } from '../types/scanner.types';
 import {
   normalizeStatementLine,
   repairBankMerchantAbbreviations,
   repairCommonMerchantSpacing,
+  extractCanonicalMerchantKey,
+  areMerchantsFuzzyMatch,
 } from './statementNormalizer';
+
+// Stage 1: Summary lines common on UK statements/PDFs
+export const SUMMARY_ROW_PATTERN =
+  /\b(?:Total\s+Payments?|Total\s+Money\s+Out|Total\s+Money\s+In|Balance\s+Brought\s+Forward|Balance\s+Carried\s+Forward|Opening\s+Balance|Closing\s+Balance|Opening\/Closing\s+Balance|Account\s+Summary|Total\s+Debits?|Total\s+Credits?|Total\s+Paid\s+In|Total\s+Paid\s+Out|Payments\s+Out|Payments\s+In|Starting\s+Balance|Ending\s+Balance)\b/i;
+
+// Stage 2: Standalone FX conversions
+export const STANDALONE_FX_PATTERN =
+  /\b(?:Exchanged\s+to|FX\s+Fee|Currency\s+Exchange|Bullion(?:\/Crypto)?\s+exchange|Crypto\s+exchange|General\s+currency\s+conversion)\b/i;
+
+// Stage 2: Revolut micro-transactions and noise
+export const REVOLUT_NOISE_PATTERN =
+  /\b(?:RevPoints|Spare\s+change|Pocket(?:\s+transfer)?|Vault(?:\s+transfer)?|Weekend\s+fee|Fair\s+usage\s+fee)\b/i;
+
+// Stage 2: Revolut paid plan exception
+export const REVOLUT_PAID_PLAN_PATTERN =
+  /\b(?:Revolut\s+(?:Plus|Premium|Metal|Ultra)|Premium\s+plan(?:\s+fee)?|Metal\s+plan(?:\s+fee)?|Ultra\s+plan(?:\s+fee)?|Plus\s+plan(?:\s+fee)?|Taxa?\s+plan\s+metal)\b/i;
+
+// UK Payment marker classification
+export function classifyUKPaymentType(line: string): UKPaymentType {
+  if (/\b(?:DIRECT\s+DEBIT|D\/D|DDR|DD)\b/i.test(line)) {
+    return 'DIRECT_DEBIT';
+  }
+  if (/\b(?:STANDING\s+ORDER|SO|STO)\b/i.test(line)) {
+    return 'STANDING_ORDER';
+  }
+  if (/\b(?:ATM|CASH\s+WITHDRAWAL|CASH\s+MACHINE|CASHLINE|C\/L)\b/i.test(line)) {
+    return 'ATM_CASH';
+  }
+  if (/\b(?:FP|FASTER\s+PAYMENT|BGC|TRANSFER\s+TO|INTERNAL\s+TRANSFER|TFR|FPO|FPI)\b/i.test(line)) {
+    return 'P2P_TRANSFER';
+  }
+  if (
+    /\b(?:DEB|POS|CARD\s+PAYMENT|CPA|CONTINUOUS\s+PAYMENT|APPLE\s+PAY|GOOGLE\s+PAY|CARD\s+SUBSCRIPTION|RECURRING\s+CARD\s+PURCHASE|CONTACTLESS|VIS|MASTERCARD)\b/i.test(
+      line,
+    )
+  ) {
+    return 'RECURRING_CARD_CPA';
+  }
+  return 'OTHER';
+}
 
 const PREFIX_PATTERN =
   /\b(?:CARD\s+SUBSCRIPTION|RECURRING\s+CARD\s+PURCHASE|PREAPPROVED\s+PAYMENT(?:\s+BILL\s+USER\s+PAYMENT)?|BILL\s+USER\s+PAYMENT|AUTOMATIC\s+PAYMENT|RECURRING\s+PAYMENT|SUBSCRIPTION\s+PAYMENT|EXPRESS\s+CHECKOUT\s+PAYMENT|OUTWARD\s+DIRECT\s+DEBIT|DIRECT\s+DEBIT\s+PAYMENT(?:\s+TO)?|DIRECT\s+DEBIT\s+TO|DIRECT\s+DEBIT|POINT\s+OF\s+SALE|CARD\s+PAYMENT\s+TO|D\/D|DDR|C\/L|OUTWARD\s+FASTER\s+PAYMENT|INWARD\s+FASTER\s+PAYMENT|FASTER\s+PAYMENT(?:\s+TO)?|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|STANDING\s+ORDER|BILL\s+PAYMENT|POS|BACS|VIS|DEB|DD|CĂTRE|CATRE|CARD|REFERINȚĂ|REFERINTA|CURSUL)\b|PAYPAL\s*\*/gi;
@@ -143,6 +197,66 @@ function toIso(year: number, monthIndex: number, day: number): string | null {
     return null;
   }
   return `${year}-${pad(monthIndex + 1)}-${pad(day)}`;
+}
+
+/**
+ * Defensive date check: identifies impossible calendar dates (e.g. 31 Sep, 2026-13-01, 29 Feb on non-leap years)
+ * caused by OCR or extraction errors without crashing.
+ */
+export function checkImpossibleDate(line: string): { isImpossible: boolean; rawDate?: string } {
+  // Strip UK banking sort codes (e.g. Sort code 20-00-00, 11-11-11) and account numbers first
+  // so sort codes are never mistaken for dates
+  const sanitized = line
+    .replace(/\b(?:Sort\s+code\s+)?\d{2}-\d{2}-\d{2}\b/gi, ' ')
+    .replace(/\bAccount\s+\d+\b/gi, ' ');
+
+  // Check ISO dashed e.g. 2026-13-01 or 2026-09-31
+  const isoDashed = sanitized.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+  if (isoDashed) {
+    const y = Number(isoDashed[1]);
+    const m = Number(isoDashed[2]);
+    const d = Number(isoDashed[3]);
+    if (m < 1 || m > 12 || d < 1 || d > 31 || !toIso(y, m - 1, d)) {
+      return { isImpossible: true, rawDate: isoDashed[0] };
+    }
+  }
+
+  // Check UK slash e.g. 31/09/2026 or 31/13/2026
+  const ukSlash = sanitized.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/);
+  if (ukSlash) {
+    const d = Number(ukSlash[1]);
+    const m = Number(ukSlash[2]);
+    const y = Number(ukSlash[3].length === 2 ? `20${ukSlash[3]}` : ukSlash[3]);
+    if (m < 1 || m > 12 || d < 1 || d > 31 || !toIso(y, m - 1, d)) {
+      return { isImpossible: true, rawDate: ukSlash[0] };
+    }
+  }
+
+  // Check UK dashed e.g. 31-09-2026 or 31.09.2026 (requires 4-digit year so 2-digit sort codes never match)
+  const ukDash = sanitized.match(/\b(\d{1,2})[-.](\d{1,2})[-.](\d{4})\b/);
+  if (ukDash) {
+    const d = Number(ukDash[1]);
+    const m = Number(ukDash[2]);
+    const y = Number(ukDash[3]);
+    if (m < 1 || m > 12 || d < 1 || d > 31 || !toIso(y, m - 1, d)) {
+      return { isImpossible: true, rawDate: ukDash[0] };
+    }
+  }
+
+  // Check Text month e.g. 31 Sep 2026 or 31 Sep
+  const textMonth = sanitized.match(
+    /\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?(?:\s+(\d{2,4}))?\b/i,
+  );
+  if (textMonth) {
+    const d = Number(textMonth[1]);
+    const m = MONTHS[textMonth[2].slice(0, 3).toLowerCase()];
+    const y = textMonth[3] ? Number(textMonth[3].length === 2 ? `20${textMonth[3]}` : textMonth[3]) : 2026;
+    if (m === undefined || d < 1 || d > 31 || !toIso(y, m, d)) {
+      return { isImpossible: true, rawDate: textMonth[0] };
+    }
+  }
+
+  return { isImpossible: false };
 }
 
 export function extractUkDate(line: string, now = new Date()): { iso: string; billingDay: number } | null {
@@ -525,10 +639,13 @@ function cancelLinkedReversals(
   debits: ScannedTransaction[],
   reversals: Array<{
     merchantKey: string;
+    canonicalMerchant?: string;
     amountGbp: number;
     dateIso: string | null;
     ref: string | null;
     rail: 'dd' | 'card' | 'other';
+    isExplicitRefund?: boolean;
+    rawLine?: string;
   }>,
 ): ScannedTransaction[] {
   if (reversals.length === 0) return debits;
@@ -546,19 +663,32 @@ function cancelLinkedReversals(
       // A RETURNED DD (rail 'dd') only cancels a Direct Debit, never a card/DEB payment.
       if (rev.rail === 'dd' && txRail === 'card') continue;
 
+      // Unlinked credit (without refund/return/reversal/chargeback keyword and not returned DD)
+      // does not cancel a Direct Debit mandate (preserves unlinked credit preservation).
+      if (txRail === 'dd' && !rev.isExplicitRefund && rev.rail !== 'dd') continue;
+
       const txKey = tx.cleanedMerchant.toUpperCase().replace(/[^A-Z0-9]/g, '');
-      if (rev.merchantKey) {
+      const txCanon = tx.canonicalMerchant || extractCanonicalMerchantKey(tx.cleanedMerchant || tx.rawLine);
+      const revCanon = rev.canonicalMerchant || (rev.rawLine ? extractCanonicalMerchantKey(rev.rawLine) : '');
+
+      let sameMerchant = false;
+      if (txCanon && revCanon && (txCanon === revCanon || areMerchantsFuzzyMatch(txCanon, revCanon))) {
+        sameMerchant = true;
+      } else if (rev.merchantKey) {
         if (!txKey) continue;
-        const sameMerchant =
+        sameMerchant =
           txKey === rev.merchantKey ||
           txKey.includes(rev.merchantKey) ||
           rev.merchantKey.includes(txKey);
-        if (!sameMerchant) continue;
       } else {
         // Anonymous RETURNED DD row (e.g. Lloyds "11 Mar 25 RETURNED DD 17.26 7.83"):
         // must only cancel a Direct Debit ('dd') row of the exact same GBP amount.
-        if (rev.rail !== 'dd' || txRail !== 'dd') continue;
+        if (rev.rail === 'dd' && txRail === 'dd') {
+          sameMerchant = true;
+        }
       }
+
+      if (!sameMerchant) continue;
 
       // If either row carries an explicit reference/card token and the other does not
       // match it, do not cancel an unrelated outgoing debit.
@@ -570,35 +700,46 @@ function cancelLinkedReversals(
       if (tx.dateIso && rev.dateIso) {
         const txTime = Date.parse(`${tx.dateIso}T00:00:00Z`);
         const revTime = Date.parse(`${rev.dateIso}T00:00:00Z`);
-        const diffDays = (revTime - txTime) / 86_400_000;
-        const maxDays = rev.merchantKey ? 14 : 5;
+        const diffDays = Math.abs(revTime - txTime) / 86_400_000;
+        const maxDays = rev.merchantKey || revCanon ? 14 : 5;
         if (diffDays < 0 || diffDays > maxDays) continue;
         if (diffDays <= bestDiffDays) {
           bestDiffDays = diffDays;
           bestIndex = idx;
         }
-      } else if (rev.merchantKey && bestIndex === -1) {
+      } else if ((rev.merchantKey || revCanon) && bestIndex === -1) {
         bestIndex = idx;
       }
     }
 
     if (bestIndex >= 0) {
       cancelledIndices.add(bestIndex);
+      debits[bestIndex].status = 'QUARANTINED';
+      debits[bestIndex].auditFlag = FLAG_REFUNDED_PAIR;
+      debits[bestIndex].reason = 'Refunded pair: net-zero matched debit and credit within 1-14 days';
     }
   }
 
   return debits.filter((_, idx) => !cancelledIndices.has(idx));
 }
 
-export function parseStatementLines(lines: string[], now = new Date()): ScannedTransaction[] {
+export function parseStatementInternal(
+  lines: string[],
+  now = new Date(),
+): { accepted: ScannedTransaction[]; ledger: ScannedTransaction[] } {
   const transactions: ScannedTransaction[] = [];
+  const ledger: ScannedTransaction[] = [];
   const reversals: Array<{
     merchantKey: string;
+    canonicalMerchant?: string;
     amountGbp: number;
     dateIso: string | null;
     ref: string | null;
     rail: 'dd' | 'card' | 'other';
+    isExplicitRefund?: boolean;
+    rawLine?: string;
   }> = [];
+  const seenRowFingerprints = new Set<string>();
   const cleanedLines = groupStatementLines(lines);
 
   const isMonzoStatement = cleanedLines.some((l) => /\bMonzo\s+Bank\b|\b04-00-0[34]\b/i.test(l));
@@ -624,7 +765,7 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
     }
   }
 
-  const resolveLineDate = (line: string): { iso: string; billingDay: number } | null => {
+  const resolveLineDate = (line: string): { iso: string; billingDay: number; rawDate?: string } | null => {
     const longMatch = line.match(LONG_UK_DATE);
     if (longMatch) {
       const m = MONTHS[longMatch[2].slice(0, 3).toLowerCase()];
@@ -647,21 +788,78 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
       }
     }
     const refNow = new Date(Date.UTC(activeYear, 0, 1));
-    return extractUkDate(line, refNow);
+    const extracted = extractUkDate(line, refNow);
+    if (!extracted) return null;
+    const rawDateMatch =
+      line.match(ISO_DATE_DASHED) ||
+      line.match(ISO_DATE) ||
+      line.match(UK_DASH_DATE) ||
+      line.match(LONG_UK_DATE) ||
+      line.match(SHORT_UK_DATE_WITH_YEAR) ||
+      line.match(SHORT_UK_DATE);
+    return { ...extracted, rawDate: rawDateMatch ? rawDateMatch[0] : undefined };
   };
 
   const matchedIndices = new Set<number>();
   let tableState: StatementTableState = 'OUT_OF_TABLE';
-  let activeTableDate: { iso: string; billingDay: number } | null = null;
-  let lastValidTableDate: { iso: string; billingDay: number } | null = null;
+  let activeTableDate: { iso: string; billingDay: number; rawDate?: string } | null = null;
+  let lastValidTableDate: { iso: string; billingDay: number; rawDate?: string } | null = null;
 
   // Pass 1: standard lines containing both merchant and amount with IN_TABLE / OUT_OF_TABLE state machine
   for (let i = 0; i < cleanedLines.length; i++) {
     const line = cleanedLines[i];
 
+    // Stage 1: Check impossible dates caused by OCR errors (e.g. 31 Sep, 2026-13-01)
+    const impossibleCheck = checkImpossibleDate(line);
+    if (impossibleCheck.isImpossible) {
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: cleanMerchantName(line),
+        amountGbp: extractGbpAmount(line) ?? 0,
+        signedAmount: -(extractGbpAmount(line) ?? 0),
+        rawDescription: line,
+        rawAmount: extractGbpAmount(line) ?? 0,
+        rawDate: impossibleCheck.rawDate,
+        dateIso: null,
+        billingDay: null,
+        isCredit: false,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_INVALID_DATE,
+        reason: 'Impossible calendar date caused by OCR error',
+        paymentType: classifyUKPaymentType(line),
+        canonicalMerchant: extractCanonicalMerchantKey(line),
+      });
+      matchedIndices.add(i);
+      continue;
+    }
+
+    // Stage 1: Detect and quarantine statement summary rows
+    if (SUMMARY_ROW_PATTERN.test(line)) {
+      const summaryAmount = extractGbpAmount(line) ?? 0;
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: cleanMerchantName(line),
+        amountGbp: summaryAmount,
+        signedAmount: -summaryAmount,
+        rawDescription: line,
+        rawAmount: summaryAmount,
+        dateIso: null,
+        billingDay: null,
+        isCredit: false,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_SUMMARY_ROW,
+        reason: 'Statement summary or header row excluded',
+        paymentType: classifyUKPaymentType(line),
+        canonicalMerchant: extractCanonicalMerchantKey(line),
+      });
+      matchedIndices.add(i);
+      continue;
+    }
+
     if (TABLE_HEADER_PATTERN.test(line)) {
       tableState = 'IN_TABLE';
-      // Preserve activeTableDate across page-continuation table headers when immediately followed by BROUGHT FORWARD
       const nextLine = cleanedLines[i + 1] ?? '';
       if (!/\bBROUGHT\s+FORWARD\b/i.test(nextLine)) {
         activeTableDate = null;
@@ -709,9 +907,139 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
     if (amountGbp === null || !Number.isFinite(amountGbp) || amountGbp <= 0) continue;
 
     if (!explicitDate && !hasExplicitTxMarker && tableState === 'IN_TABLE') {
-      // Undated row with an amount but without a leading bank transaction marker cannot inherit activeTableDate
       activeTableDate = null;
     }
+
+    const effectiveDate =
+      explicitDate ?? (tableState === 'IN_TABLE' && hasExplicitTxMarker ? activeTableDate : null);
+    const refToken = extractReferenceToken(line);
+    const merchant = cleanMerchantName(line);
+    const paymentType = classifyUKPaymentType(line);
+    const canonMerchant = extractCanonicalMerchantKey(merchant || line);
+
+    // Stage 2: Standalone FX conversions
+    if (STANDALONE_FX_PATTERN.test(line)) {
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: merchant,
+        amountGbp,
+        signedAmount: -amountGbp,
+        rawDescription: line,
+        rawAmount: amountGbp,
+        rawDate: effectiveDate?.rawDate,
+        dateIso: effectiveDate?.iso ?? null,
+        billingDay: effectiveDate?.billingDay ?? null,
+        isCredit: false,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_FX_CONVERSION,
+        reason: 'Standalone foreign exchange or FX fee row',
+        paymentType,
+        canonicalMerchant: canonMerchant,
+      });
+      matchedIndices.add(i);
+      continue;
+    }
+
+    // Stage 2: Revolut noise vs paid plan
+    const isRevolutPaid = REVOLUT_PAID_PLAN_PATTERN.test(line);
+    const isRevolutNoise = REVOLUT_NOISE_PATTERN.test(line);
+    if (isRevolutNoise && !isRevolutPaid) {
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: merchant,
+        amountGbp,
+        signedAmount: -amountGbp,
+        rawDescription: line,
+        rawAmount: amountGbp,
+        rawDate: effectiveDate?.rawDate,
+        dateIso: effectiveDate?.iso ?? null,
+        billingDay: effectiveDate?.billingDay ?? null,
+        isCredit: false,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_REVOLUT_NOISE,
+        reason: 'Internal Revolut micro-transaction, round-up, or usage fee',
+        paymentType,
+        canonicalMerchant: canonMerchant,
+      });
+      matchedIndices.add(i);
+      continue;
+    }
+
+    // Stage 2: UK payment classification & quarantine for P2P transfers & ATM cash
+    if (paymentType === 'P2P_TRANSFER' || paymentType === 'ATM_CASH') {
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: merchant,
+        amountGbp,
+        signedAmount: -amountGbp,
+        rawDescription: line,
+        rawAmount: amountGbp,
+        rawDate: effectiveDate?.rawDate,
+        dateIso: effectiveDate?.iso ?? null,
+        billingDay: effectiveDate?.billingDay ?? null,
+        isCredit: false,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_TRANSFER_OR_CASH,
+        reason: paymentType === 'ATM_CASH' ? 'ATM cash withdrawal excluded' : 'P2P transfer excluded',
+        paymentType,
+        canonicalMerchant: canonMerchant,
+      });
+      matchedIndices.add(i);
+      continue;
+    }
+
+    // Stage 2: Large round-amount Standing Orders (rent or fixed transfers, exact multiples of £100 >= £100)
+    if (paymentType === 'STANDING_ORDER' && amountGbp >= 100 && amountGbp % 100 === 0) {
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: merchant,
+        amountGbp,
+        signedAmount: -amountGbp,
+        rawDescription: line,
+        rawAmount: amountGbp,
+        rawDate: effectiveDate?.rawDate,
+        dateIso: effectiveDate?.iso ?? null,
+        billingDay: effectiveDate?.billingDay ?? null,
+        isCredit: false,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_RENT_OR_FIXED_TRANSFER,
+        reason: 'Large round-amount Standing Order (likely rent or fixed transfer)',
+        paymentType,
+        canonicalMerchant: canonMerchant,
+      });
+      matchedIndices.add(i);
+      continue;
+    }
+
+    // Stage 1: Duplicate Detection
+    const rowFingerprint = `${effectiveDate?.iso || ''}_${amountGbp.toFixed(2)}_${line.trim().toUpperCase()}`;
+    if (seenRowFingerprints.has(rowFingerprint)) {
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: merchant,
+        amountGbp,
+        signedAmount: -amountGbp,
+        rawDescription: line,
+        rawAmount: amountGbp,
+        rawDate: effectiveDate?.rawDate,
+        dateIso: effectiveDate?.iso ?? null,
+        billingDay: effectiveDate?.billingDay ?? null,
+        isCredit: false,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_DUPLICATE,
+        reason: 'Duplicate identical row',
+        paymentType,
+        canonicalMerchant: canonMerchant,
+      });
+      matchedIndices.add(i);
+      continue;
+    }
+    seenRowFingerprints.add(rowFingerprint);
 
     const isMonzoUnsignedCredit =
       isMonzoStatement &&
@@ -720,29 +1048,73 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
       /\s\d{1,4}(?:,\d{3})*\.\d{2}\s+-?\d{1,4}(?:,\d{3})*\.\d{2}$/.test(line);
 
     const isCredit = CREDIT_HINT_PATTERN.test(line) || isMonzoUnsignedCredit;
-    const isHighValueTransfer = amountGbp > HIGH_VALUE_TRANSFER_GBP;
-    if (isCredit || isHighValueTransfer) {
+    const isReturnedDd = /\b(?:RETURNED|UNPAID)\s+(?:DD|DIRECT\s+DEBIT)\b/i.test(line);
+    const isExplicitReversal =
+      /\b(?:RETURNED\s+(?:DD|DIRECT\s+DEBIT)|UNPAID\s+(?:DD|DIRECT\s+DEBIT)|REVERSAL|REVERSED|CHARGEBACK)\b/i.test(
+        line,
+      ) ||
+      (/\b(?:REFUND|RETURN)\b/i.test(line) && !/\bREFUND\s+FROM\b/i.test(line));
+
+    // Stage 4: Gather credit / reversal / refund candidates
+    if (isCredit || isReturnedDd || isExplicitReversal || REVERSAL_OR_FAILED_PATTERN.test(line)) {
+      if (isExplicitReversal || isReturnedDd) {
+        reversals.push({
+          merchantKey: merchant.toUpperCase().replace(/[^A-Z0-9]/g, ''),
+          canonicalMerchant: canonMerchant,
+          amountGbp,
+          dateIso: effectiveDate?.iso ?? null,
+          ref: refToken,
+          rail: isReturnedDd ? 'dd' : inferPaymentRail(line),
+          isExplicitRefund: true,
+          rawLine: line,
+        });
+      }
+
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: merchant,
+        amountGbp,
+        signedAmount: +amountGbp,
+        rawDescription: line,
+        rawAmount: amountGbp,
+        rawDate: effectiveDate?.rawDate,
+        dateIso: effectiveDate?.iso ?? null,
+        billingDay: effectiveDate?.billingDay ?? null,
+        isCredit: true,
+        isHighValueTransfer: false,
+        status: 'QUARANTINED',
+        auditFlag: isExplicitReversal ? FLAG_REFUNDED_PAIR : undefined,
+        reason: isExplicitReversal
+          ? 'Reversal or refund transaction'
+          : 'Incoming credit or refund excluded from subscriptions',
+        paymentType,
+        canonicalMerchant: canonMerchant,
+      });
+
       matchedIndices.add(i);
       continue;
     }
 
-    const effectiveDate =
-      explicitDate ?? (tableState === 'IN_TABLE' && hasExplicitTxMarker ? activeTableDate : null);
-    const refToken = extractReferenceToken(line);
-    const merchant = cleanMerchantName(line);
-
-    // Handle explicit reversals / returned direct debits / failed payments (including anonymous RETURNED DD rows)
-    if (REVERSAL_OR_FAILED_PATTERN.test(line)) {
-      if (/\b(?:RETURNED\s+(?:DD|DIRECT\s+DEBIT)|UNPAID\s+(?:DD|DIRECT\s+DEBIT)|REVERSAL|REVERSED)\b/i.test(line)) {
-        const isReturnedDd = /\b(?:RETURNED|UNPAID)\s+(?:DD|DIRECT\s+DEBIT)\b/i.test(line);
-        reversals.push({
-          merchantKey: merchant.toUpperCase().replace(/[^A-Z0-9]/g, ''),
-          amountGbp,
-          dateIso: effectiveDate?.iso ?? null,
-          ref: refToken,
-          rail: isReturnedDd ? 'dd' : 'other',
-        });
-      }
+    const isHighValueTransfer = amountGbp > HIGH_VALUE_TRANSFER_GBP;
+    if (isHighValueTransfer) {
+      ledger.push({
+        rawLine: line,
+        cleanedMerchant: merchant,
+        amountGbp,
+        signedAmount: -amountGbp,
+        rawDescription: line,
+        rawAmount: amountGbp,
+        rawDate: effectiveDate?.rawDate,
+        dateIso: effectiveDate?.iso ?? null,
+        billingDay: effectiveDate?.billingDay ?? null,
+        isCredit: false,
+        isHighValueTransfer: true,
+        status: 'QUARANTINED',
+        auditFlag: FLAG_TRANSFER_OR_CASH,
+        reason: 'High value transfer excluded',
+        paymentType,
+        canonicalMerchant: canonMerchant,
+      });
       matchedIndices.add(i);
       continue;
     }
@@ -755,10 +1127,14 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
       reasonCodes.push('DD_MARKER');
     }
 
-    transactions.push({
+    const txObj: ScannedTransaction = {
       rawLine: line,
       cleanedMerchant: merchant,
       amountGbp,
+      signedAmount: -amountGbp,
+      rawDescription: line,
+      rawAmount: amountGbp,
+      rawDate: effectiveDate?.rawDate,
       dateIso: effectiveDate?.iso ?? null,
       billingDay: effectiveDate?.billingDay ?? null,
       isCredit: false,
@@ -769,7 +1145,15 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
       isReversalOrFailed: false,
       referenceToken: refToken,
       reasonCodes,
-    });
+      status: 'ACCEPTED',
+      auditFlag: isRevolutPaid ? FLAG_VALID_BANK_SUB : undefined,
+      reason: isRevolutPaid ? 'Valid bank subscription plan' : undefined,
+      paymentType,
+      canonicalMerchant: canonMerchant,
+    };
+
+    transactions.push(txObj);
+    ledger.push(txObj);
     matchedIndices.add(i);
   }
 
@@ -793,10 +1177,14 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
         if (!isCredit && amount <= HIGH_VALUE_TRANSFER_GBP && !REVERSAL_OR_FAILED_PATTERN.test(combined)) {
           const date = extractUkDate(combined, now);
           const hasStrongRecurringMarker = STRONG_RECURRING_MARKER_PATTERN.test(combined);
-          transactions.push({
+          const txObj: ScannedTransaction = {
             rawLine: combined,
             cleanedMerchant: prevMerchant,
             amountGbp: amount,
+            signedAmount: -amount,
+            rawDescription: combined,
+            rawAmount: amount,
+            rawDate: date ? date.iso : undefined,
             dateIso: date?.iso ?? null,
             billingDay: date?.billingDay ?? null,
             isCredit: false,
@@ -807,7 +1195,12 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
             isReversalOrFailed: false,
             referenceToken: extractReferenceToken(combined),
             reasonCodes: hasStrongRecurringMarker ? ['VALID_DEBIT', 'DD_MARKER'] : ['VALID_DEBIT'],
-          });
+            status: 'ACCEPTED',
+            paymentType: classifyUKPaymentType(combined),
+            canonicalMerchant: extractCanonicalMerchantKey(prevMerchant),
+          };
+          transactions.push(txObj);
+          ledger.push(txObj);
           matchedIndices.add(i);
           matchedIndices.add(i - 1);
         }
@@ -824,10 +1217,14 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
         if (!isCredit && nextAmount <= HIGH_VALUE_TRANSFER_GBP && !REVERSAL_OR_FAILED_PATTERN.test(combined)) {
           const date = extractUkDate(combined, now);
           const hasStrongRecurringMarker = STRONG_RECURRING_MARKER_PATTERN.test(combined);
-          transactions.push({
+          const txObj: ScannedTransaction = {
             rawLine: combined,
             cleanedMerchant: merchant,
             amountGbp: nextAmount,
+            signedAmount: -nextAmount,
+            rawDescription: combined,
+            rawAmount: nextAmount,
+            rawDate: date ? date.iso : undefined,
             dateIso: date?.iso ?? null,
             billingDay: date?.billingDay ?? null,
             isCredit: false,
@@ -838,7 +1235,12 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
             isReversalOrFailed: false,
             referenceToken: extractReferenceToken(combined),
             reasonCodes: hasStrongRecurringMarker ? ['VALID_DEBIT', 'DD_MARKER'] : ['VALID_DEBIT'],
-          });
+            status: 'ACCEPTED',
+            paymentType: classifyUKPaymentType(combined),
+            canonicalMerchant: extractCanonicalMerchantKey(merchant),
+          };
+          transactions.push(txObj);
+          ledger.push(txObj);
           matchedIndices.add(i);
           matchedIndices.add(i + 1);
         }
@@ -846,5 +1248,14 @@ export function parseStatementLines(lines: string[], now = new Date()): ScannedT
     }
   }
 
-  return cancelLinkedReversals(transactions, reversals);
+  const accepted = cancelLinkedReversals(transactions, reversals);
+  return { accepted, ledger };
+}
+
+export function parseStatementLines(lines: string[], now = new Date()): ScannedTransaction[] {
+  return parseStatementInternal(lines, now).accepted;
+}
+
+export function parseStatementAuditLedger(lines: string[], now = new Date()): ScannedTransaction[] {
+  return parseStatementInternal(lines, now).ledger;
 }

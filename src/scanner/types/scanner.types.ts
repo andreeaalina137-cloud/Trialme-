@@ -27,6 +27,51 @@ export type ScannerErrorCode =
 
 export type StatementTableState = 'IN_TABLE' | 'OUT_OF_TABLE';
 
+export type UKPaymentType =
+  | 'DIRECT_DEBIT'
+  | 'RECURRING_CARD_CPA'
+  | 'STANDING_ORDER'
+  | 'P2P_TRANSFER'
+  | 'ATM_CASH'
+  | 'OTHER';
+
+export type TransactionStatus = 'ACCEPTED' | 'QUARANTINED';
+
+export const FLAG_SUMMARY_ROW = 'FLAG_SUMMARY_ROW';
+export const FLAG_INVALID_DATE = 'FLAG_INVALID_DATE';
+export const FLAG_DUPLICATE = 'FLAG_DUPLICATE';
+export const FLAG_FX_CONVERSION = 'FLAG_FX_CONVERSION';
+export const FLAG_REVOLUT_NOISE = 'FLAG_REVOLUT_NOISE';
+export const FLAG_VALID_BANK_SUB = 'FLAG_VALID_BANK_SUB';
+export const FLAG_TRANSFER_OR_CASH = 'FLAG_TRANSFER_OR_CASH';
+export const FLAG_RENT_OR_FIXED_TRANSFER = 'FLAG_RENT_OR_FIXED_TRANSFER';
+export const FLAG_REFUNDED_PAIR = 'FLAG_REFUNDED_PAIR';
+export const FLAG_PRICE_HIKE = 'FLAG_PRICE_HIKE';
+export const FLAG_TRIAL_CONVERTED = 'FLAG_TRIAL_CONVERTED';
+
+export interface PriceAlert {
+  previousAmount: number;
+  newAmount: number;
+  difference: number;
+  percentage: number;
+  formattedDifference: string;
+}
+
+export interface ConfirmingTransaction {
+  date: string | null;
+  amount: number;
+  rawDescription: string;
+}
+
+export interface SubscriptionEvidence {
+  confidenceScore: number;
+  subscriptionType: 'Direct Debit' | 'Recurring Card (CPA)' | 'Standing Order';
+  whyDetected: string[];
+  confirmingTransactions: ConfirmingTransaction[];
+  priceAlert?: PriceAlert | null;
+  auditFlag?: string | null;
+}
+
 export type ScannerReasonCode =
   | 'VALID_DEBIT'
   | 'BALANCE_REJECTED'
@@ -59,6 +104,15 @@ export interface ScannedTransaction {
   isReversalOrFailed?: boolean;
   referenceToken?: string | null;
   reasonCodes?: ScannerReasonCode[];
+  rawDescription?: string;
+  rawAmount?: string | number;
+  rawDate?: string;
+  signedAmount?: number;
+  status?: TransactionStatus;
+  auditFlag?: string;
+  reason?: string;
+  paymentType?: UKPaymentType;
+  canonicalMerchant?: string;
 }
 
 export interface MatchedSubscription {
@@ -83,6 +137,11 @@ export interface MatchedSubscription {
   requiresReview?: boolean;
   gateScores?: ScannerGateScores;
   reasonCodes?: ScannerReasonCode[];
+  evidence?: SubscriptionEvidence;
+  confidenceScore?: number;
+  auditFlag?: string;
+  subscriptionType?: 'Direct Debit' | 'Recurring Card (CPA)' | 'Standing Order';
+  priceAlert?: PriceAlert | string;
 }
 
 export interface ScannerProgress {

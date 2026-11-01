@@ -13,7 +13,19 @@ import type {
   ScannerGateScores,
   ScannerReasonCode,
   StatementPreset,
+  SubscriptionEvidence,
+  PriceAlert,
+  ConfirmingTransaction,
 } from '../types/scanner.types';
+import {
+  FLAG_PRICE_HIKE,
+  FLAG_TRIAL_CONVERTED,
+  FLAG_VALID_BANK_SUB,
+} from '../types/scanner.types';
+import {
+  extractCanonicalMerchantKey,
+  areMerchantsFuzzyMatch,
+} from './statementNormalizer';
 import { getScannerLearning } from './scannerLearningMemory';
 
 const FUZZY_MIN_SIMILARITY = 0.75;
@@ -372,6 +384,10 @@ function unknownMerchantKey(merchant: string, rawLine = '', amountGbp?: number):
     const pence = Math.round((amountGbp ?? 0) * 100);
     return `unknown-APPLEBILLING-${pence}`;
   }
+  const canon = extractCanonicalMerchantKey(merchant);
+  if (canon.length >= 3) {
+    return `unknown-${alphanum(canon).slice(0, 48)}`;
+  }
   return `unknown-${alphanum(merchant).slice(0, 48)}`;
 }
 
@@ -485,11 +501,12 @@ interface Candidate {
 
 function matchTransaction(tx: ScannedTransaction, presets: StatementPreset[]): Candidate | null {
   if (isOneOffMerchant(tx)) return null;
+  const canonical = tx.canonicalMerchant || extractCanonicalMerchantKey(tx.cleanedMerchant || tx.rawLine);
   const haystack = tx.cleanedMerchant.toUpperCase();
   const rawUpper = tx.rawLine.toUpperCase();
   const hayAlnum = alphanum(tx.cleanedMerchant);
   const rawAlnum = alphanum(tx.rawLine);
-  if (hayAlnum.length < 2 && rawAlnum.length < 2) return null;
+  if (hayAlnum.length < 2 && rawAlnum.length < 2 && canonical.length < 2) return null;
 
   let best: Candidate | null = null;
 
@@ -614,12 +631,260 @@ function computeIntervalRecurrence(dates: string[]): { confirmed: boolean; cycle
   }
   intervals.sort((a, b) => a - b);
   const median = intervals[Math.floor(intervals.length / 2)];
-  // Monthly: 26–35 days, Weekly: 6–8 days, Yearly: 350–380 days
+  // Monthly: 26–35 days (explicitly accounts for UK BACS / DD weekend shifts & Feb), Weekly: 6–8 days, Fortnightly: 13–15 days, Yearly: 350–380 days
   if (median >= 350 && median <= 380) return { confirmed: true, cycle: 'Annual' };
-  if ((median >= 26 && median <= 35) || (median >= 6 && median <= 8)) {
+  if ((median >= 26 && median <= 35) || (median >= 6 && median <= 8) || (median >= 13 && median <= 15)) {
     return { confirmed: true, cycle: 'Monthly' };
   }
   return { confirmed: false, cycle: null };
+}
+
+/**
+ * Stage 5: UK Recurrence Engine, Price Hikes & Clear Evidence Generation
+ * Evaluates consecutive payment intervals with UK BACS weekend shift tolerance (26-34 days monthly, 6-8/13-15 weekly, 360-370 yearly),
+ * checks amount fixedness vs FX variance (±8%) vs price hikes (>8% jump from fixed past months) vs trial-to-paid conversion,
+ * computes 0-100 confidence score rubric, and builds an auditable evidence object.
+ */
+export function evaluateSubscriptionRecurrenceAndEvidence(
+  txs: ScannedTransaction[],
+  preset: StatementPreset | null,
+  _serviceDisplayName = '',
+  _category: SubscriptionCategory = 'Other',
+  now = new Date(),
+): {
+  isVerifiedRecurring: boolean;
+  billingCycle: BillingCycle;
+  lastPaymentDate: string | null;
+  nextBillingDate: string | null;
+  daysUntilNextPayment: number | null;
+  amountGbp: number;
+  confidenceScore: number;
+  subscriptionType: 'Direct Debit' | 'Recurring Card (CPA)' | 'Standing Order';
+  whyDetected: string[];
+  confirmingTransactions: ConfirmingTransaction[];
+  priceAlert?: PriceAlert | null;
+  auditFlag?: string | null;
+  evidence: SubscriptionEvidence;
+} {
+  // Sort ascending by date
+  const sorted = [...txs].sort((a, b) => (a.dateIso || '').localeCompare(b.dateIso || ''));
+  const latestTx = sorted[sorted.length - 1];
+
+  // Determine UK payment rail
+  let subscriptionType: 'Direct Debit' | 'Recurring Card (CPA)' | 'Standing Order' = 'Recurring Card (CPA)';
+  if (
+    sorted.some(
+      (t) =>
+        t.paymentType === 'DIRECT_DEBIT' ||
+        t.hasStrongRecurringMarker ||
+        /\b(?:DIRECT\s+DEBIT|D\/D|DDR|DD)\b/i.test(t.rawLine),
+    )
+  ) {
+    subscriptionType = 'Direct Debit';
+  } else if (
+    sorted.some(
+      (t) =>
+        t.paymentType === 'STANDING_ORDER' ||
+        /\b(?:STANDING\s+ORDER|SO|STO)\b/i.test(t.rawLine),
+    )
+  ) {
+    subscriptionType = 'Standing Order';
+  }
+
+  // Extract dates and consecutive intervals
+  const datedTxs = sorted.filter((t) => Boolean(t.dateIso));
+  const timestamps = Array.from(
+    new Set(
+      datedTxs
+        .map((t) => Date.parse(`${t.dateIso}T00:00:00Z`))
+        .filter((ts) => Number.isFinite(ts)),
+    ),
+  ).sort((a, b) => a - b);
+
+  const deltaDaysList: number[] = [];
+  for (let i = 1; i < timestamps.length; i += 1) {
+    deltaDaysList.push(Math.round((timestamps[i] - timestamps[i - 1]) / 86_400_000));
+  }
+
+  // UK BACS Weekend Shift Intervals:
+  // Monthly: 26 to 34 days
+  // Weekly: 6 to 8 days, Fortnightly: 13 to 15 days
+  // Yearly: 360 to 370 days (or 350 to 380)
+  const hasMonthlyInterval =
+    deltaDaysList.length > 0 && deltaDaysList.every((d) => d >= 26 && d <= 34);
+  const hasWeeklyInterval =
+    deltaDaysList.length > 0 &&
+    deltaDaysList.every((d) => (d >= 6 && d <= 8) || (d >= 13 && d <= 15));
+  const hasYearlyInterval =
+    deltaDaysList.length > 0 && deltaDaysList.every((d) => (d >= 360 && d <= 370) || (d >= 350 && d <= 380));
+
+  const intervalConfirmed = hasMonthlyInterval || hasWeeklyInterval || hasYearlyInterval;
+  const billingCycle: BillingCycle = hasYearlyInterval ? 'Annual' : 'Monthly';
+
+  // Amount analysis
+  const amounts = sorted.map((t) => t.amountGbp);
+  const isFixedAmount = amounts.length === 1 || amounts.every((a) => Math.abs(a - amounts[0]) < 0.01);
+
+  const minAmount = Math.min(...amounts);
+  const maxAmount = Math.max(...amounts);
+  const variance = maxAmount > 0 ? (maxAmount - minAmount) / maxAmount : 0;
+  const hasFxTolerance = !isFixedAmount && variance <= 0.08;
+
+  // Monthly Key Day consistency check (within 3 calendar days)
+  const billingDays = sorted
+    .map((t) => t.billingDay)
+    .filter((d): d is number => d !== null && Number.isFinite(d));
+  const isKeyDayConsistent =
+    billingDays.length < 2 || Math.max(...billingDays) - Math.min(...billingDays) <= 3;
+
+  // Trial-to-Paid Detection (FLAG_TRIAL_CONVERTED)
+  // If initial transaction is £0.00 or <= £1.99 followed 7, 14, or 30 days later by standard recurring amount
+  let hasTrialConverted = false;
+  if (
+    amounts.length >= 2 &&
+    (amounts[0] === 0 || amounts[0] <= 1.99) &&
+    amounts[amounts.length - 1] >= 3.00
+  ) {
+    const firstDelta = deltaDaysList.length > 0 ? deltaDaysList[0] : 0;
+    if (
+      (firstDelta >= 6 && firstDelta <= 9) ||
+      (firstDelta >= 13 && firstDelta <= 16) ||
+      (firstDelta >= 26 && firstDelta <= 34)
+    ) {
+      hasTrialConverted = true;
+    }
+  }
+
+  // Silent Price Hike Detection (FLAG_PRICE_HIKE)
+  // If interval is strictly monthly (~30 days, 26-34 days), but latest payment increased by > 8% compared to previous fixed months
+  let priceAlert: PriceAlert | null = null;
+  let hasPriceHike = false;
+  if (!hasTrialConverted && hasMonthlyInterval && amounts.length >= 2) {
+    const latestAmount = amounts[amounts.length - 1];
+    const prevAmounts = amounts.slice(0, -1);
+    const earlierAmount = prevAmounts[prevAmounts.length - 1];
+    const prevFixed = prevAmounts.every((a) => Math.abs(a - earlierAmount) < 0.01);
+    const increase = earlierAmount > 0 ? (latestAmount - earlierAmount) / earlierAmount : 0;
+    if (earlierAmount > 1.99 && prevFixed && increase > 0.08) {
+      hasPriceHike = true;
+      const diff = Number((latestAmount - earlierAmount).toFixed(2));
+      const percentage = Number((increase * 100).toFixed(2));
+      priceAlert = {
+        previousAmount: earlierAmount,
+        newAmount: latestAmount,
+        difference: diff,
+        percentage,
+        formattedDifference: `+£${diff.toFixed(2)}`,
+      };
+    }
+  }
+
+  // Confidence Score (0-100) & WhyDetected strings
+  let confidenceScore = 0;
+  const whyDetected: string[] = [];
+
+  // +40 for consistent interval (matching monthly/weekly/yearly)
+  if (intervalConfirmed) {
+    confidenceScore += 40;
+    if (hasMonthlyInterval) {
+      whyDetected.push('Consistent monthly payment (~30 days with UK weekend shift tolerance)');
+    } else if (hasWeeklyInterval) {
+      whyDetected.push('Consistent weekly / fortnightly payment interval confirmed');
+    } else if (hasYearlyInterval) {
+      whyDetected.push('Consistent annual payment (~365 days) confirmed');
+    }
+  }
+
+  // +30 for fixed amount (or +20 for FX tolerance / Price Hike match)
+  if (isFixedAmount) {
+    confidenceScore += 30;
+    whyDetected.push(`Fixed amount: £${amounts[0].toFixed(2)}`);
+  } else if (hasPriceHike) {
+    confidenceScore += 20;
+    whyDetected.push(`Price increased by £${priceAlert!.difference.toFixed(2)} on latest billing`);
+  } else if (hasFxTolerance && isKeyDayConsistent) {
+    confidenceScore += 20;
+    whyDetected.push('FX billed subscription within ±8% variance on consistent monthly key day');
+  } else if (hasTrialConverted) {
+    confidenceScore += 20;
+    whyDetected.push(
+      `Trial converted to paid subscription (initial nominal £${amounts[0].toFixed(2)} followed by £${amounts[amounts.length - 1].toFixed(2)})`,
+    );
+  }
+
+  // +20 if transaction carries explicit UK DIRECT_DEBIT (DD/DDR) marker or known subscription merchant pattern
+  const hasDdMarker = subscriptionType === 'Direct Debit';
+  const hasPresetMatch = Boolean(preset && preset.monthly_price_gbp > 0);
+  if (hasDdMarker) {
+    confidenceScore += 20;
+    whyDetected.push('Direct Debit (DDR) marker confirmed');
+  } else if (hasPresetMatch) {
+    confidenceScore += 20;
+    whyDetected.push(`Known subscription merchant pattern: ${preset!.name}`);
+  } else if (subscriptionType === 'Recurring Card (CPA)') {
+    whyDetected.push('Recurring Card (CPA) payment rail confirmed');
+  } else if (subscriptionType === 'Standing Order') {
+    whyDetected.push('Standing Order payment rail confirmed');
+  }
+
+  // +10 if decimal endings match classic subscription pricing (.99, .95, .49, .00) vs round transfer numbers
+  const latestAmount = amounts[amounts.length - 1];
+  const decimalEnding = Math.round((latestAmount % 1) * 100);
+  if ([99, 95, 49, 0].includes(decimalEnding)) {
+    confidenceScore += 10;
+    whyDetected.push('Classic subscription pricing decimal ending (.99, .95, .49, .00)');
+  }
+
+  // Single transaction baseline for known catalogue presets
+  if (amounts.length === 1 && preset) {
+    confidenceScore = Math.max(confidenceScore, 60);
+  }
+
+  confidenceScore = Math.min(100, Math.max(0, confidenceScore));
+
+  let auditFlag: string | null = null;
+  if (hasPriceHike) {
+    auditFlag = FLAG_PRICE_HIKE;
+  } else if (hasTrialConverted) {
+    auditFlag = FLAG_TRIAL_CONVERTED;
+  } else if (sorted.some((t) => t.auditFlag === FLAG_VALID_BANK_SUB)) {
+    auditFlag = FLAG_VALID_BANK_SUB;
+  }
+
+  const confirmingTransactions: ConfirmingTransaction[] = sorted.map((t) => ({
+    date: t.dateIso,
+    amount: t.amountGbp,
+    rawDescription: t.rawDescription || t.rawLine,
+  }));
+
+  const lastPaymentDate = latestTx?.dateIso ?? null;
+  const nextBillingDate = calculateNextBillingDate(lastPaymentDate, billingCycle, now);
+  const daysUntilNextPayment = calculateDaysUntilNextPayment(nextBillingDate, now);
+  const isVerifiedRecurring =
+    intervalConfirmed || hasPriceHike || hasTrialConverted || sorted.length > 1;
+
+  return {
+    isVerifiedRecurring,
+    billingCycle,
+    lastPaymentDate,
+    nextBillingDate,
+    daysUntilNextPayment,
+    amountGbp: latestAmount,
+    confidenceScore,
+    subscriptionType,
+    whyDetected,
+    confirmingTransactions,
+    priceAlert: priceAlert || null,
+    auditFlag,
+    evidence: {
+      confidenceScore,
+      subscriptionType,
+      whyDetected,
+      confirmingTransactions,
+      priceAlert: priceAlert || null,
+      auditFlag: auditFlag || null,
+    },
+  };
 }
 
 function isPotentialUnknownSubscription(
@@ -678,11 +943,16 @@ export function matchStatementTransactions(
   >();
   const occurrenceCounts = new Map<string, number>();
   const datesByMerchantKey = new Map<string, string[]>();
+  const txsByGroupKey = new Map<string, ScannedTransaction[]>();
+
   for (const tx of transactions) {
+    if (tx.status === 'QUARANTINED') continue;
     const merchantKey =
       /^APPLE\s+BILLING$/i.test(tx.cleanedMerchant)
         ? `APPLEBILLING-${Math.round(tx.amountGbp * 100)}`
-        : alphanum(tx.cleanedMerchant);
+        : tx.canonicalMerchant
+          ? alphanum(tx.canonicalMerchant)
+          : alphanum(tx.cleanedMerchant);
     occurrenceCounts.set(merchantKey, (occurrenceCounts.get(merchantKey) ?? 0) + 1);
     if (tx.dateIso) {
       const list = datesByMerchantKey.get(merchantKey) ?? [];
@@ -692,9 +962,9 @@ export function matchStatementTransactions(
   }
 
   for (const tx of transactions) {
-    // Gate 1 enforcement: never allow any transaction with validityScore < 3 or OUT_OF_TABLE to enter matching.
+    // Gate 1 enforcement: never allow any transaction with validityScore < 3, OUT_OF_TABLE, or QUARANTINED to enter matching.
     const validityScore: 0 | 1 | 2 | 3 = tx.validityScore ?? (tx.amountGbp > 0 && !tx.isCredit ? 3 : 0);
-    if (validityScore < 3 || tx.tableState === 'OUT_OF_TABLE') continue;
+    if (validityScore < 3 || tx.tableState === 'OUT_OF_TABLE' || tx.status === 'QUARANTINED') continue;
 
     const learning = getScannerLearning(tx.cleanedMerchant);
     if (learning?.decision === 'dismissed') continue;
@@ -724,7 +994,9 @@ export function matchStatementTransactions(
       const merchantKey =
         /^APPLE\s+BILLING$/i.test(tx.cleanedMerchant)
           ? `APPLEBILLING-${Math.round(tx.amountGbp * 100)}`
-          : alphanum(tx.cleanedMerchant);
+          : tx.canonicalMerchant
+            ? alphanum(tx.canonicalMerchant)
+            : alphanum(tx.cleanedMerchant);
       const occurrenceCount = occurrenceCounts.get(merchantKey) ?? 0;
       const intervalCheck = computeIntervalRecurrence(datesByMerchantKey.get(merchantKey) ?? []);
       if (!isPotentialUnknownSubscription(tx, occurrenceCount, intervalCheck.confirmed)) continue;
@@ -745,7 +1017,21 @@ export function matchStatementTransactions(
 
       const datedCount = (datesByMerchantKey.get(merchantKey) ?? []).length;
       const verifiedUnknown = datedCount >= 2 ? intervalCheck.confirmed : occurrenceCount > 1;
-      const unknownId = unknownMerchantKey(tx.cleanedMerchant, tx.rawLine, tx.amountGbp);
+      let unknownId = unknownMerchantKey(tx.cleanedMerchant, tx.rawLine, tx.amountGbp);
+      for (const existingKey of grouped.keys()) {
+        if (!existingKey.startsWith('unknown-')) continue;
+        if (existingKey.startsWith('unknown-APPLEBILLING-') || existingKey.startsWith('unknown-GOOGLEPLAYPASS')) continue;
+        const existingToken = existingKey.replace(/^unknown-/, '');
+        const currentToken = unknownId.replace(/^unknown-/, '');
+        if (
+          existingToken.length >= 4 &&
+          currentToken.length >= 4 &&
+          areMerchantsFuzzyMatch(existingToken, currentToken)
+        ) {
+          unknownId = existingKey;
+          break;
+        }
+      }
       const existingUnknown = grouped.get(unknownId);
       const cycle: BillingCycle = intervalCheck.cycle ?? 'Monthly';
       const unknownPayload: MatchedSubscription = {
@@ -775,6 +1061,10 @@ export function matchStatementTransactions(
         reasonCodes,
       };
 
+      const groupTxs = txsByGroupKey.get(unknownId) ?? [];
+      groupTxs.push(tx);
+      txsByGroupKey.set(unknownId, groupTxs);
+
       if (!existingUnknown) {
         grouped.set(unknownId, {
           match: unknownPayload,
@@ -802,7 +1092,7 @@ export function matchStatementTransactions(
     const groupKey = isAppleTvPreset
       ? `${candidate.preset.id}-${Math.round(tx.amountGbp * 100)}`
       : candidate.preset.id;
-    const merchantKey = alphanum(tx.cleanedMerchant);
+    const merchantKey = tx.canonicalMerchant ? alphanum(tx.canonicalMerchant) : alphanum(tx.cleanedMerchant);
     const intervalCheck = computeIntervalRecurrence(datesByMerchantKey.get(merchantKey) ?? []);
     const recurrenceScore: 0 | 1 | 2 | 3 =
       intervalCheck.confirmed || tx.hasStrongRecurringMarker ? 3 : 2;
@@ -820,6 +1110,10 @@ export function matchStatementTransactions(
     if (intervalCheck.confirmed && !reasonCodes.includes('INTERVAL_CONFIRMED')) {
       reasonCodes.push('INTERVAL_CONFIRMED');
     }
+
+    const groupTxs = txsByGroupKey.get(groupKey) ?? [];
+    groupTxs.push(tx);
+    txsByGroupKey.set(groupKey, groupTxs);
 
     const existing = grouped.get(groupKey);
     const billingCycle = candidate.learned && candidate.preset.monthly_price_gbp > 0
@@ -881,6 +1175,56 @@ export function matchStatementTransactions(
     }
     existing.occurrences += 1;
     existing.match.isVerifiedRecurring = existing.occurrences > 1 || intervalCheck.confirmed;
+  }
+
+  // Attach Stage 5 Evidence, Confidence Score, Subscription Type, Price Alert & Audit Flag to each matched subscription
+  for (const [groupKey, entry] of grouped.entries()) {
+    const confirmingTxs = txsByGroupKey.get(groupKey) ?? [];
+    const candidatePreset = presets.find((p) => p.id === entry.match.presetId) ?? null;
+    const evidenceResult = evaluateSubscriptionRecurrenceAndEvidence(
+      confirmingTxs.length > 0
+        ? confirmingTxs
+        : [
+            {
+              rawLine: entry.match.serviceName,
+              cleanedMerchant: entry.match.serviceName,
+              amountGbp: entry.match.amountGbp,
+              dateIso: entry.match.lastPaymentDate,
+              billingDay: entry.match.billingDay,
+              isCredit: false,
+              isHighValueTransfer: false,
+              status: 'ACCEPTED',
+            },
+          ],
+      candidatePreset,
+      entry.match.serviceName,
+      entry.match.category,
+      now,
+    );
+
+    entry.match.evidence = {
+      confidenceScore: evidenceResult.confidenceScore,
+      subscriptionType: evidenceResult.subscriptionType,
+      whyDetected: evidenceResult.whyDetected,
+      confirmingTransactions: evidenceResult.confirmingTransactions,
+      priceAlert: evidenceResult.priceAlert,
+      auditFlag: evidenceResult.auditFlag,
+    };
+    entry.match.confidenceScore = evidenceResult.confidenceScore;
+    entry.match.subscriptionType = evidenceResult.subscriptionType;
+    if (evidenceResult.priceAlert) {
+      entry.match.priceAlert = evidenceResult.priceAlert;
+      entry.match.amountGbp = evidenceResult.amountGbp;
+    }
+    if (evidenceResult.auditFlag) {
+      entry.match.auditFlag = evidenceResult.auditFlag;
+    }
+    if (evidenceResult.isVerifiedRecurring) {
+      entry.match.isVerifiedRecurring = true;
+      entry.match.billingCycle = evidenceResult.billingCycle;
+      entry.match.nextBillingDate = evidenceResult.nextBillingDate;
+      entry.match.daysUntilNextPayment = evidenceResult.daysUntilNextPayment;
+    }
   }
 
   const allEntries = Array.from(grouped.values());
