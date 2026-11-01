@@ -1262,7 +1262,68 @@ export function matchStatementTransactions(
     .slice(0, MAX_UNKNOWN_CANDIDATES_PER_SCAN)
     .map((entry) => ({ ...entry.match, requiresReview: true }));
 
-  return [...catalogueMatches, ...explicitPlanUnknowns, ...generalUnknowns].sort(
-    (a, b) => b.amountGbp - a.amountGbp,
-  );
+  const rawCandidates = [...catalogueMatches, ...explicitPlanUnknowns, ...generalUnknowns];
+
+  // Final 3-Level Subscription Safety Filter:
+  // Level 1: White-list (High Confidence) - matches monetry_database.json / known digital/telecom/bank services
+  // Level 2: Explicit Bank Signals (Direct Debit, DD, DDR, CARD SUBSCRIPTION, CPA, or explicit subscription plan markers)
+  // Level 3: Everything else -> REJECT (Local shops, supermarkets, restaurants, one-off purchases)
+  const KNOWN_DIGITAL_OR_PRESET_PATTERN =
+    /\b(?:NETFLIX|SPOTIFY|DISNEY|PRIME|AMAZON\s*PRIME|APPLE|GOOGLE|MICROSOFT|ADOBE|CANVA|CHATGPT|OPENAI|CLAUDE|ANTHROPIC|YOUTUBE|AUDIBLE|BBC\s*TV|TV\s*LICENC|DAZN|PARAMOUNT|DISCOVERY|TNT\s*SPORTS|GUARDIAN|PUREGYM|GYM\s*GROUP|DAVID\s*LLOYD|JD\s*GYMS|VIRGIN\s*ACTIVE|STRAVA|MYFITNESSPAL|WHOOP|HEADSPACE|CALM|PLAYSTATION|PSN|XBOX|NINTENDO|NORDVPN|EXPRESSVPN|SURFSHARK|DELIVEROO|UBER\s*ONE|JUST\s*EAT|HELLOFRESH|GOUSTO|PRET|TESCO\s*CLUBCARD|ASOS\s*PREMIER|EXPERIAN|CLEARSCORE|EQUIFAX|MONZO|REVOLUT|STARLING|CURVE|THREE|H3G|GIFFGAFF|LYCAMOBILE|LYCA|LEBARA|O2|VODAFONE|EE|VIRGIN\s*MEDIA|TALKTALK|PLUSNET|BT|SKY|NOW\s*TV|READLY|KOBO|SUBSTACK|GEFORCE|PATREON|GITHUB|LINKEDIN|ZOOM|SLACK|NOTION|FIGMA|MIDJOURNEY|DUOLINGO|GRAMMARLY|PROTON|1PASSWORD|BITWARDEN|DROPBOX|DEEZER|TIDAL|SOUNDCLOUD|MEDIUM|LLOYDS|BARCLAYS|HALIFAX|NATWEST|SANTANDER|HSBC)\b/i;
+
+  const EXPLICIT_BANK_OR_SUB_SIGNAL_PATTERN =
+    /\b(?:DIRECT\s+DEBIT|D\/D|DDR|DD|OUTWARD\s+DIRECT\s+DEBIT|DIRECT\s+DEBIT\s+PAYMENT|CARD\s+SUBSCRIPTION|CONTINUOUS\s+PAYMENT\s+AUTHORITY|CONTINUOUS\s+PAYMENT|\bCPA\b|RECURRING\s+CARD\s+PURCHASE|RECURRING\s+CARD\s+PAYMENT|RECURRING\s+PAYMENT|AUTOMATIC\s+PAYMENT|PREAPPROVED\s+PAYMENT|SUBSCRIPTION\s+PAYMENT|MONTHLY\s+SERVICE\s+FEE|ACCOUNT\s+FEE|ULTIMATE\s+REWARD|SILVER\s+ACCOUNT|PREMIUM\s+PLAN\s+FEE|METAL\s+PLAN\s+FEE|PLAN\s+FEE|MEMBERSHIP|SUBSCRIPTION|PASS)\b/i;
+
+  const RECURRING_DIGITAL_DESCRIPTOR_PATTERN =
+    /\b(?:PLUS|PRO|CLOUD|NEWSLETTER|MAGAZINE|STREAM|FITNESS|GYM)\b/i;
+
+  const filteredCandidates = rawCandidates.filter((candidate) => {
+    // 1. White-list (High Confidence)
+    const isCatalogueMatch = !candidate.presetId.startsWith('unknown-');
+    const isAppleOrGoogle =
+      candidate.presetId.startsWith('unknown-APPLEBILLING') ||
+      candidate.presetId === 'unknown-GOOGLEPLAYPASS' ||
+      /\b(?:APPLE|GOOGLE)\b/i.test(candidate.serviceName);
+    const isLearnedConfirmed = getScannerLearning(candidate.serviceName)?.decision === 'confirmed';
+    const isKnownWhitelistMerchant =
+      KNOWN_DIGITAL_OR_PRESET_PATTERN.test(candidate.serviceName) ||
+      KNOWN_DIGITAL_OR_PRESET_PATTERN.test(candidate.presetId) ||
+      presets.some(
+        (p) =>
+          p.name.toLowerCase() === candidate.serviceName.toLowerCase() ||
+          (candidate.serviceName.length >= 4 && p.name.toLowerCase().includes(candidate.serviceName.toLowerCase())),
+      );
+
+    if (isCatalogueMatch || isAppleOrGoogle || isLearnedConfirmed || isKnownWhitelistMerchant) {
+      return true;
+    }
+
+    // 2. Explicit Bank Signals
+    const groupTxs =
+      txsByGroupKey.get(candidate.presetId) ??
+      txsByGroupKey.get(candidate.id.replace(/^scan-/, '')) ??
+      [];
+    const rawLines = [
+      ...groupTxs.map((t) => t.rawLine || t.rawDescription || ''),
+      ...(candidate.evidence?.confirmingTransactions?.map((t) => t.rawDescription) ?? []),
+      candidate.serviceName,
+    ];
+
+    const hasBankSignal =
+      candidate.subscriptionType === 'Direct Debit' ||
+      candidate.evidence?.subscriptionType === 'Direct Debit' ||
+      EXPLICIT_PLAN_LABEL_PATTERN.test(candidate.serviceName) ||
+      groupTxs.some((t) => t.paymentType === 'DIRECT_DEBIT' || t.hasStrongRecurringMarker) ||
+      rawLines.some((line) => EXPLICIT_BANK_OR_SUB_SIGNAL_PATTERN.test(line)) ||
+      (candidate.isVerifiedRecurring && rawLines.some((line) => RECURRING_DIGITAL_DESCRIPTOR_PATTERN.test(line)));
+
+    if (hasBankSignal) {
+      return true;
+    }
+
+    // 3. Everything else -> REJECT (local shops, cafes, supermarkets, one-off purchases)
+    return false;
+  });
+
+  return filteredCandidates.sort((a, b) => b.amountGbp - a.amountGbp);
 }
