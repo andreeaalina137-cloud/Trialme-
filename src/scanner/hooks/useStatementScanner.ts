@@ -179,17 +179,27 @@ export function useStatementScanner() {
           applyProgress(STAGE_SCAN);
           const extracted = await extractPdfText(file);
           if (runId !== runIdRef.current) return;
+          if (extracted.error) {
+            setError({
+              code: 'unsupported',
+              message: extracted.error,
+            });
+            setStage('error');
+            setProgress({ percent: 100, label: extracted.error, stage: 'error' });
+            return;
+          }
           if (extracted.lines.length > 0) {
             await finishWithLines(extracted.lines, 'pdf', startedAt, runId);
             return;
           }
-          const renderedPages = await renderPdfPagesForOcr(file);
           const ocrLines: string[] = [];
-          for (const page of renderedPages) {
-            const preprocessed = await preprocessStatementImage(page);
+          await renderPdfPagesForOcr(file, async (pageBlob) => {
+            if (runId !== runIdRef.current) return;
+            const preprocessed = await preprocessStatementImage(pageBlob);
             const ocr = await runOfflineOcr(preprocessed.blob);
             if (ocr.engine === 'tesseract') ocrLines.push(...ocr.lines);
-          }
+          });
+          if (runId !== runIdRef.current) return;
           if (ocrLines.length > 0) {
             await finishWithLines(ocrLines, 'pdf', startedAt, runId);
             return;

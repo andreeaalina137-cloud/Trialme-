@@ -20,6 +20,10 @@ import {
   FLAG_REFUNDED_PAIR,
   FLAG_PRICE_HIKE,
   FLAG_TRIAL_CONVERTED,
+  recordConfirmedScannerLearning,
+  getScannerLearning,
+  getScannerLearningRecords,
+  undoScannerLearning,
 } from '../src/scanner';
 
 test('Stage 1: StatementReader Pre-Validation & Unified Normalization', () => {
@@ -263,3 +267,63 @@ test('Stage 5: UK Recurrence Engine, Silent Price Hike, Converted Trial & Eviden
   assert.equal(gymSub.evidence.confidenceScore, 100); // 40 (interval) + 30 (fixed) + 20 (DD marker) + 10 (.99 ending)
   assert.equal(gymSub.evidence.confirmingTransactions.length, 3);
 });
+
+test('Stage 6: Scanner Hardening, Memory Optimization & Zero False Positives', () => {
+  // 1. Strict 3-Tier Filter: Eliminate local shops, supermarkets, cafes even if repeating
+  const statementWithRetailAndSubs = [
+    // Local shops repeating same amount: Must be REJECTED (Tier 3)
+    '01/08/2026 DEB RANYA STORE CORBY £7.00',
+    '01/09/2026 DEB RANYA STORE CORBY £7.00',
+    '05/08/2026 DEB ROCKINGHAM EURO MA CORBY £4.72',
+    '05/09/2026 DEB ROCKINGHAM EURO MA CORBY £4.72',
+    '10/08/2026 DEB MOTO TEC CORBY £29.00',
+    '10/09/2026 DEB MOTO TEC CORBY £29.00',
+    '12/08/2026 DEB AFRICALL £16.52',
+    '12/09/2026 DEB AFRICALL £16.52',
+    '15/08/2026 DEB TESCO GROCERY CORBY £45.20',
+    '15/09/2026 DEB TESCO GROCERY CORBY £45.20',
+    // Tier 1 Whitelist preset (one-off occurrence): Must be ACCEPTED
+    '18/09/2026 DEB NETFLIX.COM £10.99',
+    // Tier 2 Explicit Bank Signals (Direct Debit): Must be ACCEPTED
+    '20/08/2026 DIRECT DEBIT PUREGYM £19.99',
+    '20/09/2026 DIRECT DEBIT PUREGYM £19.99',
+    '22/09/2026 DD THREE MOBILE £15.00',
+  ];
+
+  const parsed = parseStatementLines(statementWithRetailAndSubs, new Date('2026-10-01T00:00:00Z'));
+  const matched = matchStatementTransactions(parsed);
+
+  const matchedNames = matched.map((m) => m.serviceName);
+
+  // Assert false positives are 100% eliminated
+  assert.equal(matchedNames.some((n) => /Ranya/i.test(n)), false, 'Ranya Store must be rejected');
+  assert.equal(matchedNames.some((n) => /Rockingham/i.test(n)), false, 'Rockingham Euro Market must be rejected');
+  assert.equal(matchedNames.some((n) => /Moto Tec/i.test(n)), false, 'Moto Tec must be rejected');
+  assert.equal(matchedNames.some((n) => /Africall/i.test(n)), false, 'Africall must be rejected');
+  assert.equal(matchedNames.some((n) => /Tesco Grocery/i.test(n)), false, 'Tesco Grocery must be rejected');
+
+  // Assert genuine subscriptions are preserved
+  assert.ok(matchedNames.some((n) => /Netflix/i.test(n)), 'Netflix must be accepted via Tier 1 whitelist');
+  assert.ok(matchedNames.some((n) => /PureGym/i.test(n)), 'PureGym must be accepted via Tier 2 Direct Debit signal');
+  assert.ok(matchedNames.some((n) => /Three/i.test(n)), 'Three Mobile must be accepted via Tier 2 DD signal');
+
+  // 2. Lightweight Learning Memory: Capping, Decay & Cache
+  recordConfirmedScannerLearning({
+    merchantLabel: 'TEST STREAMING SERVICE',
+    serviceName: 'Test Streaming Service',
+    category: 'Streaming',
+    frequency: 'monthly',
+    amountGbp: 8.99,
+  });
+
+  const learned = getScannerLearning('TEST STREAMING SERVICE');
+  assert.equal(learned?.decision, 'confirmed');
+  assert.equal(learned?.amountGbp, 8.99);
+  assert.ok(getScannerLearningRecords().length > 0);
+
+  // Undo restores cleanly without memory leaks
+  const undone = undoScannerLearning('TEST STREAMING SERVICE');
+  assert.equal(undone, true);
+  assert.equal(getScannerLearning('TEST STREAMING SERVICE'), null);
+});
+

@@ -570,7 +570,15 @@ async function extractNativePdfLines(buffer: ArrayBuffer): Promise<string[]> {
   return allLines;
 }
 
-async function extractWithPdfJs(buffer: ArrayBuffer): Promise<string[] | null> {
+const MAX_ALLOWED_PDF_PAGES = 100;
+
+interface PdfJsExtractInternalResult {
+  lines: string[];
+  pageCount: number;
+  error?: string;
+}
+
+async function extractWithPdfJs(buffer: ArrayBuffer): Promise<PdfJsExtractInternalResult | null> {
   if (typeof window !== 'undefined') {
     await initPdfWorker();
   }
@@ -593,17 +601,43 @@ async function extractWithPdfJs(buffer: ArrayBuffer): Promise<string[] | null> {
     });
 
     const pdf = await loadingTask.promise;
+    const pageCount = pdf.numPages;
+
+    if (pageCount > MAX_ALLOWED_PDF_PAGES) {
+      try {
+        const destroy = (pdf as unknown as { destroy?: () => Promise<void> }).destroy;
+        if (typeof destroy === 'function') await destroy.call(pdf);
+      } catch {
+        // Ignore cleanup failures
+      }
+      return {
+        lines: [],
+        pageCount,
+        error: `This statement has ${pageCount} pages (over ${MAX_ALLOWED_PDF_PAGES}). Please upload a shorter period (1–3 months) for faster and more reliable scanning.`,
+      };
+    }
+
     const allLines: string[] = [];
 
     try {
-      for (let i = 1; i <= pdf.numPages; i++) {
+      // Stream page-by-page and release each page's internal buffers immediately
+      for (let i = 1; i <= pageCount; i++) {
         const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        const pageLines = extractPageLinesFromItems(content.items);
-        allLines.push(...pageLines);
+        try {
+          const content = await page.getTextContent();
+          const pageLines = extractPageLinesFromItems(content.items);
+          allLines.push(...pageLines);
+          // Free raw text item references immediately to allow garbage collection
+          content.items.length = 0;
+        } finally {
+          // Clean up internal operator list & font caches for this page
+          if (typeof page.cleanup === 'function') {
+            page.cleanup();
+          }
+        }
       }
 
-      return allLines.length > 0 ? allLines : null;
+      return { lines: allLines, pageCount };
     } finally {
       try {
         const destroy = (pdf as unknown as { destroy?: () => Promise<void> }).destroy;
@@ -622,10 +656,26 @@ export async function extractPdfText(file: File | Blob): Promise<PdfExtractionRe
   const buffer = await file.arrayBuffer();
 
   // 1. Try pdfjs-dist with npm-bundled worker (100% offline, zero-404)
-  const pdfJsLines = await extractWithPdfJs(buffer);
-  if (pdfJsLines && pdfJsLines.length > 0) {
-    const text = pdfJsLines.join('\n');
-    return { text, lines: pdfJsLines, usedOcrFallback: false, engine: 'pdfjs' };
+  const pdfJsRes = await extractWithPdfJs(buffer);
+  if (pdfJsRes?.error) {
+    return {
+      text: '',
+      lines: [],
+      usedOcrFallback: false,
+      engine: 'pdfjs',
+      pageCount: pdfJsRes.pageCount,
+      error: pdfJsRes.error,
+    };
+  }
+  if (pdfJsRes && pdfJsRes.lines.length > 0) {
+    const text = pdfJsRes.lines.join('\n');
+    return {
+      text,
+      lines: pdfJsRes.lines,
+      usedOcrFallback: false,
+      engine: 'pdfjs',
+      pageCount: pdfJsRes.pageCount,
+    };
   }
 
   // 2. Comprehensive native PDF stream extractor (decompresses Flate streams)
@@ -639,8 +689,11 @@ export async function extractPdfText(file: File | Blob): Promise<PdfExtractionRe
   return { text: '', lines: [], usedOcrFallback: true, engine: 'none' };
 }
 
-/** Render image-only PDF pages locally so the scanner can reuse its OCR path. */
-export async function renderPdfPagesForOcr(file: File | Blob): Promise<Blob[]> {
+/** Render image-only PDF pages locally with low memory footprint and optional per-page streaming. */
+export async function renderPdfPagesForOcr(
+  file: File | Blob,
+  onPageRendered?: (pageBlob: Blob, pageNumber: number, totalPages: number) => Promise<void>,
+): Promise<Blob[]> {
   if (typeof window === 'undefined') return [];
   await initPdfWorker();
 
@@ -652,25 +705,56 @@ export async function renderPdfPagesForOcr(file: File | Blob): Promise<Blob[]> {
     });
     const pdf = await loadingTask.promise;
     const pages: Blob[] = [];
+
+    if (pdf.numPages > MAX_ALLOWED_PDF_PAGES) {
+      try {
+        const destroy = (pdf as unknown as { destroy?: () => Promise<void> }).destroy;
+        if (typeof destroy === 'function') await destroy.call(pdf);
+      } catch {
+        // Ignore
+      }
+      throw new Error(
+        `This statement has ${pdf.numPages} pages (over ${MAX_ALLOWED_PDF_PAGES}). Please upload a shorter period (1–3 months) for faster scanning.`,
+      );
+    }
+
     try {
       for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
         const page = await pdf.getPage(pageNumber);
-        const viewport = page.getViewport({ scale: 2 });
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.ceil(viewport.width);
-        canvas.height = Math.ceil(viewport.height);
-        const context = canvas.getContext('2d');
-        if (!context) continue;
-        await page.render({ canvas, canvasContext: context, viewport }).promise;
-        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
-        if (blob) pages.push(blob);
+        try {
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.ceil(viewport.width);
+          canvas.height = Math.ceil(viewport.height);
+          const context = canvas.getContext('2d');
+          if (!context) continue;
+          await page.render({ canvas, canvasContext: context, viewport }).promise;
+          const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+          // Release canvas buffers immediately
+          canvas.width = 0;
+          canvas.height = 0;
+
+          if (blob) {
+            if (onPageRendered) {
+              await onPageRendered(blob, pageNumber, pdf.numPages);
+            } else {
+              pages.push(blob);
+            }
+          }
+        } finally {
+          if (typeof page.cleanup === 'function') {
+            page.cleanup();
+          }
+        }
       }
     } finally {
       const destroy = (pdf as unknown as { destroy?: () => Promise<void> }).destroy;
       if (typeof destroy === 'function') await destroy.call(pdf);
     }
     return pages;
-  } catch {
+  } catch (err) {
+    console.warn('[pdfTextExtractor] renderPdfPagesForOcr error:', err);
     return [];
   }
 }

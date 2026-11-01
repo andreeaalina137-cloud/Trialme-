@@ -168,6 +168,8 @@ export interface PdfExtractionResult {
   lines: string[];
   usedOcrFallback: boolean;
   engine: 'pdfjs' | 'native' | 'none';
+  pageCount?: number;
+  error?: string;
 }
 
 export interface OcrExecutionResult {
