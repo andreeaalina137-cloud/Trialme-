@@ -45,7 +45,7 @@ function splitOcrLines(text: string): string[] {
 }
 
 export async function runOfflineOcr(
-  image: Blob | HTMLCanvasElement | OffscreenCanvas,
+  image: Blob | HTMLCanvasElement | OffscreenCanvas | Buffer | Uint8Array,
   onProgress?: OcrProgressHandler
 ): Promise<OcrExecutionResult> {
   onProgress?.(8, 'Booting on-device OCR worker...');
@@ -73,7 +73,11 @@ export async function runOfflineOcr(
         onProgress?.(Math.round(ratio * 100), message.status ?? 'recognizing text');
       },
     });
-    const result = await worker.recognize(image);
+    let input: any = image;
+    if (typeof window === 'undefined' && typeof Blob !== 'undefined' && image instanceof Blob) {
+      input = Buffer.from(await image.arrayBuffer());
+    }
+    const result = await worker.recognize(input);
     const text = result.data.text ?? '';
     return { text, lines: splitOcrLines(text), engine: 'tesseract' };
   } catch (err) {

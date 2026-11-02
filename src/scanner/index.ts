@@ -15,10 +15,16 @@ export {
   extractUkDate,
   checkImpossibleDate,
   classifyUKPaymentType,
+  detectDocumentDateFormat,
+  extractStatementPeriod,
+  resolveYearForMonth,
 } from './services/ukBankCleaner';
 export {
   matchStatementTransactions,
   evaluateSubscriptionRecurrenceAndEvidence,
+  detectStatementDateRange,
+  classifyScannerItemType,
+  DEFAULT_STATEMENT_FRESHNESS_DAYS,
 } from './services/statementMatcher';
 export {
   normalizeStatementLine,
@@ -87,6 +93,8 @@ export type {
   ScannerResult,
   ScannerSource,
   ScannerStage,
+  ScannerItemType,
+  StatementDateRange,
   StatementPreset,
   StatementTableState,
   SubscriptionEvidence,
@@ -100,6 +108,10 @@ export type {
   RecurrenceSummary,
   SpatialTransactionRow,
 } from './types/scanner.types';
+export type {
+  StatementDateFormat,
+  StatementPeriodInfo,
+} from './services/ukBankCleaner';
 export type {
   SpatialGlyph,
   SpatialCell,

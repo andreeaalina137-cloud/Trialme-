@@ -3,6 +3,8 @@ import type { PresetService } from '../../types/database';
 import type { SubscriptionCategory, SubscriptionFrequency } from '../../types/subscription';
 import {
   parseLocalDateKey,
+  formatLocalDateKey,
+  addBillingCycles,
   rollForwardPaymentDate,
 } from '../../utils/subscriptionCalculations';
 import type {
@@ -17,6 +19,8 @@ import type {
   PriceAlert,
   ConfirmingTransaction,
   RecurrenceSummary,
+  ScannerItemType,
+  StatementDateRange,
 } from '../types/scanner.types';
 import {
   FLAG_PRICE_HIKE,
@@ -471,6 +475,67 @@ function inferBillingCycle(amount: number, monthlyPrice: number): BillingCycle {
   return 'Monthly';
 }
 
+export const DEFAULT_STATEMENT_FRESHNESS_DAYS = 90;
+
+export function detectStatementDateRange(
+  transactions: ScannedTransaction[],
+  now = new Date(),
+  freshnessThresholdDays = DEFAULT_STATEMENT_FRESHNESS_DAYS,
+): StatementDateRange {
+  const dates = transactions
+    .map((t) => t.dateIso)
+    .filter((d): d is string => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d))
+    .sort();
+
+  if (dates.length === 0) {
+    return {
+      earliestIso: null,
+      latestIso: null,
+      statementAgeDays: null,
+      isHistorical: false,
+    };
+  }
+
+  const earliestIso = dates[0];
+  const latestIso = dates[dates.length - 1];
+  const latestDate = parseLocalDateKey(latestIso);
+  if (!latestDate) {
+    return { earliestIso, latestIso, statementAgeDays: null, isHistorical: false };
+  }
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const ageDays = Math.round((today.getTime() - latestDate.getTime()) / 86_400_000);
+  const isHistorical = ageDays > freshnessThresholdDays;
+
+  return {
+    earliestIso,
+    latestIso,
+    statementAgeDays: ageDays,
+    isHistorical,
+  };
+}
+
+export function classifyScannerItemType(
+  serviceName: string,
+  presetId: string,
+  rawLines: string[] = [],
+): ScannerItemType {
+  const isBankFeePreset =
+    presetId === 'lloyds_account_fee_uk' ||
+    presetId === 'lloyds_silver_account_uk' ||
+    presetId === 'chase_monthly_service_fee_uk';
+
+  const isBankFeePattern =
+    /\b(?:ACCOUNT\s+FEE|MAINTAINING\s+(?:THE\s+)?ACCOUNT|MONTHLY\s+(?:ACCOUNT\s+)?FEE|SILVER\s+ACCOUNT\s+FEE|PLATINUM\s+ACCOUNT\s+FEE|CLUB\s+LLOYDS\s+FEE|ULTIMATE\s+REWARD\s+ACCOUNT|MONTHLY\s+SERVICE\s+FEE|OVERDRAFT\s+FEE)\b/i.test(
+      serviceName,
+    ) ||
+    rawLines.some((l) =>
+      /\b(?:ACCOUNT\s+FEE|MAINTAINING\s+(?:THE\s+)?ACCOUNT|SILVER\s+ACCOUNT\s+FEE|MONTHLY\s+SERVICE\s+FEE|OVERDRAFT\s+FEE)\b/i.test(l)
+    );
+
+  return isBankFeePreset || isBankFeePattern ? 'BANK_FEE' : 'SUBSCRIPTION';
+}
+
 function frequencyForCycle(cycle: BillingCycle): SubscriptionFrequency {
   return cycle === 'Annual' ? 'yearly' : 'monthly';
 }
@@ -479,8 +544,14 @@ export function calculateNextBillingDate(
   lastPaymentDate: string | null,
   cycle: BillingCycle,
   now = new Date(),
+  isHistorical = false,
 ): string | null {
   if (!lastPaymentDate || !parseLocalDateKey(lastPaymentDate)) return null;
+  if (isHistorical) {
+    const anchor = parseLocalDateKey(lastPaymentDate);
+    if (!anchor) return null;
+    return formatLocalDateKey(addBillingCycles(anchor, frequencyForCycle(cycle), 1));
+  }
   return rollForwardPaymentDate(lastPaymentDate, frequencyForCycle(cycle), now);
 }
 
@@ -653,6 +724,7 @@ export function evaluateSubscriptionRecurrenceAndEvidence(
   _serviceDisplayName = '',
   _category: SubscriptionCategory = 'Other',
   now = new Date(),
+  isHistorical = false,
 ): {
   isVerifiedRecurring: boolean;
   billingCycle: BillingCycle;
@@ -861,7 +933,7 @@ export function evaluateSubscriptionRecurrenceAndEvidence(
   }));
 
   const lastPaymentDate = latestTx?.dateIso ?? null;
-  const nextBillingDate = calculateNextBillingDate(lastPaymentDate, billingCycle, now);
+  const nextBillingDate = calculateNextBillingDate(lastPaymentDate, billingCycle, now, isHistorical);
   const daysUntilNextPayment = calculateDaysUntilNextPayment(nextBillingDate, now);
   const isVerifiedRecurring =
     intervalConfirmed || hasPriceHike || hasTrialConverted || sorted.length > 1;
@@ -948,8 +1020,15 @@ function toStatementPreset(preset: PresetService): StatementPreset {
 
 export function matchStatementTransactions(
   transactions: ScannedTransaction[],
-  now = new Date()
+  now = new Date(),
+  options: { freshnessThresholdDays?: number } = {},
 ): MatchedSubscription[] {
+  const dateRange = detectStatementDateRange(
+    transactions,
+    now,
+    options.freshnessThresholdDays ?? DEFAULT_STATEMENT_FRESHNESS_DAYS,
+  );
+  const isHistorical = dateRange.isHistorical;
   const presets = [...getPresets().map(toStatementPreset), ...BANK_PROVIDER_PRESETS];
   const grouped = new Map<
     string,
@@ -1057,9 +1136,9 @@ export function matchStatementTransactions(
         billingCycle: cycle,
         billingDay: tx.billingDay,
         lastPaymentDate: tx.dateIso,
-        nextBillingDate: calculateNextBillingDate(tx.dateIso, cycle, now),
+        nextBillingDate: calculateNextBillingDate(tx.dateIso, cycle, now, isHistorical),
         daysUntilNextPayment: calculateDaysUntilNextPayment(
-          calculateNextBillingDate(tx.dateIso, cycle, now),
+          calculateNextBillingDate(tx.dateIso, cycle, now, isHistorical),
           now,
         ),
         confidence: verifiedUnknown ? 0.78 : 0.62,
@@ -1069,10 +1148,12 @@ export function matchStatementTransactions(
         trapLabel: null,
         color: '#D4AF37',
         cancelUrl: '',
-        selected: true,
+        selected: !isHistorical,
         requiresReview: true,
         gateScores,
         reasonCodes,
+        isHistorical,
+        itemType: classifyScannerItemType(unknownMerchantDisplay(tx.cleanedMerchant, tx.rawLine), unknownId, [tx.rawLine]),
       };
 
       const groupTxs = txsByGroupKey.get(unknownId) ?? [];
@@ -1133,7 +1214,7 @@ export function matchStatementTransactions(
     const billingCycle = candidate.learned && candidate.preset.monthly_price_gbp > 0
       ? (learning?.frequency === 'yearly' ? 'Annual' : 'Monthly')
       : (intervalCheck.cycle ?? inferBillingCycle(tx.amountGbp, candidate.preset.monthly_price_gbp));
-    const nextDate = calculateNextBillingDate(tx.dateIso, billingCycle, now);
+    const nextDate = calculateNextBillingDate(tx.dateIso, billingCycle, now, isHistorical);
     const payload: MatchedSubscription = {
       id: `scan-${groupKey}`,
       presetId: candidate.preset.id,
@@ -1152,9 +1233,11 @@ export function matchStatementTransactions(
       trapLabel: trapLabel(candidate.preset),
       color: PRESET_COLORS[candidate.preset.id] ?? '#D4AF37',
       cancelUrl: candidate.preset.cancel_url,
-      selected: true,
+      selected: !isHistorical,
       gateScores,
       reasonCodes,
+      isHistorical,
+      itemType: classifyScannerItemType(displayName(candidate.preset.name), candidate.preset.id, [tx.rawLine]),
     };
 
     if (!existing) {
@@ -1214,6 +1297,14 @@ export function matchStatementTransactions(
       entry.match.serviceName,
       entry.match.category,
       now,
+      isHistorical,
+    );
+
+    entry.match.isHistorical = isHistorical;
+    entry.match.itemType = classifyScannerItemType(
+      entry.match.serviceName,
+      entry.match.presetId,
+      confirmingTxs.map((t) => t.rawLine),
     );
 
     entry.match.evidence = {

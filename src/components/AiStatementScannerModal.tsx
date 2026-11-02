@@ -7,6 +7,7 @@ import {
   FileSpreadsheet,
   FileText,
   Image as ImageIcon,
+  Info,
   Loader2,
   Lock,
   Plus,
@@ -193,6 +194,8 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
               : matchedPreset?.notes,
             hasCancellationTrap: item.hasCancellationTrap,
             trapLabel: item.trapLabel,
+            itemType: item.itemType || 'SUBSCRIPTION',
+            isHistorical: item.isHistorical,
           };
         })
       );
@@ -306,12 +309,14 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   };
 
   const handleImportSelected = () => {
-    const selectedItems = detectedItems.filter(
+    const candidateItems = detectedItems.filter(
       (item) =>
-        item.selected &&
         !addedIds.has(item.id) &&
         !existingSubscriptions.some((s) => isDuplicateScannedSubscription({ name: item.name }, s))
     );
+    const selectedItems = candidateItems.some((item) => item.selected)
+      ? candidateItems.filter((item) => item.selected)
+      : candidateItems;
     if (selectedItems.length === 0) return;
 
     onImportSubscriptions(
@@ -604,12 +609,30 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         {/* Detected Subscriptions List (rendered cleanly and spaciously under upload section) */}
         {detectedItems.length > 0 && (
           <div className="w-full space-y-4">
+            {/* Historical Statement Warning Banner */}
+            {(scanner.result?.isHistorical || detectedItems.some((i) => i.isHistorical)) && (
+              <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200/90 flex items-center gap-2.5 shadow-sm">
+                <Info className="h-4 w-4 shrink-0 text-amber-400" />
+                <span>This statement contains historical transactions. Detected recurring payments may no longer be active.</span>
+              </div>
+            )}
+
             {/* Detected Subscriptions Card */}
             <div className="luxury-panel rounded-3xl p-4 sm:p-5 border border-white/[0.08] space-y-3.5 shadow-xl bg-[#161616]">
               <div className="flex items-center justify-between px-1">
                 <div>
                   <span className="text-sm font-extrabold text-[#F5F5F5]">
-                    AI found {detectedItems.length} subscriptions
+                    {(() => {
+                      const commercialCount = detectedItems.filter((i) => i.itemType !== 'BANK_FEE').length;
+                      const bankFeeCount = detectedItems.filter((i) => i.itemType === 'BANK_FEE').length;
+                      if (commercialCount > 0 && bankFeeCount > 0) {
+                        return `AI found ${commercialCount} subscription${commercialCount === 1 ? '' : 's'} and ${bankFeeCount} bank fee${bankFeeCount === 1 ? '' : 's'}`;
+                      }
+                      if (bankFeeCount > 0) {
+                        return `AI found ${bankFeeCount} bank fee${bankFeeCount === 1 ? '' : 's'}`;
+                      }
+                      return `AI found ${commercialCount} subscription${commercialCount === 1 ? '' : 's'}`;
+                    })()}
                   </span>
                   <p className="text-[11px] text-[#A0A0A0]">Review detected recurring items</p>
                 </div>
@@ -668,6 +691,14 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                             </span>
                             <span className="shrink-0 text-[#A0A0A0]/50">·</span>
                             <span className="truncate">{item.category}</span>
+                            {item.itemType === 'BANK_FEE' && (
+                              <>
+                                <span className="shrink-0 text-[#A0A0A0]/50">·</span>
+                                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-amber-300 font-semibold shrink-0">
+                                  Bank Fee
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -864,7 +895,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
           className="mt-5 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-sm font-black text-[#0A0A0A] shadow-lg"
         >
           <Plus className="h-4 w-4" />
-          Add Subscription
+          {previewItem.itemType === 'BANK_FEE' ? 'Add Bank Fee' : 'Add Subscription'}
         </button>
       </div>
     </div>

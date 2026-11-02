@@ -153,9 +153,9 @@ const CREDIT_HINT_PATTERN =
 const ISO_DATE = /(\d{2})\/(\d{2})\/(\d{4})/;
 const UK_DASH_DATE = /(\d{1,2})[-.](\d{1,2})[-.](\d{4})/;
 const ISO_DATE_DASHED = /(\d{4})-(\d{2})-(\d{2})/;
-const LONG_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{4})/i;
-const SHORT_UK_DATE_WITH_YEAR = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{2})(?:\s|$)/i;
-const SHORT_UK_DATE = /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?(?:\s|$)/i;
+const LONG_UK_DATE = /(\d{1,2})\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s*(\d{4})/i;
+const SHORT_UK_DATE_WITH_YEAR = /(\d{1,2})\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s*(\d{2})(?:\s|[|,]|$)/i;
+const SHORT_UK_DATE = /(\d{1,2})\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?(?:\s|[|,]|$)/i;
 
 const MONTHS: Record<string, number> = {
   jan: 0,
@@ -201,11 +201,202 @@ function toIso(year: number, monthIndex: number, day: number): string | null {
   return `${year}-${pad(monthIndex + 1)}-${pad(day)}`;
 }
 
+export type StatementDateFormat = 'DMY' | 'MDY';
+
+export interface StatementPeriodInfo {
+  startYear: number;
+  startMonth: number; // 0-11
+  endYear: number;
+  endMonth: number;   // 0-11
+}
+
+/**
+ * Extracts statement period start and end years/months from document header lines.
+ * Supports:
+ * - "January 01, 2025 through March 31, 2025" (US Chase)
+ * - "16 Jan 2024 to 15 Feb 2024" or "01 JUN 2019 - 30 JUN 2019" (UK long)
+ * - "16 Jan 24 to 15 Feb 24" (UK short year)
+ * - "01/01/2024 - 31/03/2024" (Numeric period)
+ * - "Oct 1, 2023 - Oct 31, 2023" (Same-year month period)
+ * - Single date header fallback (e.g. "Statement date: 15/01/2025" or "Issue date 15 February 2024")
+ */
+export function extractStatementPeriod(lines: readonly string[]): StatementPeriodInfo | null {
+  for (const l of lines) {
+    // 1. Month Day, Year through/to/- Month Day, Year (e.g. "January 01, 2025 through March 31, 2025")
+    const mdyPeriod = l.match(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2}),?\s+(20\d{2})\s*(?:through|to|-)\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2}),?\s+(20\d{2})\b/i,
+    );
+    if (mdyPeriod) {
+      return {
+        startMonth: MONTHS[mdyPeriod[1].slice(0, 3).toLowerCase()],
+        startYear: Number(mdyPeriod[3]),
+        endMonth: MONTHS[mdyPeriod[4].slice(0, 3).toLowerCase()],
+        endYear: Number(mdyPeriod[6]),
+      };
+    }
+
+    // 2. Day Month Year to/- Day Month Year (e.g. "16 Jan 2024 to 15 Feb 2024" or "01 JUN 2019 - 30 JUN 2019")
+    const dmyPeriod = l.match(
+      /\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?,?\s+(20\d{2})\s*(?:to|-|through)\s*(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?,?\s+(20\d{2})\b/i,
+    );
+    if (dmyPeriod) {
+      return {
+        startMonth: MONTHS[dmyPeriod[2].slice(0, 3).toLowerCase()],
+        startYear: Number(dmyPeriod[3]),
+        endMonth: MONTHS[dmyPeriod[5].slice(0, 3).toLowerCase()],
+        endYear: Number(dmyPeriod[6]),
+      };
+    }
+
+    // 3. Short 2-digit year (e.g. "16 Jan 24 to 15 Feb 24")
+    const shortYearPeriod = l.match(
+      /\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{2})\s*(?:to|-|through)\s*(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{2})\b/i,
+    );
+    if (shortYearPeriod) {
+      const y1 = Number(shortYearPeriod[3]);
+      const y2 = Number(shortYearPeriod[6]);
+      return {
+        startMonth: MONTHS[shortYearPeriod[2].slice(0, 3).toLowerCase()],
+        startYear: y1 >= 70 ? 1900 + y1 : 2000 + y1,
+        endMonth: MONTHS[shortYearPeriod[5].slice(0, 3).toLowerCase()],
+        endYear: y2 >= 70 ? 1900 + y2 : 2000 + y2,
+      };
+    }
+
+    // 4. Numeric period (e.g. "01/01/2024 - 31/03/2024" or "01-01-2024 to 31-03-2024")
+    const numPeriod = l.match(
+      /\b(\d{1,2})[./-](\d{1,2})[./-](20\d{2})\s*(?:-|to|through)\s*(\d{1,2})[./-](\d{1,2})[./-](20\d{2})\b/,
+    );
+    if (numPeriod) {
+      const p1 = Number(numPeriod[1]);
+      const p2 = Number(numPeriod[2]);
+      const p4 = Number(numPeriod[4]);
+      const p5 = Number(numPeriod[5]);
+      const isMdy = p2 > 12 || p5 > 12;
+      return {
+        startMonth: isMdy ? p1 - 1 : p2 - 1,
+        startYear: Number(numPeriod[3]),
+        endMonth: isMdy ? p4 - 1 : p5 - 1,
+        endYear: Number(numPeriod[6]),
+      };
+    }
+
+    // 5. Month Day - Month Day, Year (e.g. "Oct 1, 2023 - Oct 31, 2023")
+    const sameYearMonthPeriod = l.match(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})(?:,?\s+(20\d{2}))?\s*(?:-|to|through)\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2}),?\s+(20\d{2})\b/i,
+    );
+    if (sameYearMonthPeriod) {
+      const yEnd = Number(sameYearMonthPeriod[5]);
+      const yStart = sameYearMonthPeriod[3] ? Number(sameYearMonthPeriod[3]) : yEnd;
+      return {
+        startMonth: MONTHS[sameYearMonthPeriod[1].slice(0, 3).toLowerCase()],
+        startYear: yStart,
+        endMonth: MONTHS[sameYearMonthPeriod[4].slice(0, 3).toLowerCase()],
+        endYear: yEnd,
+      };
+    }
+  }
+
+  // Fallback: single date header (e.g. "Statement date: 15/01/2025" or "Issue date 15 February 2024")
+  for (const l of lines) {
+    const singleLong = l.match(LONG_UK_DATE);
+    if (singleLong) {
+      const y = Number(singleLong[3]);
+      const m = MONTHS[singleLong[2].slice(0, 3).toLowerCase()];
+      return { startMonth: m, startYear: y, endMonth: m, endYear: y };
+    }
+    const singleIso = l.match(ISO_DATE) || l.match(UK_DASH_DATE);
+    if (singleIso) {
+      const y = Number(singleIso[3]);
+      const m = Number(singleIso[2]) - 1;
+      return { startMonth: m, startYear: y, endMonth: m, endYear: y };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Resolves the calendar year for a given month within a statement period.
+ * Accurately handles December/January year boundaries (e.g. Dec 2024 -> 2024, Jan 2025 -> 2025).
+ * Never guesses if period is null.
+ */
+export function resolveYearForMonth(
+  monthIndex: number,
+  period: StatementPeriodInfo | null,
+): number | null {
+  if (!period) return null;
+  const { startYear, startMonth, endYear, endMonth } = period;
+  if (startYear === endYear) {
+    return startYear;
+  }
+  // Period spans across year boundary (e.g. Dec 2024 to Jan 2025)
+  if (monthIndex >= startMonth) {
+    return startYear;
+  }
+  if (monthIndex <= endMonth) {
+    return endYear;
+  }
+  return monthIndex >= 6 ? startYear : endYear;
+}
+
+/**
+ * Resolves document-wide date format consensus (DMY vs MDY) across statement lines.
+ * If any line carries day > 12 in part 1, locks to UK DMY.
+ * If any line carries day > 12 in part 2 without DMY contradiction, uses MDY.
+ * Defaults to standard UK DMY.
+ */
+export function detectDocumentDateFormat(lines: readonly string[]): StatementDateFormat {
+  let hasDmyEvidence = false;
+  let hasMdyEvidence = false;
+
+  for (const rawLine of lines) {
+    const sanitized = rawLine
+      .replace(/\b(?:Sort\s+code\s+)?\d{2}-\d{2}-\d{2}\b/gi, ' ')
+      .replace(/\bAccount\s+\d+\b/gi, ' ');
+
+    // 1. Check 3-part dates
+    const matches3 = Array.from(sanitized.matchAll(/\b(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})\b/g));
+    for (const match of matches3) {
+      const p1 = Number(match[1]);
+      const p2 = Number(match[2]);
+      if (p1 > 12 && p1 <= 31 && p2 >= 1 && p2 <= 12) {
+        hasDmyEvidence = true;
+      } else if (p2 > 12 && p2 <= 31 && p1 >= 1 && p1 <= 12) {
+        hasMdyEvidence = true;
+      }
+    }
+
+    // 2. Check 2-part slash dates (e.g. 01/16, 03/31) not part of 3-part dates
+    const matches2 = Array.from(
+      sanitized.matchAll(/(?<!\d\/)\b(\d{1,2})\/(\d{1,2})\b(?!\/\d)/g),
+    );
+    for (const match of matches2) {
+      const p1 = Number(match[1]);
+      const p2 = Number(match[2]);
+      if (p1 > 12 && p1 <= 31 && p2 >= 1 && p2 <= 12) {
+        hasDmyEvidence = true;
+      } else if (p2 > 12 && p2 <= 31 && p1 >= 1 && p1 <= 12) {
+        hasMdyEvidence = true;
+      }
+    }
+  }
+
+  if (hasMdyEvidence && !hasDmyEvidence) {
+    return 'MDY';
+  }
+
+  return 'DMY';
+}
+
 /**
  * Defensive date check: identifies impossible calendar dates (e.g. 31 Sep, 2026-13-01, 29 Feb on non-leap years)
  * caused by OCR or extraction errors without crashing.
  */
-export function checkImpossibleDate(line: string): { isImpossible: boolean; rawDate?: string } {
+export function checkImpossibleDate(
+  line: string,
+  dateFormat: StatementDateFormat = 'DMY',
+): { isImpossible: boolean; rawDate?: string } {
   // Strip UK banking sort codes (e.g. Sort code 20-00-00, 11-11-11) and account numbers first
   // so sort codes are never mistaken for dates
   const sanitized = line
@@ -226,8 +417,8 @@ export function checkImpossibleDate(line: string): { isImpossible: boolean; rawD
   // Check UK slash e.g. 31/09/2026 or 31/13/2026
   const ukSlash = sanitized.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/);
   if (ukSlash) {
-    const d = Number(ukSlash[1]);
-    const m = Number(ukSlash[2]);
+    const d = dateFormat === 'MDY' ? Number(ukSlash[2]) : Number(ukSlash[1]);
+    const m = dateFormat === 'MDY' ? Number(ukSlash[1]) : Number(ukSlash[2]);
     const y = Number(ukSlash[3].length === 2 ? `20${ukSlash[3]}` : ukSlash[3]);
     if (m < 1 || m > 12 || d < 1 || d > 31 || !toIso(y, m - 1, d)) {
       return { isImpossible: true, rawDate: ukSlash[0] };
@@ -237,11 +428,21 @@ export function checkImpossibleDate(line: string): { isImpossible: boolean; rawD
   // Check UK dashed e.g. 31-09-2026 or 31.09.2026 (requires 4-digit year so 2-digit sort codes never match)
   const ukDash = sanitized.match(/\b(\d{1,2})[-.](\d{1,2})[-.](\d{4})\b/);
   if (ukDash) {
-    const d = Number(ukDash[1]);
-    const m = Number(ukDash[2]);
+    const d = dateFormat === 'MDY' ? Number(ukDash[2]) : Number(ukDash[1]);
+    const m = dateFormat === 'MDY' ? Number(ukDash[1]) : Number(ukDash[2]);
     const y = Number(ukDash[3]);
     if (m < 1 || m > 12 || d < 1 || d > 31 || !toIso(y, m - 1, d)) {
       return { isImpossible: true, rawDate: ukDash[0] };
+    }
+  }
+
+  // Check 2-part numeric date without year e.g. 31/02 or 02/31 (slashes only, never period decimal)
+  const twoPart = sanitized.match(/(?<!\d\/)\b(\d{1,2})\/(\d{1,2})\b(?!\/\d)/);
+  if (twoPart) {
+    const d = dateFormat === 'MDY' ? Number(twoPart[2]) : Number(twoPart[1]);
+    const m = dateFormat === 'MDY' ? Number(twoPart[1]) : Number(twoPart[2]);
+    if (m < 1 || m > 12 || d < 1 || d > 31 || (m === 2 && d > 29) || ([4, 6, 9, 11].includes(m) && d > 30)) {
+      return { isImpossible: true, rawDate: twoPart[0] };
     }
   }
 
@@ -261,7 +462,12 @@ export function checkImpossibleDate(line: string): { isImpossible: boolean; rawD
   return { isImpossible: false };
 }
 
-export function extractUkDate(line: string, now = new Date()): { iso: string; billingDay: number } | null {
+export function extractUkDate(
+  line: string,
+  now?: Date | null,
+  dateFormat: StatementDateFormat = 'DMY',
+  periodInfo?: StatementPeriodInfo | null,
+): { iso: string; billingDay: number } | null {
   const isoDashedMatch = line.match(ISO_DATE_DASHED);
   if (isoDashedMatch) {
     const year = Number(isoDashedMatch[1]);
@@ -273,8 +479,8 @@ export function extractUkDate(line: string, now = new Date()): { iso: string; bi
 
   const isoMatch = line.match(ISO_DATE);
   if (isoMatch) {
-    const day = Number(isoMatch[1]);
-    const month = Number(isoMatch[2]) - 1;
+    const day = dateFormat === 'MDY' ? Number(isoMatch[2]) : Number(isoMatch[1]);
+    const month = (dateFormat === 'MDY' ? Number(isoMatch[1]) : Number(isoMatch[2])) - 1;
     const year = Number(isoMatch[3]);
     const iso = toIso(year, month, day);
     return iso ? { iso, billingDay: day } : null;
@@ -282,8 +488,8 @@ export function extractUkDate(line: string, now = new Date()): { iso: string; bi
 
   const ukDashedMatch = line.match(UK_DASH_DATE);
   if (ukDashedMatch) {
-    const day = Number(ukDashedMatch[1]);
-    const month = Number(ukDashedMatch[2]) - 1;
+    const day = dateFormat === 'MDY' ? Number(ukDashedMatch[2]) : Number(ukDashedMatch[1]);
+    const month = (dateFormat === 'MDY' ? Number(ukDashedMatch[1]) : Number(ukDashedMatch[2])) - 1;
     const year = Number(ukDashedMatch[3]);
     const iso = toIso(year, month, day);
     return iso ? { iso, billingDay: day } : null;
@@ -312,8 +518,25 @@ export function extractUkDate(line: string, now = new Date()): { iso: string; bi
   if (shortMatch) {
     const day = Number(shortMatch[1]);
     const month = MONTHS[shortMatch[2].slice(0, 3).toLowerCase()];
-    const iso = toIso(now.getFullYear(), month, day);
+    const year = periodInfo ? resolveYearForMonth(month, periodInfo) : (now ? now.getFullYear() : null);
+    if (!year) return null;
+    const iso = toIso(year, month, day);
     return iso ? { iso, billingDay: day } : null;
+  }
+
+  // Two-part numeric date without year (e.g. "01/09", "03/16", slashes only)
+  const twoPartMatch = line.match(/(?<!\d\/)\b(\d{1,2})\/(\d{1,2})\b(?!\/\d)/);
+  if (twoPartMatch) {
+    const p1 = Number(twoPartMatch[1]);
+    const p2 = Number(twoPartMatch[2]);
+    const day = dateFormat === 'MDY' ? p2 : p1;
+    const month = (dateFormat === 'MDY' ? p1 : p2) - 1;
+    if (month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+      const year = periodInfo ? resolveYearForMonth(month, periodInfo) : (now ? now.getFullYear() : null);
+      if (!year) return null;
+      const iso = toIso(year, month, day);
+      return iso ? { iso, billingDay: day } : null;
+    }
   }
 
   return null;
@@ -743,27 +966,28 @@ export function parseStatementInternal(
   }> = [];
   const seenRowFingerprints = new Set<string>();
   const cleanedLines = groupStatementLines(lines);
+  const dateFormat = detectDocumentDateFormat(cleanedLines);
+  const periodInfo = extractStatementPeriod(cleanedLines);
 
   const isMonzoStatement = cleanedLines.some((l) => /\bMonzo\s+Bank\b|\b04-00-0[34]\b/i.test(l));
 
-  // Track active statement year from explicit 4-digit years in headers or dated rows
-  // so short dates without a year (e.g. "14 DEC", "03 JAN") resolve to the statement's year.
-  let activeYear = now.getFullYear();
-  let lastSeenMonth: number | null = null;
-  for (const l of cleanedLines) {
-    const periodMatch = l.match(
-      /\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(20\d{2})\s+to\s+\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+(20\d{2})\b/i,
-    );
-    if (periodMatch) {
-      activeYear = Number(periodMatch[3]);
-      lastSeenMonth = MONTHS[periodMatch[2].slice(0, 3).toLowerCase()];
-      break;
-    }
-    const longMatch = l.match(LONG_UK_DATE);
-    if (longMatch) {
-      activeYear = Number(longMatch[3]);
-      lastSeenMonth = MONTHS[longMatch[2].slice(0, 3).toLowerCase()];
-      break;
+  // Determine active statement year from statement period or passed now (fallback to 4-digit years in lines)
+  let activeYear: number | null = periodInfo?.startYear ?? (now ? now.getFullYear() : null);
+  let lastSeenMonth: number | null = periodInfo?.startMonth ?? null;
+
+  if (activeYear === null) {
+    for (const l of cleanedLines) {
+      const longMatch = l.match(LONG_UK_DATE);
+      if (longMatch) {
+        activeYear = Number(longMatch[3]);
+        lastSeenMonth = MONTHS[longMatch[2].slice(0, 3).toLowerCase()];
+        break;
+      }
+      const isoMatch = l.match(ISO_DATE) || l.match(UK_DASH_DATE) || l.match(ISO_DATE_DASHED);
+      if (isoMatch) {
+        activeYear = Number(isoMatch[1].length === 4 ? isoMatch[1] : isoMatch[3]);
+        break;
+      }
     }
   }
 
@@ -783,14 +1007,14 @@ export function parseStatementInternal(
           : null;
       if (shortNoYear) {
         const m = MONTHS[shortNoYear[2].slice(0, 3).toLowerCase()];
-        if (lastSeenMonth !== null && lastSeenMonth >= 10 && m <= 1) {
+        if (activeYear !== null && lastSeenMonth !== null && lastSeenMonth >= 10 && m <= 1) {
           activeYear += 1;
         }
         lastSeenMonth = m;
       }
     }
-    const refNow = new Date(Date.UTC(activeYear, 0, 1));
-    const extracted = extractUkDate(line, refNow);
+    const refNow = activeYear !== null ? new Date(Date.UTC(activeYear, 0, 1)) : null;
+    const extracted = extractUkDate(line, refNow, dateFormat, periodInfo);
     if (!extracted) return null;
     const rawDateMatch =
       line.match(ISO_DATE_DASHED) ||
@@ -798,7 +1022,8 @@ export function parseStatementInternal(
       line.match(UK_DASH_DATE) ||
       line.match(LONG_UK_DATE) ||
       line.match(SHORT_UK_DATE_WITH_YEAR) ||
-      line.match(SHORT_UK_DATE);
+      line.match(SHORT_UK_DATE) ||
+      line.match(/(?<!\d[./-])\b(\d{1,2})([./-])(\d{1,2})\b(?![./-]\d)/);
     return { ...extracted, rawDate: rawDateMatch ? rawDateMatch[0] : undefined };
   };
 
@@ -812,7 +1037,7 @@ export function parseStatementInternal(
     const line = cleanedLines[i];
 
     // Stage 1: Check impossible dates caused by OCR errors (e.g. 31 Sep, 2026-13-01)
-    const impossibleCheck = checkImpossibleDate(line);
+    const impossibleCheck = checkImpossibleDate(line, dateFormat);
     if (impossibleCheck.isImpossible) {
       ledger.push({
         rawLine: line,
@@ -1177,7 +1402,12 @@ export function parseStatementInternal(
         const combined = `${prevLine} ${line}`;
         const isCredit = CREDIT_HINT_PATTERN.test(combined);
         if (!isCredit && amount <= HIGH_VALUE_TRANSFER_GBP && !REVERSAL_OR_FAILED_PATTERN.test(combined)) {
-          const date = extractUkDate(combined, now);
+          const date = extractUkDate(
+            combined,
+            activeYear !== null ? new Date(Date.UTC(activeYear, 0, 1)) : null,
+            dateFormat,
+            periodInfo,
+          );
           const hasStrongRecurringMarker = STRONG_RECURRING_MARKER_PATTERN.test(combined);
           const txObj: ScannedTransaction = {
             rawLine: combined,
@@ -1217,7 +1447,12 @@ export function parseStatementInternal(
         const combined = `${line} ${nextLine}`;
         const isCredit = CREDIT_HINT_PATTERN.test(combined);
         if (!isCredit && nextAmount <= HIGH_VALUE_TRANSFER_GBP && !REVERSAL_OR_FAILED_PATTERN.test(combined)) {
-          const date = extractUkDate(combined, now);
+          const date = extractUkDate(
+            combined,
+            activeYear !== null ? new Date(Date.UTC(activeYear, 0, 1)) : null,
+            dateFormat,
+            periodInfo,
+          );
           const hasStrongRecurringMarker = STRONG_RECURRING_MARKER_PATTERN.test(combined);
           const txObj: ScannedTransaction = {
             rawLine: combined,
@@ -1255,11 +1490,15 @@ export function parseStatementInternal(
   // Extract candidate amounts and running balances to generate balance reconciliation evidence
   const balanceInputs: BalanceRowInput[] = accepted.map((tx) => {
     const extracted = extractRowAmountsAndBalance(tx.rawLine);
+    const hasExplicitDebit =
+      /[-−]\s*(?:£|GBP)?\s*\d/i.test(tx.rawLine) ||
+      /\b(?:DR|DEB)\b/i.test(tx.rawLine) ||
+      TRAILING_DEBIT_PATTERN.test(tx.rawLine);
     return {
       amounts: extracted.amounts.length > 0 ? extracted.amounts : [tx.amountGbp],
       balance: extracted.balance,
       date: tx.dateIso,
-      existingIsCredit: tx.isCredit,
+      existingIsCredit: tx.isCredit ? true : hasExplicitDebit ? false : null,
     };
   });
 
@@ -1276,6 +1515,20 @@ export function parseStatementInternal(
     }
     if (evidences[idx] && evidences[idx].classification !== 'UNVERIFIED') {
       tx.balanceEvidence = evidences[idx];
+      // Close the loop on running-balance delta sign determination:
+      // If the running balance mathematically increased by this candidate amount (money in),
+      // quarantine it so an incoming credit/refund is never falsely accepted as a subscription debit.
+      if (evidences[idx].reconciled && evidences[idx].classification === 'CREDIT_SUPPORTED' && !evidences[idx].supportsDebit) {
+        tx.isCredit = true;
+        tx.status = 'QUARANTINED';
+        tx.validityScore = 0;
+        tx.reason = 'Balance reconciliation proved money in (credit), not an outgoing debit';
+        if (!tx.reasonCodes) {
+          tx.reasonCodes = ['BALANCE_REJECTED'];
+        } else if (!tx.reasonCodes.includes('BALANCE_REJECTED')) {
+          tx.reasonCodes.push('BALANCE_REJECTED');
+        }
+      }
     }
   }
 
@@ -1289,7 +1542,8 @@ export function parseStatementInternal(
     }
   }
 
-  return { accepted, ledger };
+  const finalAccepted = accepted.filter((tx) => tx.status !== 'QUARANTINED');
+  return { accepted: finalAccepted, ledger };
 }
 
 function extractRowAmountsAndBalance(line: string): { amounts: number[]; balance: number | null } {
@@ -1300,7 +1554,7 @@ function extractRowAmountsAndBalance(line: string): { amounts: number[]; balance
     .trim();
 
   const matches = Array.from(
-    stripped.matchAll(/(?:^|\s)([-+]?[£$€]?\s*\d{1,4}(?:,\d{3})*\.\d{2})\s*(DR|CR)?(?:\s|$)/gi),
+    stripped.matchAll(/(?:^|\s)([-+]?[£$€]?\s*\d{1,4}(?:,\d{3})*\.\d{2})\s*(DR|CR)?(?=\s|$)/gi),
   );
   if (matches.length < 2) {
     const val = extractGbpAmount(line);

@@ -194,6 +194,17 @@ export interface MatchedSubscription {
   subscriptionType?: 'Direct Debit' | 'Recurring Card (CPA)' | 'Standing Order';
   priceAlert?: PriceAlert | string;
   recurrence?: RecurrenceSummary;
+  isHistorical?: boolean;
+  itemType?: ScannerItemType;
+}
+
+export type ScannerItemType = 'SUBSCRIPTION' | 'BANK_FEE';
+
+export interface StatementDateRange {
+  earliestIso: string | null;
+  latestIso: string | null;
+  statementAgeDays: number | null;
+  isHistorical: boolean;
 }
 
 export interface ScannerProgress {
@@ -208,6 +219,11 @@ export interface ScannerResult {
   source: ScannerSource;
   durationMs: number;
   bankFormat?: BankFormatDetection;
+  isHistorical?: boolean;
+  statementDateRange?: StatementDateRange | null;
+  warning?: string | null;
+  commercialSubscriptionCount?: number;
+  bankFeeCount?: number;
 }
 
 export interface ScannerError {

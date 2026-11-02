@@ -3,7 +3,7 @@ import { preprocessStatementImage } from '../services/imagePreprocessor';
 import { extractPdfText, looksLikePdf, renderPdfPagesForOcr } from '../services/pdfTextExtractor';
 import { runOfflineOcr } from '../services/ocrWorker';
 import { parseStatementLines } from '../services/ukBankCleaner';
-import { matchStatementTransactions } from '../services/statementMatcher';
+import { matchStatementTransactions, detectStatementDateRange } from '../services/statementMatcher';
 import { detectBankFormat } from '../services/bankFormatDetector';
 import {
   type MatchedSubscription,
@@ -101,13 +101,25 @@ export function useStatementScanner() {
       await wait(220);
       if (runId !== runIdRef.current) return;
 
+      const dateRange = detectStatementDateRange(transactions);
       const found = matchStatementTransactions(transactions);
+      const commercialCount = found.filter((m) => m.itemType !== 'BANK_FEE').length;
+      const bankFeeCount = found.filter((m) => m.itemType === 'BANK_FEE').length;
+      const warning = dateRange.isHistorical
+        ? 'This statement contains historical transactions. Detected recurring payments may no longer be active.'
+        : null;
+
       const payload: ScannerResult = {
         matches: found,
         processedLineCount: transactions.length,
         source,
         durationMs: Date.now() - startedAt,
         bankFormat: detectBankFormat(lines),
+        isHistorical: dateRange.isHistorical,
+        statementDateRange: dateRange,
+        warning,
+        commercialSubscriptionCount: commercialCount,
+        bankFeeCount,
       };
       setResult(payload);
       setMatches(found);

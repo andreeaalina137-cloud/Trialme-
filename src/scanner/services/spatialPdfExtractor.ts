@@ -13,6 +13,7 @@ export interface SpatialGlyph {
   x: number;
   y: number;
   width: number;
+  height?: number;
   page: number;
 }
 
@@ -79,7 +80,7 @@ export function glyphsFromPdfJsItems(rawItems: readonly unknown[], page: number)
   let invalid = 0;
   for (const raw of rawItems) {
     if (!raw || typeof raw !== 'object' || !('str' in raw)) continue;
-    const item = raw as { str?: unknown; transform?: unknown; width?: unknown };
+    const item = raw as { str?: unknown; transform?: unknown; width?: unknown; height?: unknown };
     const str = typeof item.str === 'string' ? item.str.replace(/[Â\xa0]/g, ' ').replace(/\s+/g, ' ').trim() : '';
     if (!str) continue;
     total += 1;
@@ -99,7 +100,13 @@ export function glyphsFromPdfJsItems(rawItems: readonly unknown[], page: number)
       invalid += 1;
       continue;
     }
-    glyphs.push({ str, x, y, width, page });
+    const height =
+      typeof item.height === 'number' && Number.isFinite(item.height) && item.height > 0
+        ? item.height
+        : Array.isArray(t) && typeof t[3] === 'number' && Number.isFinite(t[3]) && Math.abs(t[3]) > 0
+        ? Math.abs(t[3])
+        : undefined;
+    glyphs.push({ str, x, y, width, height, page });
   }
   return { glyphs, total, invalid };
 }
@@ -129,12 +136,24 @@ export function groupGlyphsIntoRows(
 
   const rows: SpatialRow[] = [];
   for (const page of [...byPage.keys()].sort((a, b) => a - b)) {
-    const sorted = (byPage.get(page) ?? []).sort((a, b) => b.g.y - a.g.y || a.g.x - b.g.x || a.i - b.i);
+    const pageItems = byPage.get(page) ?? [];
+    let yTol = config.yTolerance;
+    const heights = pageItems
+      .map((it) => it.g.height)
+      .filter((h): h is number => typeof h === 'number' && h > 0);
+    if (heights.length >= 2) {
+      const sortedH = [...heights].sort((a, b) => a - b);
+      const medianH = sortedH[Math.floor(sortedH.length / 2)];
+      // Proportional scaling clamped safely between 2.0 (tiny ~5-6pt print) and 6.5 (large font)
+      yTol = Math.max(2.0, Math.min(6.5, medianH * 0.4));
+    }
+
+    const sorted = pageItems.sort((a, b) => b.g.y - a.g.y || a.g.x - b.g.x || a.i - b.i);
     const buckets: { anchor: number; items: SpatialGlyph[] }[] = [];
     for (const { g } of sorted) {
       const last = buckets[buckets.length - 1];
       // Anchor-based (not chained) so a long run of slightly drifting glyphs cannot swallow the next row.
-      if (last && Math.abs(last.anchor - g.y) <= config.yTolerance) last.items.push(g);
+      if (last && Math.abs(last.anchor - g.y) <= yTol) last.items.push(g);
       else buckets.push({ anchor: g.y, items: [g] });
     }
     for (const bucket of buckets) {
@@ -186,10 +205,17 @@ function moneyCells(row: SpatialRow): { cell: SpatialCell; value: number }[] {
   return out;
 }
 
-function descriptionX(row: SpatialRow): number | null {
+function descriptionBounds(row: SpatialRow): { x0: number; x1: number } | null {
   for (const cell of row.cells) {
     if (DATE_START_PATTERN.test(cell.text) || parseMoneyCell(cell.text) !== null) continue;
-    return cell.x0;
+    return { x0: cell.x0, x1: cell.x1 };
+  }
+  return null;
+}
+
+function firstMoneyX0(row: SpatialRow): number | null {
+  for (const cell of row.cells) {
+    if (parseMoneyCell(cell.text) !== null) return cell.x0;
   }
   return null;
 }
@@ -197,9 +223,10 @@ function descriptionX(row: SpatialRow): number | null {
 /**
  * Attaches wrapped description lines to the transaction row above them. A continuation
  * must be on the same page, carry no date and no amount, start in the description column
- * of the transaction row, sit within `maxContinuationGap` and not look like a boundary/total
- * row. Any non-continuation row ends the transaction context, so rows are never chained
- * across unrelated lines and two transactions are never merged.
+ * zone of the transaction row (including reasonable typographic indentations), sit within
+ * `maxContinuationGap` and not look like a boundary/total row. Any non-continuation row ends
+ * the transaction context, so rows are never chained across unrelated lines and two transactions
+ * are never merged.
  */
 export function attachContinuationLines(
   rows: readonly SpatialRow[],
@@ -207,17 +234,27 @@ export function attachContinuationLines(
 ): SpatialRow[] {
   const result: SpatialRow[] = [];
   let tx: SpatialRow | null = null;
-  let txDescX: number | null = null;
+  let txDescBounds: { x0: number; x1: number } | null = null;
+  let txMoneyMinX: number | null = null;
   let lastY = 0;
   for (const row of rows) {
     const isTx = startsWithDate(row) && moneyCells(row).length > 0;
     if (isTx) {
       tx = { ...row, continuations: [] };
-      txDescX = descriptionX(row);
+      txDescBounds = descriptionBounds(row);
+      txMoneyMinX = firstMoneyX0(row);
       lastY = row.y;
       result.push(tx);
       continue;
     }
+
+    const contStart = row.cells[0]?.x0;
+    const withinDescZone =
+      txDescBounds !== null &&
+      contStart !== undefined &&
+      contStart >= txDescBounds.x0 - config.columnAlignTolerance &&
+      (txMoneyMinX !== null ? contStart < txMoneyMinX - 5 : contStart <= txDescBounds.x1 + 120);
+
     const canAttach =
       tx !== null &&
       tx.page === row.page &&
@@ -225,8 +262,7 @@ export function attachContinuationLines(
       moneyCells(row).length === 0 &&
       !BOUNDARY_TEXT_PATTERN.test(row.text) &&
       tx.continuations.length < config.maxContinuationLines &&
-      txDescX !== null &&
-      Math.abs(row.cells[0].x0 - txDescX) <= config.columnAlignTolerance &&
+      withinDescZone &&
       lastY - row.y > 0 &&
       lastY - row.y <= config.maxContinuationGap;
     if (canAttach && tx) {
@@ -236,32 +272,60 @@ export function attachContinuationLines(
       continue;
     }
     tx = null;
-    txDescX = null;
+    txDescBounds = null;
+    txMoneyMinX = null;
     result.push(row);
   }
   return result;
 }
 
-interface ColumnAnchors {
+export interface ColumnAnchors {
+  date: number | null;
+  desc: number | null;
   out: number | null;
   in: number | null;
+  amount: number | null;
   balance: number | null;
 }
 
-const OUT_HEADER = /^(?:money\s*out|paid\s*out|debits?|withdrawals?|out)(?:\s*\(£\))?$/i;
-const IN_HEADER = /^(?:money\s*in|paid\s*in|credits?|deposits?|in)(?:\s*\(£\))?$/i;
-const BALANCE_HEADER = /^balance(?:\s*\(£\))?$/i;
+const DATE_HEADER = /^(?:date|trans(?:action)?\s*date|posting\s*date|process\s*date|when)$/i;
+const DESC_HEADER =
+  /^(?:description|trans(?:action)?\s*details|details|particulars|narrative|payment\s*details|merchant|payee|type\s*(?:&|\/)\s*details)$/i;
+const OUT_HEADER =
+  /^(?:money\s*out|paid\s*out|debits?|withdrawals?|payments?|charges?|out|amount\s*out)(?:\s*\([£$€]\))?$/i;
+const IN_HEADER =
+  /^(?:money\s*in|paid\s*in|credits?|deposits?|receipts?|in|amount\s*in)(?:\s*\([£$€]\))?$/i;
+const BALANCE_HEADER = /^(?:balance|running\s*balance|closing\s*balance|ending\s*balance)(?:\s*\([£$€]\))?$/i;
+const AMOUNT_HEADER = /^(?:amount|trans(?:action)?\s*amount)(?:\s*\([£$€]\))?$/i;
 
 export function detectColumnAnchors(row: SpatialRow): ColumnAnchors | null {
+  let date: number | null = null;
+  let desc: number | null = null;
   let out: number | null = null;
   let inn: number | null = null;
+  let amount: number | null = null;
   let balance: number | null = null;
+
   for (const cell of row.cells) {
-    if (OUT_HEADER.test(cell.text)) out = cell.x1;
-    else if (IN_HEADER.test(cell.text)) inn = cell.x1;
-    else if (BALANCE_HEADER.test(cell.text)) balance = cell.x1;
+    const text = cell.text.trim();
+    if (DATE_HEADER.test(text)) date = cell.x1;
+    else if (DESC_HEADER.test(text)) desc = cell.x1;
+    else if (OUT_HEADER.test(text)) out = cell.x1;
+    else if (IN_HEADER.test(text)) inn = cell.x1;
+    else if (AMOUNT_HEADER.test(text)) amount = cell.x1;
+    else if (BALANCE_HEADER.test(text)) balance = cell.x1;
   }
-  return balance !== null && (out !== null || inn !== null) ? { out, in: inn, balance } : null;
+
+  const hasMonetary = out !== null || inn !== null || amount !== null || balance !== null;
+  const hasStructuralPair =
+    (balance !== null && (out !== null || inn !== null || amount !== null)) ||
+    (out !== null && inn !== null) ||
+    ((date !== null || desc !== null) && hasMonetary);
+
+  if (hasStructuralPair) {
+    return { date, desc, out, in: inn, amount, balance };
+  }
+  return null;
 }
 
 function classifyNumericCells(
@@ -271,6 +335,7 @@ function classifyNumericCells(
 ): { amounts: number[]; balance: number | null } {
   const money = moneyCells(row);
   if (money.length === 0) return { amounts: [], balance: null };
+
   if (anchors) {
     const amounts: number[] = [];
     let balance: number | null = null;
@@ -278,6 +343,7 @@ function classifyNumericCells(
       const targets: [string, number | null][] = [
         ['out', anchors.out],
         ['in', anchors.in],
+        ['amount', anchors.amount],
         ['balance', anchors.balance],
       ];
       let best: string | null = null;
@@ -290,20 +356,38 @@ function classifyNumericCells(
           bestDist = d;
         }
       }
-      if (best === 'balance') balance = value;
-      else amounts.push(Math.abs(value)); // unsnapped cells stay candidates; never assume the first is the amount
+      if (best === 'balance') {
+        balance = value;
+      } else {
+        amounts.push(Math.abs(value));
+      }
     }
-    return { amounts, balance };
+    if (amounts.length > 0 || balance !== null) {
+      return { amounts, balance };
+    }
   }
+
   if (money.length === 1) return { amounts: [Math.abs(money[0].value)], balance: null };
+
   const last = money[money.length - 1];
-  return { amounts: money.slice(0, -1).map((m) => Math.abs(m.value)), balance: last.value };
+  const lastCellText = last.cell.text.toUpperCase();
+  const hasBalanceIndicator = /CR|DR\b/.test(lastCellText) || /\bBALANCE\b/i.test(row.text);
+  const first = money[0];
+  const colSeparated = last.cell.x0 - first.cell.x1 > 35;
+
+  if (hasBalanceIndicator || colSeparated) {
+    return { amounts: money.slice(0, -1).map((m) => Math.abs(m.value)), balance: last.value };
+  }
+
+  return { amounts: money.map((m) => Math.abs(m.value)), balance: null };
 }
 
 export interface SpatialPageResult {
   reliable: boolean;
   reason: string | null;
   rows: SpatialTransactionRow[];
+  layoutReliability?: 'RELIABLE' | 'DEGRADED' | 'UNKNOWN_LAYOUT';
+  anchors?: ColumnAnchors | null;
 }
 
 /**
@@ -318,29 +402,55 @@ export function reconstructPageTransactionRows(
   carriedAnchors: { current: ColumnAnchors | null } = { current: null },
 ): SpatialPageResult {
   const { glyphs, total, invalid } = glyphsFromPdfJsItems(rawItems, page);
-  if (total === 0) return { reliable: false, reason: 'NO_TEXT_ITEMS', rows: [] };
-  if (invalid / total > config.maxInvalidRatio) return { reliable: false, reason: 'INVALID_COORDINATES', rows: [] };
+  if (total === 0) return { reliable: false, reason: 'NO_TEXT_ITEMS', rows: [], layoutReliability: 'UNKNOWN_LAYOUT' };
+  if (invalid / total > config.maxInvalidRatio) {
+    return { reliable: false, reason: 'INVALID_COORDINATES', rows: [], layoutReliability: 'UNKNOWN_LAYOUT' };
+  }
   if (glyphs.length > 3 && glyphs.every((g) => g.y === glyphs[0].y)) {
-    return { reliable: false, reason: 'SINGLE_BASELINE', rows: [] };
+    return { reliable: false, reason: 'SINGLE_BASELINE', rows: [], layoutReliability: 'UNKNOWN_LAYOUT' };
   }
   if (glyphs.length > 3 && glyphs.every((g) => g.x === 0)) {
-    return { reliable: false, reason: 'ZERO_X_COORDINATES', rows: [] };
+    return { reliable: false, reason: 'ZERO_X_COORDINATES', rows: [], layoutReliability: 'UNKNOWN_LAYOUT' };
   }
 
   const visual = attachContinuationLines(groupGlyphsIntoRows(glyphs, config), config);
   const out: SpatialTransactionRow[] = [];
+  let detectedPageHeader = false;
+
   for (const row of visual) {
     const header = detectColumnAnchors(row);
     if (header) {
       carriedAnchors.current = header;
+      detectedPageHeader = true;
       continue;
     }
     if (!startsWithDate(row)) continue;
+
+    // Malformed transaction row check: must have at least one non-date, non-numeric cell with text
+    const hasDescriptionCell = row.cells.some(
+      (c) => !DATE_START_PATTERN.test(c.text) && parseMoneyCell(c.text) === null && c.text.length > 1,
+    );
+    if (!hasDescriptionCell) continue;
+
     const { amounts, balance } = classifyNumericCells(row, carriedAnchors.current, config);
     if (amounts.length === 0 && balance === null) continue;
     out.push({ page, text: row.text, amounts, balance });
   }
-  return { reliable: true, reason: null, rows: out };
+
+  const layoutReliability =
+    detectedPageHeader || carriedAnchors.current !== null
+      ? 'RELIABLE'
+      : out.length > 0
+      ? 'DEGRADED'
+      : 'UNKNOWN_LAYOUT';
+
+  return {
+    reliable: true,
+    reason: null,
+    rows: out,
+    layoutReliability,
+    anchors: carriedAnchors.current,
+  };
 }
 
 // ---------------------------------------------------------------------------

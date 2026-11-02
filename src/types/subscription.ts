@@ -87,4 +87,6 @@ export interface DetectedSubscription {
   daysUntilNextPayment?: number | null;
   hasCancellationTrap?: boolean;
   trapLabel?: string | null;
+  itemType?: 'SUBSCRIPTION' | 'BANK_FEE';
+  isHistorical?: boolean;
 }

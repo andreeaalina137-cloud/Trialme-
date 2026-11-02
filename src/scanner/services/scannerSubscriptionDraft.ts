@@ -9,14 +9,15 @@ export function buildScannerSubscriptionDraft(
   currencySymbol: string,
   fallbackDate: string,
 ): ScannerSubscriptionDraft {
+  const itemPrice = typeof item.price === 'number' && item.price > 0 ? item.price : ((item as any).amountGbp || 0);
   return {
-    name: item.name,
-    price: item.price > 0 ? item.price : preset?.monthly_price_gbp || 0,
+    name: item.name || (item as any).serviceName || 'Subscription',
+    price: itemPrice > 0 ? itemPrice : preset?.monthly_price_gbp || 0,
     currency: item.currency || currencySymbol,
-    frequency: item.frequency,
+    frequency: item.frequency || ((item as any).billingCycle === 'Annual' ? 'yearly' : 'monthly'),
     category: item.category || preset?.category || 'Other',
-    nextPaymentDate: item.nextPaymentDate || fallbackDate,
-    status: 'active',
+    nextPaymentDate: item.nextPaymentDate || (item as any).nextBillingDate || fallbackDate,
+    status: item.isHistorical ? 'cancelled' : 'active',
     color: item.color || '#D4AF7C',
     cancelUrl: item.cancelUrl || preset?.cancel_url,
     notes: item.notes || preset?.notes,

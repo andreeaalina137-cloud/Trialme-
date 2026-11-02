@@ -9,6 +9,8 @@ export function normalizeStatementLine(value: string): string {
     .replace(/[\u0000\u200B\u200C\u200D\u2060\uFEFF]/g, '')
     .replace(/[\u00A0\u202F]/g, ' ')
     .replace(/[‐‑‒–—―]/g, '-')
+    .replace(/\s*\|\s*/g, ' | ')
+    .replace(/(?<=\b\d{1,2})[04]an(?=\d{2}\b)/gi, ' Jan ')
     .replace(/[\t ]+/g, ' ')
     .trim();
 }
