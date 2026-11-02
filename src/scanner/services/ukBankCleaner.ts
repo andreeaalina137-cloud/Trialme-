@@ -22,6 +22,8 @@ import {
   extractCanonicalMerchantKey,
   areMerchantsFuzzyMatch,
 } from './statementNormalizer';
+import { buildMerchantFingerprint } from './merchantFingerprint';
+import { reconcileBalances, type BalanceRowInput } from './spatialPdfExtractor';
 
 // Stage 1: Summary lines common on UK statements/PDFs
 export const SUMMARY_ROW_PATTERN =
@@ -1249,7 +1251,76 @@ export function parseStatementInternal(
   }
 
   const accepted = cancelLinkedReversals(transactions, reversals);
+
+  // Extract candidate amounts and running balances to generate balance reconciliation evidence
+  const balanceInputs: BalanceRowInput[] = accepted.map((tx) => {
+    const extracted = extractRowAmountsAndBalance(tx.rawLine);
+    return {
+      amounts: extracted.amounts.length > 0 ? extracted.amounts : [tx.amountGbp],
+      balance: extracted.balance,
+      date: tx.dateIso,
+      existingIsCredit: tx.isCredit,
+    };
+  });
+
+  const evidences = reconcileBalances(balanceInputs);
+
+  for (let idx = 0; idx < accepted.length; idx++) {
+    const tx = accepted[idx];
+    if (!tx.normalizedMerchant || !tx.merchantFingerprint) {
+      const fp = buildMerchantFingerprint(tx.rawLine || tx.cleanedMerchant, {
+        amountGbp: tx.amountGbp,
+      });
+      tx.normalizedMerchant = fp.normalized;
+      tx.merchantFingerprint = fp.fingerprint;
+    }
+    if (evidences[idx] && evidences[idx].classification !== 'UNVERIFIED') {
+      tx.balanceEvidence = evidences[idx];
+    }
+  }
+
+  for (const tx of ledger) {
+    if (!tx.normalizedMerchant || !tx.merchantFingerprint) {
+      const fp = buildMerchantFingerprint(tx.rawLine || tx.cleanedMerchant, {
+        amountGbp: tx.amountGbp,
+      });
+      tx.normalizedMerchant = fp.normalized;
+      tx.merchantFingerprint = fp.fingerprint;
+    }
+  }
+
   return { accepted, ledger };
+}
+
+function extractRowAmountsAndBalance(line: string): { amounts: number[]; balance: number | null } {
+  const stripped = line
+    .replace(/\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b/g, ' ')
+    .replace(COUNTRY_PATTERN, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const matches = Array.from(
+    stripped.matchAll(/(?:^|\s)([-+]?[£$€]?\s*\d{1,4}(?:,\d{3})*\.\d{2})\s*(DR|CR)?(?:\s|$)/gi),
+  );
+  if (matches.length < 2) {
+    const val = extractGbpAmount(line);
+    return { amounts: val !== null ? [val] : [], balance: null };
+  }
+  const parsedValues = matches
+    .map((m) => {
+      const clean = m[1].replace(/[£$€\s]/g, '').replace(/,/g, '');
+      let val = Number(clean);
+      if (m[2]?.toUpperCase() === 'DR' || m[1].includes('-')) val = -Math.abs(val);
+      return val;
+    })
+    .filter((n) => Number.isFinite(n));
+
+  if (parsedValues.length >= 2) {
+    const balance = parsedValues[parsedValues.length - 1];
+    const candidateAmounts = parsedValues.slice(0, -1).map((v) => Math.abs(v));
+    return { amounts: candidateAmounts, balance };
+  }
+  return { amounts: parsedValues.map((v) => Math.abs(v)), balance: null };
 }
 
 export function parseStatementLines(lines: string[], now = new Date()): ScannedTransaction[] {

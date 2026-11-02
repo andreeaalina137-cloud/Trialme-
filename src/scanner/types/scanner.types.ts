@@ -90,6 +90,54 @@ export interface ScannerGateScores {
   recurrence: 0 | 1 | 2 | 3;
 }
 
+export type BalanceClassification =
+  | 'DEBIT_SUPPORTED'
+  | 'CREDIT_SUPPORTED'
+  | 'NO_MOVEMENT'
+  | 'AMBIGUOUS'
+  | 'NOT_RECONCILED'
+  | 'CONFLICT'
+  | 'UNVERIFIED';
+
+/** Supporting evidence only: never overrides the existing validation engine or the original amount. */
+export interface BalanceEvidence {
+  reconciled: boolean;
+  supportsDebit: boolean;
+  matchedAmount: number | null;
+  balanceDelta: number | null;
+  classification: BalanceClassification;
+  reason: string;
+  source?: 'spatial' | 'text';
+}
+
+export type RecurrenceClassification =
+  | 'CONFIRMED_SUBSCRIPTION'
+  | 'STRONG_RECURRING_CANDIDATE'
+  | 'POSSIBLE_RECURRING'
+  | 'ORDINARY_REPEATED_PURCHASE'
+  | 'UNKNOWN_REQUIRES_CONFIRMATION'
+  | 'INSUFFICIENT_DATA';
+
+export interface RecurrenceSummary {
+  classification: RecurrenceClassification;
+  cycle: 'weekly' | 'monthly' | 'annual' | null;
+  confidence: number;
+  occurrences: number;
+  meanIntervalDays: number | null;
+  intervalStdDevDays: number | null;
+  amountVariation: number | null;
+  expectedNextDate: string | null;
+  reasons: string[];
+}
+
+/** Compact per-row result of spatial reconstruction (glyph arrays are never retained). */
+export interface SpatialTransactionRow {
+  page: number;
+  text: string;
+  amounts: number[];
+  balance: number | null;
+}
+
 export interface ScannedTransaction {
   rawLine: string;
   cleanedMerchant: string;
@@ -113,6 +161,9 @@ export interface ScannedTransaction {
   reason?: string;
   paymentType?: UKPaymentType;
   canonicalMerchant?: string;
+  normalizedMerchant?: string;
+  merchantFingerprint?: string;
+  balanceEvidence?: BalanceEvidence;
 }
 
 export interface MatchedSubscription {
@@ -142,6 +193,7 @@ export interface MatchedSubscription {
   auditFlag?: string;
   subscriptionType?: 'Direct Debit' | 'Recurring Card (CPA)' | 'Standing Order';
   priceAlert?: PriceAlert | string;
+  recurrence?: RecurrenceSummary;
 }
 
 export interface ScannerProgress {
@@ -170,6 +222,8 @@ export interface PdfExtractionResult {
   engine: 'pdfjs' | 'native' | 'none';
   pageCount?: number;
   error?: string;
+  /** Spatially reconstructed numeric rows; supporting evidence only, `lines` stays authoritative. */
+  spatialRows?: SpatialTransactionRow[];
 }
 
 export interface OcrExecutionResult {

@@ -16,10 +16,10 @@ export function normalizeStatementLine(value: string): string {
 /** Repairs only high-signal OCR spacing patterns; meaningful unknown text is untouched. */
 export function repairCommonMerchantSpacing(value: string): string {
   return value
-    .replace(/N\s*E\s*T\s*F\s*L\s*I\s*X\s*(?:\.\s*C\s*O\s*M)?/gi, 'NETFLIX.COM')
-    .replace(/S\s*P\s*O\s*T\s*I\s*F\s*Y/gi, 'SPOTIFY')
-    .replace(/G\s*O\s*O\s*G\s*L\s*E\s+O\s*N\s*E/gi, 'GOOGLE ONE')
-    .replace(/M\s*I\s*C\s*R\s*O\s*S\s*O\s*F\s*T\s+365/gi, 'MICROSOFT 365');
+    .replace(/N\s*E\s*T\s*F\s*L\s*I\s*X(?:\s*\.\s*C\s*O\s*M)?\b/gi, 'NETFLIX.COM')
+    .replace(/S\s*P\s*O\s*T\s*I\s*F\s*Y\b/gi, 'SPOTIFY')
+    .replace(/G\s*O\s*O\s*G\s*L\s*E\s+O\s*N\s*E\b/gi, 'GOOGLE ONE')
+    .replace(/M\s*I\s*C\s*R\s*O\s*S\s*O\s*F\s*T\s+365\b/gi, 'MICROSOFT 365');
 }
 
 /** Repairs common bank/OCR abbreviations without guessing at arbitrary words. */
@@ -47,6 +47,30 @@ export function normalizeStatementLines(lines: string[]): string[] {
  */
 export function extractCanonicalMerchantKey(rawOrClean: string): string {
   if (!rawOrClean) return '';
+  const normalized = stripMerchantNoise(rawOrClean, true);
+
+  // Normalize specific aliases to canonical names
+  if (/^NETFLIX\b/.test(normalized)) return 'NETFLIX';
+  if (/^SPOTIFY\b/.test(normalized)) return 'SPOTIFY';
+  if (/^AMAZON\s*(?:PRIME|VIDEO)?\b|^AMZN\s*(?:PRIME|MKTP)?\b/.test(normalized)) return 'AMAZON PRIME';
+  if (/^DISNEY\s*(?:PLUS|\+)?\b/.test(normalized)) return 'DISNEY PLUS';
+  if (/^YOUTUBE\s*(?:PREMIUM)?\b/.test(normalized)) return 'YOUTUBE PREMIUM';
+  if (/^MICROSOFT\s*(?:365|OFFICE)?\b|^MSFT\b/.test(normalized)) return 'MICROSOFT 365';
+  if (/^GOOGLE\s*(?:ONE)?\b/.test(normalized)) return 'GOOGLE ONE';
+  if (/^PURE\s*GYM\b|^PUREGYM\b/.test(normalized)) return 'PUREGYM';
+
+  return normalized;
+}
+
+/**
+ * Alias-free noise stripping shared by the canonical key and the merchant fingerprint.
+ * Removes bank rails, references, card markers, dates, amounts, locations and company
+ * suffixes, but never maps a merchant onto another brand. When `applyBankAbbreviations`
+ * is false the context-dependent abbreviation repairs (e.g. H3G) are skipped so the
+ * caller can apply them only when bank context supports it.
+ */
+export function stripMerchantNoise(rawOrClean: string, applyBankAbbreviations = true): string {
+  if (!rawOrClean) return '';
 
   let normalized = rawOrClean
     .normalize('NFKC')
@@ -57,11 +81,13 @@ export function extractCanonicalMerchantKey(rawOrClean: string): string {
     .replace(/www\.[^\s]+/gi, '');
 
   // Repair known abbreviations & spacing first
-  normalized = repairBankMerchantAbbreviations(repairCommonMerchantSpacing(normalized));
+  normalized = applyBankAbbreviations
+    ? repairBankMerchantAbbreviations(repairCommonMerchantSpacing(normalized))
+    : repairCommonMerchantSpacing(normalized);
 
   // Strip leading bank rails / payment prefixes
   normalized = normalized.replace(
-    /\b(?:CARD\s+SUBSCRIPTION|RECURRING\s+CARD\s+PURCHASE|CARD\s+PAYMENT(?:\s+TO)?|DIRECT\s+DEBIT(?:\s+PAYMENT|\s+TO)?|D\/D|DDR|DD|STANDING\s+ORDER|SO|STO|POS|DEB|BACS|BILL\s+PAYMENT|AUTOMATIC\s+PAYMENT|PREAPPROVED\s+PAYMENT|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|OUTWARD\s+FASTER\s+PAYMENT|FASTER\s+PAYMENT(?:\s+TO)?|FP|FPI|FPO|BGC|TFR|MOB|VIS|MASTERCARD)\b/gi,
+    /\b(?:CARD\s+SUBSCRIPTION|RECURRING\s+CARD\s+PURCHASE|CARD\s+PAYMENT(?:\s+TO)?|DIRECT\s+DEBIT(?:\s+PAYMENT)?(?:\s+TO)?|D\/D|DDR|DD|STANDING\s+ORDER|SO|STO|POS|DEB|BACS|BILL\s+PAYMENT|AUTOMATIC\s+PAYMENT|PREAPPROVED\s+PAYMENT|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|OUTWARD\s+FASTER\s+PAYMENT|FASTER\s+PAYMENT(?:\s+TO)?|FP|FPI|FPO|BGC|TFR|MOB|VIS|MASTERCARD)\b/gi,
     ' ',
   );
 
@@ -100,16 +126,6 @@ export function extractCanonicalMerchantKey(rawOrClean: string): string {
 
   // Keep letters, digits, spaces, plus sign (for Disney+)
   normalized = normalized.replace(/[^\w\s+]/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
-
-  // Normalize specific aliases to canonical names
-  if (/^NETFLIX\b/.test(normalized)) return 'NETFLIX';
-  if (/^SPOTIFY\b/.test(normalized)) return 'SPOTIFY';
-  if (/^AMAZON\s*(?:PRIME|VIDEO)?\b|^AMZN\s*(?:PRIME|MKTP)?\b/.test(normalized)) return 'AMAZON PRIME';
-  if (/^DISNEY\s*(?:PLUS|\+)?\b/.test(normalized)) return 'DISNEY PLUS';
-  if (/^YOUTUBE\s*(?:PREMIUM)?\b/.test(normalized)) return 'YOUTUBE PREMIUM';
-  if (/^MICROSOFT\s*(?:365|OFFICE)?\b|^MSFT\b/.test(normalized)) return 'MICROSOFT 365';
-  if (/^GOOGLE\s*(?:ONE)?\b/.test(normalized)) return 'GOOGLE ONE';
-  if (/^PURE\s*GYM\b|^PUREGYM\b/.test(normalized)) return 'PUREGYM';
 
   return normalized;
 }

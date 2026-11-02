@@ -1,5 +1,6 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import type { PdfExtractionResult } from '../types/scanner.types';
+import type { PdfExtractionResult, SpatialTransactionRow } from '../types/scanner.types';
+import { reconstructPageTransactionRows } from './spatialPdfExtractor';
 
 let pdfWorkerUrl: string | null = null;
 
@@ -576,6 +577,7 @@ interface PdfJsExtractInternalResult {
   lines: string[];
   pageCount: number;
   error?: string;
+  spatialRows?: SpatialTransactionRow[];
 }
 
 async function extractWithPdfJs(buffer: ArrayBuffer): Promise<PdfJsExtractInternalResult | null> {
@@ -618,6 +620,8 @@ async function extractWithPdfJs(buffer: ArrayBuffer): Promise<PdfJsExtractIntern
     }
 
     const allLines: string[] = [];
+    const allSpatialRows: SpatialTransactionRow[] = [];
+    const carriedAnchors = { current: null };
 
     try {
       // Stream page-by-page and release each page's internal buffers immediately
@@ -625,6 +629,14 @@ async function extractWithPdfJs(buffer: ArrayBuffer): Promise<PdfJsExtractIntern
         const page = await pdf.getPage(i);
         try {
           const content = await page.getTextContent();
+          try {
+            const spatialRes = reconstructPageTransactionRows(content.items, i, undefined, carriedAnchors);
+            if (spatialRes.reliable && spatialRes.rows.length > 0) {
+              allSpatialRows.push(...spatialRes.rows);
+            }
+          } catch {
+            // Spatial reconstruction is supporting evidence only; never break line extraction
+          }
           const pageLines = extractPageLinesFromItems(content.items);
           allLines.push(...pageLines);
           // Free raw text item references immediately to allow garbage collection
@@ -637,7 +649,7 @@ async function extractWithPdfJs(buffer: ArrayBuffer): Promise<PdfJsExtractIntern
         }
       }
 
-      return { lines: allLines, pageCount };
+      return { lines: allLines, pageCount, spatialRows: allSpatialRows };
     } finally {
       try {
         const destroy = (pdf as unknown as { destroy?: () => Promise<void> }).destroy;
@@ -675,6 +687,7 @@ export async function extractPdfText(file: File | Blob): Promise<PdfExtractionRe
       usedOcrFallback: false,
       engine: 'pdfjs',
       pageCount: pdfJsRes.pageCount,
+      spatialRows: pdfJsRes.spatialRows,
     };
   }
 

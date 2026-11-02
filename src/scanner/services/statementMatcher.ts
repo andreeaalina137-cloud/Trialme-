@@ -16,6 +16,7 @@ import type {
   SubscriptionEvidence,
   PriceAlert,
   ConfirmingTransaction,
+  RecurrenceSummary,
 } from '../types/scanner.types';
 import {
   FLAG_PRICE_HIKE,
@@ -27,6 +28,7 @@ import {
   areMerchantsFuzzyMatch,
 } from './statementNormalizer';
 import { getScannerLearning } from './scannerLearningMemory';
+import { analyzeRecurrence } from './recurrenceMathEngine';
 
 const FUZZY_MIN_SIMILARITY = 0.75;
 const FUZZY_MAX_EDITS = 2;
@@ -665,6 +667,7 @@ export function evaluateSubscriptionRecurrenceAndEvidence(
   priceAlert?: PriceAlert | null;
   auditFlag?: string | null;
   evidence: SubscriptionEvidence;
+  recurrence?: RecurrenceSummary;
 } {
   // Sort ascending by date
   const sorted = [...txs].sort((a, b) => (a.dateIso || '').localeCompare(b.dateIso || ''));
@@ -863,6 +866,16 @@ export function evaluateSubscriptionRecurrenceAndEvidence(
   const isVerifiedRecurring =
     intervalConfirmed || hasPriceHike || hasTrialConverted || sorted.length > 1;
 
+  const recurrence = analyzeRecurrence(
+    sorted.map((t) => t.dateIso),
+    sorted.map((t) => t.amountGbp),
+    {
+      isKnownMerchant: Boolean(preset && preset.monthly_price_gbp > 0),
+      hasExplicitBankMarker: subscriptionType === 'Direct Debit',
+      now,
+    },
+  );
+
   return {
     isVerifiedRecurring,
     billingCycle,
@@ -884,6 +897,7 @@ export function evaluateSubscriptionRecurrenceAndEvidence(
       priceAlert: priceAlert || null,
       auditFlag: auditFlag || null,
     },
+    recurrence,
   };
 }
 
@@ -1218,6 +1232,9 @@ export function matchStatementTransactions(
     }
     if (evidenceResult.auditFlag) {
       entry.match.auditFlag = evidenceResult.auditFlag;
+    }
+    if (evidenceResult.recurrence) {
+      entry.match.recurrence = evidenceResult.recurrence;
     }
     if (evidenceResult.isVerifiedRecurring) {
       entry.match.isVerifiedRecurring = true;

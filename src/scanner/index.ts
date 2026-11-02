@@ -1,13 +1,8 @@
 export {
-  ScannerScreen,
   DEMO_UK_STATEMENT_LINES,
   BARCLAYS_SAMPLE_LINES,
   REVOLUT_SAMPLE_LINES,
-} from './components/ScannerScreen';
-export { UploadDropzone } from './components/UploadDropzone';
-export { ScanningRadar } from './components/ScanningRadar';
-export { DetectedSubCard } from './components/DetectedSubCard';
-export { BatchActionFooter } from './components/BatchActionFooter';
+} from './types/scanner.types';
 export { useStatementScanner } from './hooks/useStatementScanner';
 export { preprocessStatementImage } from './services/imagePreprocessor';
 export { extractPdfText, looksLikePdf, renderPdfPagesForOcr } from './services/pdfTextExtractor';
@@ -44,6 +39,26 @@ export {
 export { detectBankFormat } from './services/bankFormatDetector';
 export { buildScannerSubscriptionDraft } from './services/scannerSubscriptionDraft';
 export {
+  reconstructPageTransactionRows,
+  reconcileBalances,
+  groupGlyphsIntoRows,
+  attachContinuationLines,
+  detectColumnAnchors,
+  glyphsFromPdfJsItems,
+  parseMoneyCell,
+  DEFAULT_SPATIAL_CONFIG,
+  DEFAULT_BALANCE_CONFIG,
+} from './services/spatialPdfExtractor';
+export {
+  buildMerchantFingerprint,
+  fnv1a32,
+} from './services/merchantFingerprint';
+export {
+  analyzeRecurrence,
+  calculateExpectedNextDate,
+  DEFAULT_RECURRENCE_OPTIONS,
+} from './services/recurrenceMathEngine';
+export {
   FLAG_SUMMARY_ROW,
   FLAG_INVALID_DATE,
   FLAG_DUPLICATE,
@@ -79,4 +94,26 @@ export type {
   ConfirmingTransaction,
   UKPaymentType,
   TransactionStatus,
+  BalanceClassification,
+  BalanceEvidence,
+  RecurrenceClassification,
+  RecurrenceSummary,
+  SpatialTransactionRow,
 } from './types/scanner.types';
+export type {
+  SpatialGlyph,
+  SpatialCell,
+  SpatialRow,
+  SpatialConfig,
+  SpatialPageResult,
+  BalanceRowInput,
+  BalanceReconcileConfig,
+} from './services/spatialPdfExtractor';
+export type {
+  MerchantFingerprint,
+  MerchantAmbiguity,
+  FingerprintOptions,
+} from './services/merchantFingerprint';
+export type {
+  RecurrenceOptions,
+} from './services/recurrenceMathEngine';
