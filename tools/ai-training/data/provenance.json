@@ -1,0 +1,99 @@
+{
+  "seed": 20261103,
+  "generatedAt": "2026-11-03T00:39:15.721Z",
+  "totalRows": 10934,
+  "splits": {
+    "train": {
+      "rows": 7690,
+      "families": 396,
+      "SUBSCRIPTION_SERVICE": 3846,
+      "ONE_OFF_RETAIL": 2178,
+      "GAMBLING": 242,
+      "BILL_OR_CREDIT": 528,
+      "TRANSFER_OR_CASH": 352,
+      "BANK_FEE": 272,
+      "AMBIGUOUS": 272
+    },
+    "val": {
+      "rows": 1455,
+      "families": 75,
+      "SUBSCRIPTION_SERVICE": 748,
+      "ONE_OFF_RETAIL": 462,
+      "GAMBLING": 44,
+      "BILL_OR_CREDIT": 110,
+      "TRANSFER_OR_CASH": 35,
+      "BANK_FEE": 28,
+      "AMBIGUOUS": 28
+    },
+    "test": {
+      "rows": 1309,
+      "families": 67,
+      "SUBSCRIPTION_SERVICE": 638,
+      "ONE_OFF_RETAIL": 462,
+      "GAMBLING": 44,
+      "BILL_OR_CREDIT": 88,
+      "TRANSFER_OR_CASH": 35,
+      "BANK_FEE": 21,
+      "AMBIGUOUS": 21
+    },
+    "test_ocr": {
+      "rows": 480,
+      "families": 67,
+      "SUBSCRIPTION_SERVICE": 231,
+      "ONE_OFF_RETAIL": 168,
+      "GAMBLING": 16,
+      "BILL_OR_CREDIT": 32,
+      "TRANSFER_OR_CASH": 15,
+      "BANK_FEE": 9,
+      "AMBIGUOUS": 9
+    }
+  },
+  "bySource": {
+    "monetry-authored-family (public brand names, synthetic descriptors)": 9445,
+    "monetry-catalogue (src/data/monetry_database.json)": 392,
+    "monetry-authored-template-synthetic (random synthetic person names)": 437,
+    "monetry-authored-template-synthetic (UK bank fee terminology)": 330,
+    "monetry-authored-template-synthetic (merchant-free descriptors)": 330
+  },
+  "galleryMerchants": 340,
+  "identityTest": {
+    "seen": 1164,
+    "unseen": 400
+  },
+  "adversarialRows": 50,
+  "leakageChecks": "PASSED: every family confined to exactly one split; no adversarial text appears in the dataset",
+  "externalDatasets": [
+    {
+      "name": "Xenova/all-MiniLM-L6-v2 (pretrained encoder, NOT a dataset; used as frozen foundation)",
+      "url": "https://huggingface.co/Xenova/all-MiniLM-L6-v2",
+      "revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+      "licence": "apache-2.0",
+      "permittedUse": "commercial use and redistribution permitted with notice",
+      "recordsUsed": 0
+    },
+    {
+      "name": "mitulshah/transaction-categorization",
+      "url": "https://huggingface.co/datasets/mitulshah/transaction-categorization",
+      "licence": "mit (per dataset card metadata)",
+      "status": "NOT USED",
+      "reason": "data files are gated (HTTP restricted without authentication); no access control was bypassed. Card also describes the data as machine-generated, so it would not add authentic UK ground truth.",
+      "recordsUsed": 0
+    },
+    {
+      "name": "Sumeetgpt/indian-transaction-categorization-synthetic, Karthik-Eswar/indian-transaction-categorization-synthetic",
+      "url": "https://huggingface.co/datasets?search=transaction%20categorization",
+      "licence": "mit",
+      "status": "NOT USED",
+      "reason": "Indian merchants; synthetic; no UK relevance",
+      "recordsUsed": 0
+    },
+    {
+      "name": "qppd/bank-transaction-fraud and other \"bank transaction\" datasets",
+      "url": "https://huggingface.co/datasets?search=bank%20transaction",
+      "licence": "mixed / frequently unspecified",
+      "status": "NOT USED",
+      "reason": "fraud-detection or numeric tables without UK merchant descriptions; unspecified licences cannot be relied on",
+      "recordsUsed": 0
+    }
+  ]
+}

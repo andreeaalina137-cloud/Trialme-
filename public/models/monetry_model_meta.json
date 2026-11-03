@@ -1,0 +1,42 @@
+{
+  "modelName": "monetry-semantic-v1",
+  "version": "1.0.0",
+  "exportedAt": "2026-11-03T01:03:22.526Z",
+  "architecture": "Distilled Model2Vec INT8 Token Embeddings + Multi-Task Linear Classification Heads",
+  "foundationModel": "Xenova/all-MiniLM-L6-v2",
+  "quantization": "INT8 Symmetric Per-Token Scaling",
+  "artifactSizeMb": 2.9,
+  "vocabSize": 6282,
+  "hiddenDim": 384,
+  "temperature": 1,
+  "classes": [
+    "SUBSCRIPTION_SERVICE",
+    "ONE_OFF_RETAIL",
+    "TRANSFER_OR_CASH",
+    "BANK_FEE",
+    "BILL_OR_CREDIT",
+    "GAMBLING",
+    "AMBIGUOUS"
+  ],
+  "categories": [
+    "Streaming",
+    "AI & Tech",
+    "Music & Audio",
+    "Fitness & Gym",
+    "Productivity",
+    "Gaming",
+    "News & Magazines",
+    "Food & Delivery",
+    "Utilities",
+    "Other"
+  ],
+  "galleryMerchantsCount": 340,
+  "metrics": {
+    "testSubscriptionPrecision": 100,
+    "adversarialUnsafeClaims": 0,
+    "adversarialTotal": 50,
+    "eceAfterCalibration": 0.0609,
+    "testSampleCount": 1309,
+    "valSampleCount": 1455
+  }
+}

@@ -33,6 +33,7 @@ import {
 } from './statementNormalizer';
 import { getScannerLearning } from './scannerLearningMemory';
 import { analyzeRecurrence } from './recurrenceMathEngine';
+import { classifyTransactionWithAI } from './aiSemanticClassifier';
 
 const FUZZY_MIN_SIMILARITY = 0.75;
 const FUZZY_MAX_EDITS = 2;
@@ -1084,6 +1085,10 @@ export function matchStatementTransactions(
       };
     }
     if (!candidate) {
+      const aiEv = classifyTransactionWithAI(tx.cleanedMerchant || tx.rawLine);
+      if (aiEv) {
+        tx.aiEvidence = aiEv;
+      }
       const merchantKey =
         /^APPLE\s+BILLING$/i.test(tx.cleanedMerchant)
           ? `APPLEBILLING-${Math.round(tx.amountGbp * 100)}`
@@ -1092,6 +1097,20 @@ export function matchStatementTransactions(
             : alphanum(tx.cleanedMerchant);
       const occurrenceCount = occurrenceCounts.get(merchantKey) ?? 0;
       const intervalCheck = computeIntervalRecurrence(datesByMerchantKey.get(merchantKey) ?? []);
+
+      // Supplementary AI Evidence: if AI determined with high confidence that this is non-subscription
+      // retail, bank fee, transfer, or bill, and there is no confirmed interval recurrence across transactions,
+      // respect AI negative evidence and do not treat as an unknown subscription.
+      if (
+        aiEv &&
+        !aiEv.isSubscriptionCandidate &&
+        aiEv.confidence >= 0.90 &&
+        !tx.hasStrongRecurringMarker &&
+        !intervalCheck.confirmed
+      ) {
+        continue;
+      }
+
       if (!isPotentialUnknownSubscription(tx, occurrenceCount, intervalCheck.confirmed)) continue;
 
       const recurrenceScore: 0 | 1 | 2 | 3 =
@@ -1131,7 +1150,9 @@ export function matchStatementTransactions(
         id: `scan-${unknownId}`,
         presetId: unknownId,
         serviceName: unknownMerchantDisplay(tx.cleanedMerchant, tx.rawLine),
-        category: inferUnknownCategory(tx.cleanedMerchant),
+        category: (aiEv?.predictedCategory && aiEv.confidence >= 0.70)
+          ? (aiEv.predictedCategory as SubscriptionCategory)
+          : inferUnknownCategory(tx.cleanedMerchant),
         amountGbp: tx.amountGbp,
         billingCycle: cycle,
         billingDay: tx.billingDay,
@@ -1154,6 +1175,7 @@ export function matchStatementTransactions(
         reasonCodes,
         isHistorical,
         itemType: classifyScannerItemType(unknownMerchantDisplay(tx.cleanedMerchant, tx.rawLine), unknownId, [tx.rawLine]),
+        aiEvidence: aiEv ?? undefined,
       };
 
       const groupTxs = txsByGroupKey.get(unknownId) ?? [];

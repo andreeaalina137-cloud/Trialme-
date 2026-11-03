@@ -1,0 +1,8 @@
+{
+  "model": "Xenova/all-MiniLM-L6-v2",
+  "revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+  "vocabSize": 30522,
+  "hidden": 384,
+  "quantization": "onnx model_quantized.onnx (int8) via onnxruntime-web wasm",
+  "seconds": 104.731
+}

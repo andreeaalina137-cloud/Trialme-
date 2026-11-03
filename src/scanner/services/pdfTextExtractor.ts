@@ -390,8 +390,16 @@ function coalescePdfLines(lines: string[]): string[] {
   const result: string[] = [];
   let pending: string[] = [];
 
-  const isContinuation = (line: string): boolean =>
-    /^(?:Către|Catre|To|From|De la|Card|Referință|Referinta|Cursul)\s*:?/i.test(line);
+  const isContinuation = (line: string): boolean => {
+    if (
+      PDF_GBP_AMOUNT_PATTERN.test(line) ||
+      PDF_LEADING_DATE_PATTERN.test(line) ||
+      /\b(?:Card\s+Transaction|Online\s+Transaction|Automated\s+Credit)\b/i.test(line)
+    ) {
+      return false;
+    }
+    return /^(?:Către|Catre|To|From|De la|Referință|Referinta|Cursul|Card\s*:|Card\s+\*)\s*:?/i.test(line);
+  };
 
   const flush = () => {
     const joined = pending.join(' ').replace(/\s+/g, ' ').trim();

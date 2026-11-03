@@ -21,8 +21,10 @@ import {
 import {
   parseStatementLines,
   parseStatementAuditLedger,
+  parseStatementInternal,
   detectDocumentDateFormat,
   extractUkDate,
+  extractGbpAmount,
   extractStatementPeriod,
   resolveYearForMonth,
 } from '../src/scanner/services/ukBankCleaner';
@@ -883,4 +885,49 @@ test('OCR statement lines: parses unspaced dates, pipes, and OCR month artifacts
   assert.equal(parsed[2].amountGbp, 10.99);
   assert.ok(parsed[3].dateIso?.endsWith('-09-24'));
   assert.equal(parsed[3].amountGbp, 10.36);
+});
+
+test('NatWest card transaction splitting: separates consecutive card transactions and strips card auth prefixes', () => {
+  const rawLines = [
+    'Card Transaction 7248 23SEP25 CD LIDL GB NOTTINGHAM CAR LIDL GB NOTTI GB 10.36 79.38',
+    'Card Transaction 9911 26SEP25 D CLEARPAY CLEARPAY.CO.U GB 3.72 80.66',
+    'Card Transaction 7248 25SEP25 CD COSTA MAPPERLEY NOTTINGHAM GB 3.60 77.06',
+    'Card Transaction 7248 28SEP25 D APPLE.COM/BILL CORK IE 4.99 141.16',
+    'Card Transaction 2193 29SEP25 BRITISH GAS LEEDS GB 41.00 1,437.69',
+  ];
+  const parsed = parseStatementLines(rawLines, new Date('2025-10-01T12:00:00Z'));
+  assert.equal(parsed.length, 5, 'Every card transaction must be isolated as an independent transaction row');
+  assert.equal(parsed[0].amountGbp, 10.36);
+  assert.equal(parsed[0].cleanedMerchant, 'LIDL NOTTINGHAM CAR LIDL NOTTI');
+  assert.equal(parsed[1].amountGbp, 3.72);
+  assert.equal(parsed[1].cleanedMerchant, 'CLEARPAY CLEARPAY.CO.U');
+  assert.equal(parsed[2].amountGbp, 3.60);
+  assert.equal(parsed[3].amountGbp, 4.99);
+  assert.equal(parsed[3].cleanedMerchant, 'APPLE BILLING');
+  assert.equal(parsed[4].amountGbp, 41.00);
+  assert.equal(parsed[4].cleanedMerchant, 'BRITISH GAS LEEDS');
+});
+
+test('Financial safety: prevents balance column false positives and unverified integer extrapolation', () => {
+  // 1. Columnar statement line where debit column is unpunctuated integer: balance must not be extracted as amount
+  const lineWithIntegerDebitAndDecimalBalance = '02 Jan 24 | PAYPAL SPOTIFY | DEB | 1099 344.93';
+  const extractedAmount = extractGbpAmount(lineWithIntegerDebitAndDecimalBalance);
+  assert.equal(extractedAmount, null, 'Running balance 344.93 must not be extracted as the transaction amount');
+
+  // 2. Unpunctuated 3-digit number (500) without currency symbol or debit marker must never be assumed to be £500
+  const unpunctuatedIntegerLine = '18 Jan 24 | NATIONAL LOTTERY | DEB 500 020';
+  const integerParsed = extractGbpAmount(unpunctuatedIntegerLine);
+  assert.equal(integerParsed, null, 'Unpunctuated 500 must not be extracted as £500 without currency symbol or balance proof');
+
+  // 3. Quarantines rows where candidate amount equals the row balance column without debit reconciliation
+  const mockStatementWithBalanceAsDebit = [
+    'Date Description Amount Balance',
+    '01 Jan 2026 Balance Forward 500.00',
+    '02 Jan 2026 Monthly Subscription 10.00 490.00',
+    '03 Jan 2026 Ambiguous Row 490.00 490.00',
+  ];
+  const internalRes = parseStatementInternal(mockStatementWithBalanceAsDebit, new Date('2026-01-15T12:00:00Z'));
+  const ambiguousRow = internalRes.ledger.find((l) => l.rawLine.includes('Ambiguous Row'));
+  assert.ok(ambiguousRow, 'Ambiguous row must be in ledger');
+  assert.notEqual(ambiguousRow?.status, 'ACCEPTED', 'Row matching balance without debit delta must not be accepted');
 });

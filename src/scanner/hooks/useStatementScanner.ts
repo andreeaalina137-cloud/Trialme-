@@ -3,6 +3,7 @@ import { preprocessStatementImage } from '../services/imagePreprocessor';
 import { extractPdfText, looksLikePdf, renderPdfPagesForOcr } from '../services/pdfTextExtractor';
 import { runOfflineOcr } from '../services/ocrWorker';
 import { parseStatementLines } from '../services/ukBankCleaner';
+import { parseStatementFromOcrDocument } from '../services/ocrScannerBridge';
 import { matchStatementTransactions, detectStatementDateRange } from '../services/statementMatcher';
 import { detectBankFormat } from '../services/bankFormatDetector';
 import {
@@ -12,6 +13,7 @@ import {
   type ScannerResult,
   type ScannerSource,
   type ScannerStage,
+  type OcrDocument,
 } from '../types/scanner.types';
 
 const STAGE_ENHANCE: ScannerProgress = {
@@ -81,12 +83,20 @@ export function useStatementScanner() {
   }, []);
 
   const finishWithLines = useCallback(
-    async (lines: string[], source: ScannerSource, startedAt: number, runId: number) => {
+    async (
+      lines: string[],
+      source: ScannerSource,
+      startedAt: number,
+      runId: number,
+      ocrDoc?: OcrDocument,
+    ) => {
       applyProgress(STAGE_CLEAN);
       await wait(220);
       if (runId !== runIdRef.current) return;
 
-      const transactions = parseStatementLines(lines);
+      const transactions = ocrDoc
+        ? parseStatementFromOcrDocument(ocrDoc)
+        : parseStatementLines(lines);
       if (transactions.length === 0) {
         setError({
           code: 'parse_failed',
@@ -265,13 +275,17 @@ export function useStatementScanner() {
         }
 
         if (ocr.lines.length === 0) {
-          setError({ code: 'parse_failed', message: NO_READABLE_TEXT_MESSAGE });
+          const isLowRes = preprocessed.width < 550 && preprocessed.height / preprocessed.width > 1.6;
+          const msg = isLowRes
+            ? `Image resolution is too low (${preprocessed.width}px width) for optical character recognition. Please upload a full-resolution photo or digital PDF export.`
+            : NO_READABLE_TEXT_MESSAGE;
+          setError({ code: 'parse_failed', message: msg });
           setStage('error');
-          setProgress({ percent: 100, label: 'Statement text could not be read.', stage: 'error' });
+          setProgress({ percent: 100, label: isLowRes ? 'Image resolution too low.' : 'Statement text could not be read.', stage: 'error' });
           return;
         }
 
-        await finishWithLines(ocr.lines, 'image', startedAt, runId);
+        await finishWithLines(ocr.lines, 'image', startedAt, runId, ocr.document);
       } catch (cause) {
         if (runId !== runIdRef.current) return;
         const detail = cause instanceof Error && cause.message ? ` ${cause.message}` : '';

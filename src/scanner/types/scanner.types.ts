@@ -82,7 +82,8 @@ export type ScannerReasonCode =
   | 'INTERVAL_CONFIRMED'
   | 'RETURNED_PAYMENT_REJECTED'
   | 'BRAND_ONLY_REJECTED'
-  | 'INSUFFICIENT_EVIDENCE';
+  | 'INSUFFICIENT_EVIDENCE'
+  | 'OCR_UNCERTAIN';
 
 export interface ScannerGateScores {
   validity: 0 | 1 | 2 | 3;
@@ -164,6 +165,8 @@ export interface ScannedTransaction {
   normalizedMerchant?: string;
   merchantFingerprint?: string;
   balanceEvidence?: BalanceEvidence;
+  ocrEvidence?: OcrRowEvidence;
+  aiEvidence?: AITransactionEvidence;
 }
 
 export interface MatchedSubscription {
@@ -196,6 +199,29 @@ export interface MatchedSubscription {
   recurrence?: RecurrenceSummary;
   isHistorical?: boolean;
   itemType?: ScannerItemType;
+  aiEvidence?: AITransactionEvidence;
+}
+
+export type AILabel =
+  | 'SUBSCRIPTION_SERVICE'
+  | 'ONE_OFF_RETAIL'
+  | 'TRANSFER_OR_CASH'
+  | 'BANK_FEE'
+  | 'BILL_OR_CREDIT'
+  | 'GAMBLING'
+  | 'AMBIGUOUS';
+
+export interface AITransactionEvidence {
+  predictedLabel: AILabel;
+  predictedCategory: string;
+  confidence: number;
+  isSubscriptionCandidate: boolean;
+  canonicalMerchantMatch?: {
+    merchant: string;
+    similarity: number;
+  } | null;
+  reason?: string;
+  modelVersion: string;
 }
 
 export type ScannerItemType = 'SUBSCRIPTION' | 'BANK_FEE';
@@ -242,10 +268,63 @@ export interface PdfExtractionResult {
   spatialRows?: SpatialTransactionRow[];
 }
 
+export interface OcrBbox {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+  width?: number;
+  height?: number;
+}
+
+export interface OcrToken {
+  text: string;
+  confidence: number;
+  bbox: OcrBbox;
+  page?: number;
+}
+
+export interface OcrStructuredLine {
+  rawText: string;
+  normalizedText: string;
+  page: number;
+  confidence: number;
+  bbox: OcrBbox;
+  tokens: OcrToken[];
+  readingOrder: number;
+  isLowConfidence?: boolean;
+}
+
+export interface OcrRowEvidence {
+  rawText: string;
+  normalizedText: string;
+  page: number;
+  bbox: OcrBbox;
+  confidence: number;
+  tokens: OcrToken[];
+  readingOrder: number;
+  isLowConfidence?: boolean;
+  columnClassification?: 'MONEY_OUT' | 'MONEY_IN' | 'BALANCE' | 'UNKNOWN';
+}
+
+export interface OcrDocument {
+  rawText: string;
+  lines: string[];
+  structuredLines: OcrStructuredLine[];
+  tokens: OcrToken[];
+  confidence: number;
+  engine: 'tesseract' | 'unavailable' | 'mock';
+  pageCount?: number;
+}
+
 export interface OcrExecutionResult {
   text: string;
   lines: string[];
-  engine: 'tesseract' | 'unavailable';
+  engine: 'tesseract' | 'unavailable' | 'mock';
+  confidence?: number;
+  tokens?: OcrToken[];
+  structuredLines?: OcrStructuredLine[];
+  document?: OcrDocument;
 }
 
 export interface StatementPreset {

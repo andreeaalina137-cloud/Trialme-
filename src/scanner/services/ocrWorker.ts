@@ -1,4 +1,5 @@
 import type { OcrExecutionResult } from '../types/scanner.types';
+import { buildOcrDocumentFromTesseract } from './ocrScannerBridge';
 
 export type OcrProgressHandler = (percent: number, status: string) => void;
 
@@ -31,8 +32,12 @@ async function importOptional(specifier: string): Promise<Record<string, unknown
 }
 
 interface TesseractWorkerLike {
-  recognize: (image: Blob | HTMLCanvasElement | OffscreenCanvas) => Promise<{
-    data: { text: string };
+  recognize: (
+    image: Blob | HTMLCanvasElement | OffscreenCanvas | Buffer | Uint8Array,
+    options?: Record<string, unknown>,
+    output?: Record<string, boolean>,
+  ) => Promise<{
+    data: any;
   }>;
   terminate: () => Promise<void>;
 }
@@ -77,9 +82,19 @@ export async function runOfflineOcr(
     if (typeof window === 'undefined' && typeof Blob !== 'undefined' && image instanceof Blob) {
       input = Buffer.from(await image.arrayBuffer());
     }
-    const result = await worker.recognize(input);
-    const text = result.data.text ?? '';
-    return { text, lines: splitOcrLines(text), engine: 'tesseract' };
+    const result = await worker.recognize(input, {}, { blocks: true });
+    const ocrDoc = buildOcrDocumentFromTesseract(result.data, 1, 'tesseract');
+    const fallbackLines = splitOcrLines(ocrDoc.rawText);
+    const lines = ocrDoc.lines.length > 0 ? ocrDoc.lines : fallbackLines;
+    return {
+      text: ocrDoc.rawText,
+      lines,
+      engine: 'tesseract',
+      confidence: ocrDoc.confidence,
+      tokens: ocrDoc.tokens,
+      structuredLines: ocrDoc.structuredLines,
+      document: ocrDoc,
+    };
   } catch (err) {
     onProgress?.(100, 'OCR engine fallback to realistic UK statement matcher.');
     return { text: '', lines: [], engine: 'unavailable' };

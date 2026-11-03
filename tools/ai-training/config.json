@@ -1,0 +1,30 @@
+{
+  "experiment": "monetry-txn-v1",
+  "seed": 20261103,
+  "dataset": {
+    "variantsPerFamily": 22,
+    "noiseRateTrainVal": 0.12,
+    "noisyTestCopies": 1,
+    "splitFractions": { "train": 0.7, "val": 0.15, "test": 0.15 },
+    "templateRowsPerSplit": { "train": 60, "val": 14, "test": 14 }
+  },
+  "model": {
+    "labels": ["SUBSCRIPTION_SERVICE", "ONE_OFF_RETAIL", "TRANSFER_OR_CASH", "BANK_FEE", "BILL_OR_CREDIT", "GAMBLING", "AMBIGUOUS"],
+    "categories": ["Streaming", "AI & Tech", "Music & Audio", "Fitness & Gym", "Productivity", "Gaming", "News & Magazines", "Food & Delivery", "Utilities", "Other"]
+  },
+  "budget": {
+    "maxRuns": 8,
+    "maxEpochs": 60,
+    "earlyStopPatience": 6,
+    "batchSize": 64,
+    "learningRate": 0.003,
+    "weightDecay": 0.0001
+  },
+  "gates": {
+    "comment": "A candidate is only promoted to public/models if it passes ALL of these on held-out TEST families.",
+    "minSubscriptionPrecisionAtThreshold": 0.97,
+    "maxAdversarialUnsafeSubClaims": 0,
+    "maxEceAfterCalibration": 0.08,
+    "targetValidationPrecision": 0.985
+  }
+}

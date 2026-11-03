@@ -1,0 +1,3035 @@
+[
+ {
+  "canonical": "NETFLIX",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "NETFLIX.COM",
+   "NETFLIX"
+  ]
+ },
+ {
+  "canonical": "APPLE TV",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "APPLE TV+",
+   "APPLE.COM/BILL TV"
+  ]
+ },
+ {
+  "canonical": "NOW TV",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "NOW TV",
+   "NOWTV.COM"
+  ]
+ },
+ {
+  "canonical": "PARAMOUNT PLUS",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "PARAMOUNT+",
+   "PARAMOUNT PLUS"
+  ]
+ },
+ {
+  "canonical": "DAZN",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "DAZN",
+   "DAZN LIMITED"
+  ]
+ },
+ {
+  "canonical": "BRITBOX",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "BRITBOX",
+   "BRITBOX UK"
+  ]
+ },
+ {
+  "canonical": "DISCOVERY PLUS",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "DISCOVERY+",
+   "DISCOVERYPLUS"
+  ]
+ },
+ {
+  "canonical": "CURZON HOME",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "CURZON HOME CINEMA",
+   "CURZON"
+  ]
+ },
+ {
+  "canonical": "HAYU",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "HAYU",
+   "HAYU.COM"
+  ]
+ },
+ {
+  "canonical": "SHUDDER",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "SHUDDER",
+   "SHUDDER.COM"
+  ]
+ },
+ {
+  "canonical": "PLEX",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "PLEX PASS",
+   "PLEX.TV"
+  ]
+ },
+ {
+  "canonical": "TNT SPORTS",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "TNT SPORTS",
+   "DISCOVERY SPORTS"
+  ]
+ },
+ {
+  "canonical": "AMAZON PRIME",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "AMAZON PRIME",
+   "AMZN PRIME"
+  ]
+ },
+ {
+  "canonical": "ITVX",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "ITVX PREMIUM",
+   "ITV HUB"
+  ]
+ },
+ {
+  "canonical": "SPRING PLUS",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "SPRINGPLUS",
+   "SPRING PLUS TV"
+  ]
+ },
+ {
+  "canonical": "STARZPLAY",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "STARZPLAY",
+   "LIONSGATE PLUS"
+  ]
+ },
+ {
+  "canonical": "ACORN TV",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "ACORN TV",
+   "ACORN MEDIA"
+  ]
+ },
+ {
+  "canonical": "AUDIBLE",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "AUDIBLE",
+   "AUDIBLE UK"
+  ]
+ },
+ {
+  "canonical": "SOUNDCLOUD",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "SOUNDCLOUD",
+   "SOUNDCLOUD GO"
+  ]
+ },
+ {
+  "canonical": "AMAZON MUSIC",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "AMAZON MUSIC UNLIMITED",
+   "AMZNMUSIC"
+  ]
+ },
+ {
+  "canonical": "QOBUZ",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "QOBUZ",
+   "QOBUZ.COM"
+  ]
+ },
+ {
+  "canonical": "STORYTEL",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "STORYTEL",
+   "STORYTEL UK"
+  ]
+ },
+ {
+  "canonical": "NAPSTER",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "NAPSTER",
+   "NAPSTER.COM"
+  ]
+ },
+ {
+  "canonical": "BANDCAMP",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "BANDCAMP FAN CLUB",
+   "BANDCAMP.COM FAN"
+  ]
+ },
+ {
+  "canonical": "TIDAL HIFI",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "TIDAL HIFI PLUS"
+  ]
+ },
+ {
+  "canonical": "PODIMO",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "PODIMO",
+   "PODIMO UK"
+  ]
+ },
+ {
+  "canonical": "SCRIBD",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "SCRIBD",
+   "SCRIBD.COM"
+  ]
+ },
+ {
+  "canonical": "OPENAI",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "OPENAI",
+   "OPENAI *CHATGPT SUBSCR"
+  ]
+ },
+ {
+  "canonical": "ANTHROPIC",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "ANTHROPIC",
+   "CLAUDE.AI SUBSCRIPTION"
+  ]
+ },
+ {
+  "canonical": "GITHUB COPILOT",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "GITHUB",
+   "GITHUB.COM"
+  ]
+ },
+ {
+  "canonical": "PERPLEXITY",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "PERPLEXITY AI",
+   "PERPLEXITY.AI"
+  ]
+ },
+ {
+  "canonical": "CURSOR",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "CURSOR AI",
+   "ANYSPHERE CURSOR"
+  ]
+ },
+ {
+  "canonical": "HUGGING FACE",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "HUGGING FACE",
+   "HUGGINGFACE.CO"
+  ]
+ },
+ {
+  "canonical": "JASPER AI",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "JASPER.AI",
+   "JASPER AI INC"
+  ]
+ },
+ {
+  "canonical": "RUNWAY",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "RUNWAYML",
+   "RUNWAY AI"
+  ]
+ },
+ {
+  "canonical": "SUNO",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "SUNO AI",
+   "SUNO INC"
+  ]
+ },
+ {
+  "canonical": "STABILITY AI",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "STABILITY.AI",
+   "STABILITY AI LTD"
+  ]
+ },
+ {
+  "canonical": "GAMMA APP",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "GAMMA.APP",
+   "GAMMA TECHNOLOGIES"
+  ]
+ },
+ {
+  "canonical": "POE",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "POE.COM",
+   "QUORA POE"
+  ]
+ },
+ {
+  "canonical": "MICROSOFT 365",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "MICROSOFT 365",
+   "MICROSOFT*365"
+  ]
+ },
+ {
+  "canonical": "GOOGLE ONE",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "GOOGLE ONE",
+   "GOOGLE *ONE"
+  ]
+ },
+ {
+  "canonical": "ADOBE",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "ADOBE",
+   "ADOBE SYSTEMS"
+  ]
+ },
+ {
+  "canonical": "DROPBOX",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "DROPBOX",
+   "DROPBOX*"
+  ]
+ },
+ {
+  "canonical": "NOTION",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "NOTION LABS",
+   "NOTION.SO"
+  ]
+ },
+ {
+  "canonical": "SLACK",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "SLACK",
+   "SLACK TECHNOLOGIES"
+  ]
+ },
+ {
+  "canonical": "EVERNOTE",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "EVERNOTE",
+   "EVERNOTE CORP"
+  ]
+ },
+ {
+  "canonical": "NORDVPN",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "NORDVPN",
+   "NORDVPN.COM"
+  ]
+ },
+ {
+  "canonical": "EXPRESSVPN",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "EXPRESSVPN",
+   "EXPRESSVPN.COM"
+  ]
+ },
+ {
+  "canonical": "VERCEL",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "VERCEL",
+   "VERCEL INC"
+  ]
+ },
+ {
+  "canonical": "SUPABASE",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "SUPABASE",
+   "SUPABASE INC"
+  ]
+ },
+ {
+  "canonical": "FIGMA",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "FIGMA",
+   "FIGMA INC"
+  ]
+ },
+ {
+  "canonical": "ATLASSIAN",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "ATLASSIAN",
+   "ATLASSIAN PTY"
+  ]
+ },
+ {
+  "canonical": "MAILCHIMP",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "MAILCHIMP",
+   "THE ROCKET SCIENCE GROUP"
+  ]
+ },
+ {
+  "canonical": "WIX",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "WIX.COM",
+   "WIX COM"
+  ]
+ },
+ {
+  "canonical": "NAMECHEAP",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "NAMECHEAP",
+   "NAMECHEAP INC"
+  ]
+ },
+ {
+  "canonical": "DIGITALOCEAN",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "DIGITALOCEAN",
+   "DIGITALOCEAN.COM"
+  ]
+ },
+ {
+  "canonical": "HEROKU",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "HEROKU",
+   "HEROKU SALESFORCE"
+  ]
+ },
+ {
+  "canonical": "NETLIFY",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "NETLIFY",
+   "NETLIFY INC"
+  ]
+ },
+ {
+  "canonical": "CLOUDFLARE",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "CLOUDFLARE",
+   "CLOUDFLARE INC"
+  ]
+ },
+ {
+  "canonical": "SURFSHARK",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "SURFSHARK",
+   "SURFSHARK.COM"
+  ]
+ },
+ {
+  "canonical": "DUOLINGO",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "DUOLINGO",
+   "DUOLINGO SUPER"
+  ]
+ },
+ {
+  "canonical": "GRAMMARLY",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "GRAMMARLY",
+   "GRAMMARLY INC"
+  ]
+ },
+ {
+  "canonical": "LINKEDIN",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "LINKEDIN",
+   "LINKEDIN PREMIUM"
+  ]
+ },
+ {
+  "canonical": "SUBSTACK",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "SUBSTACK",
+   "SUBSTACK INC"
+  ]
+ },
+ {
+  "canonical": "AIRTABLE",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "AIRTABLE",
+   "AIRTABLE.COM"
+  ]
+ },
+ {
+  "canonical": "TRELLO",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "TRELLO",
+   "ATLASSIAN TRELLO"
+  ]
+ },
+ {
+  "canonical": "POSTMAN",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "POSTMAN",
+   "POSTMAN INC"
+  ]
+ },
+ {
+  "canonical": "DATADOG",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "DATADOG",
+   "DATADOG INC"
+  ]
+ },
+ {
+  "canonical": "STRIPE ATLAS",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "STRIPE ATLAS",
+   "STRIPE SUBSCRIPTION"
+  ]
+ },
+ {
+  "canonical": "XERO",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "XERO",
+   "XERO UK LIMITED"
+  ]
+ },
+ {
+  "canonical": "ZAPIER",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "ZAPIER",
+   "ZAPIER INC"
+  ]
+ },
+ {
+  "canonical": "CALENDLY",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "CALENDLY",
+   "CALENDLY LLC"
+  ]
+ },
+ {
+  "canonical": "OVERLEAF",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "OVERLEAF",
+   "OVERLEAF.COM"
+  ]
+ },
+ {
+  "canonical": "MEDIUM",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "MEDIUM.COM",
+   "MEDIUM MEMBERSHIP"
+  ]
+ },
+ {
+  "canonical": "PUREGYM",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "PUREGYM",
+   "PUREGYM LTD"
+  ]
+ },
+ {
+  "canonical": "THE GYM GROUP",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "THE GYM GROUP",
+   "GYM GROUP"
+  ]
+ },
+ {
+  "canonical": "DAVID LLOYD",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "DAVID LLOYD",
+   "DAVID LLOYD CLUBS"
+  ]
+ },
+ {
+  "canonical": "VIRGIN ACTIVE",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "VIRGIN ACTIVE",
+   "VIRGIN ACTIVE UK"
+  ]
+ },
+ {
+  "canonical": "ANYTIME FITNESS",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "ANYTIME FITNESS",
+   "ANYTIME FITNESS UK"
+  ]
+ },
+ {
+  "canonical": "NUFFIELD HEALTH",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "NUFFIELD HEALTH",
+   "NUFFIELD HEALTH FITNESS"
+  ]
+ },
+ {
+  "canonical": "STRAVA",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "STRAVA",
+   "STRAVA INC"
+  ]
+ },
+ {
+  "canonical": "HEADSPACE",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "HEADSPACE",
+   "HEADSPACE INC"
+  ]
+ },
+ {
+  "canonical": "CALM",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "CALM.COM",
+   "CALM APP"
+  ]
+ },
+ {
+  "canonical": "JD GYMS",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "JD GYMS",
+   "JD GYM"
+  ]
+ },
+ {
+  "canonical": "THIRD SPACE",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "THIRD SPACE",
+   "THIRD SPACE LONDON"
+  ]
+ },
+ {
+  "canonical": "F45",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "F45 TRAINING",
+   "F45 STUDIO"
+  ]
+ },
+ {
+  "canonical": "BARRYS",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "BARRYS BOOTCAMP",
+   "BARRYS UK"
+  ]
+ },
+ {
+  "canonical": "SNAP FITNESS",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "SNAP FITNESS",
+   "SNAP FITNESS UK"
+  ]
+ },
+ {
+  "canonical": "1REBEL",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "1REBEL",
+   "1REBEL LONDON"
+  ]
+ },
+ {
+  "canonical": "FITBIT PREMIUM",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "FITBIT PREMIUM",
+   "FITBIT"
+  ]
+ },
+ {
+  "canonical": "WEIGHT WATCHERS",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "WW INTERNATIONAL",
+   "WEIGHT WATCHERS UK"
+  ]
+ },
+ {
+  "canonical": "XBOX GAME PASS",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "XBOX GAME PASS",
+   "MICROSOFT XBOX"
+  ]
+ },
+ {
+  "canonical": "NINTENDO ONLINE",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "NINTENDO SWITCH ONLINE",
+   "NINTENDO ONLINE"
+  ]
+ },
+ {
+  "canonical": "EA PLAY",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "EA PLAY",
+   "ELECTRONIC ARTS EA PLAY"
+  ]
+ },
+ {
+  "canonical": "UBISOFT PLUS",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "UBISOFT+",
+   "UBISOFT PLUS"
+  ]
+ },
+ {
+  "canonical": "WORLD OF WARCRAFT",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "BLIZZARD WOW",
+   "BLIZZARD ENTERTAINMENT SUB"
+  ]
+ },
+ {
+  "canonical": "APPLE ARCADE",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "APPLE ARCADE",
+   "APPLE.COM/BILL ARCADE"
+  ]
+ },
+ {
+  "canonical": "GEFORCE NOW",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "GEFORCE NOW",
+   "NVIDIA GEFORCE NOW"
+  ]
+ },
+ {
+  "canonical": "HUMBLE CHOICE",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "HUMBLE BUNDLE CHOICE",
+   "HUMBLE CHOICE"
+  ]
+ },
+ {
+  "canonical": "FINAL FANTASY XIV",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "SQUARE ENIX FFXIV",
+   "FFXIV SUBSCRIPTION"
+  ]
+ },
+ {
+  "canonical": "MINECRAFT REALMS",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "MINECRAFT REALMS",
+   "MOJANG REALMS"
+  ]
+ },
+ {
+  "canonical": "TELEGRAPH",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "THE TELEGRAPH",
+   "TELEGRAPH MEDIA GROUP"
+  ]
+ },
+ {
+  "canonical": "FINANCIAL TIMES",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "FINANCIAL TIMES",
+   "FT.COM"
+  ]
+ },
+ {
+  "canonical": "THE ECONOMIST",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "THE ECONOMIST",
+   "ECONOMIST NEWSPAPER"
+  ]
+ },
+ {
+  "canonical": "NEW YORK TIMES",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "NYTIMES",
+   "NEW YORK TIMES DIGITAL"
+  ]
+ },
+ {
+  "canonical": "PRIVATE EYE",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "PRIVATE EYE",
+   "PRIVATE EYE MAGAZINE"
+  ]
+ },
+ {
+  "canonical": "WHICH",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "WHICH? LIMITED",
+   "WHICH MAGAZINE"
+  ]
+ },
+ {
+  "canonical": "READLY",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "READLY",
+   "READLY UK"
+  ]
+ },
+ {
+  "canonical": "APPLE NEWS",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "APPLE NEWS+",
+   "APPLE.COM/BILL NEWS"
+  ]
+ },
+ {
+  "canonical": "THE SPECTATOR",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "THE SPECTATOR",
+   "SPECTATOR MAGAZINE"
+  ]
+ },
+ {
+  "canonical": "BLOOMBERG",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "BLOOMBERG.COM",
+   "BLOOMBERG SUBSCRIPTION"
+  ]
+ },
+ {
+  "canonical": "WALL STREET JOURNAL",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "WSJ.COM",
+   "WALL STREET JOURNAL"
+  ]
+ },
+ {
+  "canonical": "THE WEEK",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "THE WEEK MAGAZINE",
+   "DENNIS PUBLISHING WEEK"
+  ]
+ },
+ {
+  "canonical": "DELIVEROO PLUS",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "DELIVEROO PLUS",
+   "DELIVEROO *PLUS"
+  ]
+ },
+ {
+  "canonical": "GOUSTO",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "GOUSTO",
+   "GOUSTO.CO.UK"
+  ]
+ },
+ {
+  "canonical": "MINDFUL CHEF",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "MINDFUL CHEF",
+   "MINDFUL CHEF LTD"
+  ]
+ },
+ {
+  "canonical": "PRET CLUB",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "PRET A MANGER CLUB",
+   "PRET CLUB SUBSCRIPTION"
+  ]
+ },
+ {
+  "canonical": "ODDBOX",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "ODDBOX",
+   "ODDBOX LTD"
+  ]
+ },
+ {
+  "canonical": "RIVERFORD",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "RIVERFORD ORGANIC",
+   "RIVERFORD BOX"
+  ]
+ },
+ {
+  "canonical": "TESCO CLUBCARD PLUS",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "TESCO CLUBCARD PLUS",
+   "CLUBCARD PLUS"
+  ]
+ },
+ {
+  "canonical": "WINE SOCIETY",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "THE WINE SOCIETY",
+   "WINE SOCIETY MEMBERSHIP"
+  ]
+ },
+ {
+  "canonical": "BLOOM AND WILD",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "BLOOM & WILD",
+   "BLOOM AND WILD SUB"
+  ]
+ },
+ {
+  "canonical": "CHARLIE BIGHAM",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "CHARLIE BIGHAMS",
+   "CHARLIE BIGHAMS BOX"
+  ]
+ },
+ {
+  "canonical": "VODAFONE",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "VODAFONE",
+   "VODAFONE LTD"
+  ]
+ },
+ {
+  "canonical": "EE",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "EE",
+   "EE LIMITED"
+  ]
+ },
+ {
+  "canonical": "GIFFGAFF",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "GIFFGAFF",
+   "GIFFGAFF LTD"
+  ]
+ },
+ {
+  "canonical": "LEBARA",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "LEBARA",
+   "LEBARA MOBILE"
+  ]
+ },
+ {
+  "canonical": "LYCAMOBILE",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "LYCAMOBILE",
+   "LYCA MOBILE"
+  ]
+ },
+ {
+  "canonical": "SKY MOBILE",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "SKY MOBILE",
+   "SKY MOBILE UK"
+  ]
+ },
+ {
+  "canonical": "SMARTY",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "SMARTY",
+   "SMARTY MOBILE"
+  ]
+ },
+ {
+  "canonical": "ID MOBILE",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "ID MOBILE",
+   "IDMOBILE"
+  ]
+ },
+ {
+  "canonical": "BT",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "BT GROUP",
+   "BT BROADBAND"
+  ]
+ },
+ {
+  "canonical": "SKY BROADBAND",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "SKY BROADBAND",
+   "SKY TALK"
+  ]
+ },
+ {
+  "canonical": "VIRGIN MEDIA",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "VIRGIN MEDIA",
+   "VIRGIN MEDIA PYMTS"
+  ]
+ },
+ {
+  "canonical": "TALKTALK",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "TALKTALK",
+   "TALKTALK TELECOM"
+  ]
+ },
+ {
+  "canonical": "HYPEROPTIC",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "HYPEROPTIC",
+   "HYPEROPTIC LTD"
+  ]
+ },
+ {
+  "canonical": "NOW BROADBAND",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "NOW BROADBAND",
+   "NOW BB"
+  ]
+ },
+ {
+  "canonical": "SMARTY BROADBAND",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "SMARTY HOME BROADBAND"
+  ]
+ },
+ {
+  "canonical": "VIDEOWAVE",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "VIDEOWAVE",
+   "VIDEOWAVE LTD"
+  ]
+ },
+ {
+  "canonical": "TRUESPEED",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "TRUESPEED",
+   "TRUESPEED COMMUNICATIONS"
+  ]
+ },
+ {
+  "canonical": "DIRECT LINE",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "DIRECT LINE INSURANCE",
+   "DIRECT LINE"
+  ]
+ },
+ {
+  "canonical": "ADMIRAL",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "ADMIRAL INSURANCE",
+   "ADMIRAL"
+  ]
+ },
+ {
+  "canonical": "AVIVA",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "AVIVA",
+   "AVIVA INSURANCE"
+  ]
+ },
+ {
+  "canonical": "VITALITY",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "VITALITY HEALTH",
+   "VITALITY LIFE"
+  ]
+ },
+ {
+  "canonical": "BUPA",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "BUPA",
+   "BUPA INSURANCE"
+  ]
+ },
+ {
+  "canonical": "HASTINGS",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "HASTINGS DIRECT",
+   "HASTINGS INSURANCE"
+  ]
+ },
+ {
+  "canonical": "CHURCHILL",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "CHURCHILL INSURANCE",
+   "CHURCHILL"
+  ]
+ },
+ {
+  "canonical": "PETPLAN",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "PETPLAN",
+   "PETPLAN UK"
+  ]
+ },
+ {
+  "canonical": "MANYPETS",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "MANYPETS",
+   "MANYPETS WELLNESS"
+  ]
+ },
+ {
+  "canonical": "AA",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "THE AA",
+   "AA MEMBERSHIP"
+  ]
+ },
+ {
+  "canonical": "FORESTER LIFE",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "FORESTER LIFE",
+   "FORESTERS LIFE"
+  ]
+ },
+ {
+  "canonical": "LEGAL AND GENERAL",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "LEGAL & GENERAL",
+   "LEGAL AND GENERAL ASSURANCE"
+  ]
+ },
+ {
+  "canonical": "TILE",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "TILE TRACKER",
+   "LIFE360 TILE"
+  ]
+ },
+ {
+  "canonical": "RING PROTECT",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "RING PROTECT",
+   "RING.COM PROTECT"
+  ]
+ },
+ {
+  "canonical": "NORTON",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "NORTON LIFELOCK",
+   "NORTON 360"
+  ]
+ },
+ {
+  "canonical": "EXPERIAN",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "EXPERIAN CREDITEXPERT",
+   "EXPERIAN LTD"
+  ]
+ },
+ {
+  "canonical": "CLEARSCORE",
+  "type": "SUB",
+  "category": "Other",
+  "aliases": [
+   "CLEARSCORE PROTECT",
+   "CLEARSCORE"
+  ]
+ },
+ {
+  "canonical": "TESCO",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "TESCO STORES",
+   "TESCO EXTRA"
+  ]
+ },
+ {
+  "canonical": "SAINSBURYS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "SAINSBURYS S/MKTS",
+   "SAINSBURYS"
+  ]
+ },
+ {
+  "canonical": "ASDA",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ASDA STORES",
+   "ASDA SUPERSTORE"
+  ]
+ },
+ {
+  "canonical": "MORRISONS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "MORRISONS",
+   "WM MORRISON"
+  ]
+ },
+ {
+  "canonical": "LIDL",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "LIDL GB",
+   "LIDL"
+  ]
+ },
+ {
+  "canonical": "WAITROSE",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "WAITROSE",
+   "WAITROSE & PARTNERS"
+  ]
+ },
+ {
+  "canonical": "CO-OP",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "CO-OP FOOD",
+   "COOP GROUP"
+  ]
+ },
+ {
+  "canonical": "M&S FOOD",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "M&S SIMPLY FOOD",
+   "MARKS & SPENCER"
+  ]
+ },
+ {
+  "canonical": "ICELAND",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ICELAND FOODS",
+   "ICELAND"
+  ]
+ },
+ {
+  "canonical": "COSTCUTTER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "COSTCUTTER",
+   "COSTCUTTER STORE"
+  ]
+ },
+ {
+  "canonical": "NISA",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "NISA LOCAL",
+   "NISA"
+  ]
+ },
+ {
+  "canonical": "FARMFOODS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "FARMFOODS",
+   "FARMFOODS LTD"
+  ]
+ },
+ {
+  "canonical": "B&M",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "B&M RETAIL",
+   "B AND M"
+  ]
+ },
+ {
+  "canonical": "HOME BARGAINS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "HOME BARGAINS",
+   "HOME BARGAINS LTD"
+  ]
+ },
+ {
+  "canonical": "BOOTS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "BOOTS",
+   "BOOTS PHARMACY"
+  ]
+ },
+ {
+  "canonical": "SUPERDRUG",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "SUPERDRUG",
+   "SUPERDRUG STORES"
+  ]
+ },
+ {
+  "canonical": "WHSMITH",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "WHSMITH",
+   "WH SMITH"
+  ]
+ },
+ {
+  "canonical": "ARGOS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ARGOS",
+   "ARGOS LTD"
+  ]
+ },
+ {
+  "canonical": "CURRYS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "CURRYS",
+   "CURRYS PC WORLD"
+  ]
+ },
+ {
+  "canonical": "WICKES",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "WICKES",
+   "WICKES BUILDING SUPPLIES"
+  ]
+ },
+ {
+  "canonical": "DUNELM",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "DUNELM",
+   "DUNELM MILL"
+  ]
+ },
+ {
+  "canonical": "PRIMARK",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "PRIMARK",
+   "PRIMARK STORES"
+  ]
+ },
+ {
+  "canonical": "TK MAXX",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "TK MAXX",
+   "TKMAXX"
+  ]
+ },
+ {
+  "canonical": "JD SPORTS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "JD SPORTS",
+   "JD SPORTS FASHION"
+  ]
+ },
+ {
+  "canonical": "AMAZON MARKETPLACE",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "AMZNMktplace",
+   "AMAZON.CO.UK"
+  ]
+ },
+ {
+  "canonical": "EBAY",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "EBAY",
+   "EBAY UK"
+  ]
+ },
+ {
+  "canonical": "VINTED",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "VINTED",
+   "VINTED UAB"
+  ]
+ },
+ {
+  "canonical": "BOOHOO",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "BOOHOO",
+   "BOOHOO.COM"
+  ]
+ },
+ {
+  "canonical": "SHEIN",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "SHEIN",
+   "SHEIN.COM"
+  ]
+ },
+ {
+  "canonical": "SPECSAVERS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "SPECSAVERS",
+   "SPECSAVERS OPTICIANS"
+  ]
+ },
+ {
+  "canonical": "CARD FACTORY",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "CARD FACTORY",
+   "CARD FACTORY PLC"
+  ]
+ },
+ {
+  "canonical": "THE RANGE",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "THE RANGE",
+   "THE RANGE LTD"
+  ]
+ },
+ {
+  "canonical": "MATALAN",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "MATALAN",
+   "MATALAN RETAIL"
+  ]
+ },
+ {
+  "canonical": "RIVER ISLAND",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "RIVER ISLAND",
+   "RIVER ISLAND CLOTHING"
+  ]
+ },
+ {
+  "canonical": "GREGGS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "GREGGS",
+   "GREGGS PLC"
+  ]
+ },
+ {
+  "canonical": "CAFFE NERO",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "CAFFE NERO",
+   "CAFFÃˆ NERO"
+  ]
+ },
+ {
+  "canonical": "PRET",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "PRET A MANGER",
+   "PRET"
+  ]
+ },
+ {
+  "canonical": "MCDONALDS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "MCDONALDS",
+   "MCDONALDS RESTAURANT"
+  ]
+ },
+ {
+  "canonical": "KFC",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "KFC",
+   "KFC UK"
+  ]
+ },
+ {
+  "canonical": "BURGER KING",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "BURGER KING",
+   "BURGER KING UK"
+  ]
+ },
+ {
+  "canonical": "SUBWAY",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "SUBWAY",
+   "SUBWAY UK"
+  ]
+ },
+ {
+  "canonical": "NANDOS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "NANDOS",
+   "NANDOS CHICKEN"
+  ]
+ },
+ {
+  "canonical": "WETHERSPOON",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "WETHERSPOON",
+   "J D WETHERSPOON"
+  ]
+ },
+ {
+  "canonical": "PIZZA HUT",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "PIZZA HUT",
+   "PIZZA HUT UK"
+  ]
+ },
+ {
+  "canonical": "WAGAMAMA",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "WAGAMAMA",
+   "WAGAMAMA LTD"
+  ]
+ },
+ {
+  "canonical": "PIZZA EXPRESS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "PIZZA EXPRESS",
+   "PIZZAEXPRESS"
+  ]
+ },
+ {
+  "canonical": "LEON",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "LEON RESTAURANTS",
+   "LEON"
+  ]
+ },
+ {
+  "canonical": "ITSU",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ITSU",
+   "ITSU LTD"
+  ]
+ },
+ {
+  "canonical": "WASABI",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "WASABI SUSHI",
+   "WASABI"
+  ]
+ },
+ {
+  "canonical": "DISHOOM",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "DISHOOM",
+   "DISHOOM LTD"
+  ]
+ },
+ {
+  "canonical": "PREZZO",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "PREZZO",
+   "PREZZO RESTAURANT"
+  ]
+ },
+ {
+  "canonical": "ZIZZI",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ZIZZI",
+   "ZIZZI RESTAURANTS"
+  ]
+ },
+ {
+  "canonical": "HARVESTER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "HARVESTER",
+   "HARVESTER RESTAURANT"
+  ]
+ },
+ {
+  "canonical": "TOBY CARVERY",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "TOBY CARVERY",
+   "TOBY CARVERY LTD"
+  ]
+ },
+ {
+  "canonical": "ROSE AND CROWN",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ROSE & CROWN",
+   "ROSE AND CROWN INN"
+  ]
+ },
+ {
+  "canonical": "THE PLOUGH",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "THE PLOUGH",
+   "PLOUGH INN"
+  ]
+ },
+ {
+  "canonical": "TEA ROOM",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "COTTAGE TEA ROOMS",
+   "VILLAGE TEA ROOM"
+  ]
+ },
+ {
+  "canonical": "CHIPPY",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "THE GOLDEN FRY",
+   "GOLDEN FRY FISH BAR"
+  ]
+ },
+ {
+  "canonical": "KEBAB HOUSE",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "KEBAB HOUSE",
+   "ISTANBUL KEBAB"
+  ]
+ },
+ {
+  "canonical": "JUST EAT ORDER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "JUST EAT",
+   "JUST-EAT.CO.UK"
+  ]
+ },
+ {
+  "canonical": "DELIVEROO ORDER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "DELIVEROO",
+   "DELIVEROO ORDER"
+  ]
+ },
+ {
+  "canonical": "BP",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "BP",
+   "BP OIL"
+  ]
+ },
+ {
+  "canonical": "SHELL",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "SHELL",
+   "SHELL SERVICE STATION"
+  ]
+ },
+ {
+  "canonical": "JET",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "JET PETROL",
+   "JET GARAGE"
+  ]
+ },
+ {
+  "canonical": "GULF",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "GULF PETROL",
+   "GULF OIL"
+  ]
+ },
+ {
+  "canonical": "MURCO",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "MURCO",
+   "MURCO PETROLEUM"
+  ]
+ },
+ {
+  "canonical": "APPLEGREEN",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "APPLEGREEN",
+   "APPLEGREEN UK"
+  ]
+ },
+ {
+  "canonical": "MFG",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "MFG",
+   "MOTOR FUEL GROUP"
+  ]
+ },
+ {
+  "canonical": "MOTO",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "MOTO HOSPITALITY",
+   "MOTO SERVICES"
+  ]
+ },
+ {
+  "canonical": "WELCOME BREAK",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "WELCOME BREAK",
+   "WELCOME BREAK SERVICES"
+  ]
+ },
+ {
+  "canonical": "ROADCHEF",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ROADCHEF",
+   "ROADCHEF SERVICES"
+  ]
+ },
+ {
+  "canonical": "TFL",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "TFL TRAVEL CH",
+   "TFL.GOV.UK"
+  ]
+ },
+ {
+  "canonical": "NATIONAL EXPRESS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "NATIONAL EXPRESS",
+   "NATIONAL EXPRESS COACHES"
+  ]
+ },
+ {
+  "canonical": "FIRST BUS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "FIRST BUS",
+   "FIRSTGROUP"
+  ]
+ },
+ {
+  "canonical": "UBER TRIP",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "UBER *TRIP",
+   "UBER TRIP"
+  ]
+ },
+ {
+  "canonical": "BOLT",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "BOLT.EU",
+   "BOLT RIDE"
+  ]
+ },
+ {
+  "canonical": "ADDISON LEE",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ADDISON LEE",
+   "ADDISON LEE PLC"
+  ]
+ },
+ {
+  "canonical": "LNER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "LNER",
+   "LNER TICKETS"
+  ]
+ },
+ {
+  "canonical": "GWR",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "GREAT WESTERN RAILWAY",
+   "GWR"
+  ]
+ },
+ {
+  "canonical": "AVANTI",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "AVANTI WEST COAST",
+   "AVANTI"
+  ]
+ },
+ {
+  "canonical": "NORTHERN RAIL",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "NORTHERN RAIL",
+   "NORTHERN TRAINS"
+  ]
+ },
+ {
+  "canonical": "SCOTRAIL",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "SCOTRAIL",
+   "SCOTRAIL TICKETS"
+  ]
+ },
+ {
+  "canonical": "RYANAIR",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "RYANAIR",
+   "RYANAIR DAC"
+  ]
+ },
+ {
+  "canonical": "BRITISH AIRWAYS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "BRITISH AIRWAYS",
+   "BA.COM"
+  ]
+ },
+ {
+  "canonical": "LIME",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "LIME RIDE",
+   "LIME BIKE"
+  ]
+ },
+ {
+  "canonical": "NCP",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "NCP CAR PARKS",
+   "NCP"
+  ]
+ },
+ {
+  "canonical": "RINGGO",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "RINGGO",
+   "RINGGO PARKING"
+  ]
+ },
+ {
+  "canonical": "EURO CAR PARKS",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "EURO CAR PARKS",
+   "ECP PARKING"
+  ]
+ },
+ {
+  "canonical": "CINEMA",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "ODEON CINEMAS",
+   "ODEON"
+  ]
+ },
+ {
+  "canonical": "VUE",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "VUE CINEMA",
+   "VUE ENTERTAINMENT"
+  ]
+ },
+ {
+  "canonical": "CINEWORLD",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "CINEWORLD",
+   "CINEWORLD CINEMAS"
+  ]
+ },
+ {
+  "canonical": "TICKETMASTER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "TICKETMASTER",
+   "TICKETMASTER UK"
+  ]
+ },
+ {
+  "canonical": "BOOKING",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "BOOKING.COM",
+   "BOOKING COM BV"
+  ]
+ },
+ {
+  "canonical": "HAIRDRESSER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "HEADLINERS HAIR",
+   "HAIR SALON"
+  ]
+ },
+ {
+  "canonical": "DRY CLEANER",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "DRY CLEANERS",
+   "SPOTLESS CLEANERS"
+  ]
+ },
+ {
+  "canonical": "TAKEAWAY",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "GOLDEN DRAGON TAKEAWAY",
+   "CHINESE TAKEAWAY"
+  ]
+ },
+ {
+  "canonical": "VET",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "VETS4PETS",
+   "PETS AT HOME"
+  ]
+ },
+ {
+  "canonical": "DENTIST",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "DENTAL PRACTICE",
+   "SMILE DENTAL"
+  ]
+ },
+ {
+  "canonical": "CORNER SHOP",
+  "type": "RETAIL",
+  "category": null,
+  "aliases": [
+   "NEWS AND FOOD CENTRE",
+   "CORNER STORE"
+  ]
+ },
+ {
+  "canonical": "WILLIAM HILL",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "WILLIAM HILL",
+   "WILLIAM HILL ONLINE"
+  ]
+ },
+ {
+  "canonical": "LADBROKES",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "LADBROKES",
+   "LADBROKES BETTING"
+  ]
+ },
+ {
+  "canonical": "PADDY POWER",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "PADDY POWER",
+   "PADDYPOWER.COM"
+  ]
+ },
+ {
+  "canonical": "BETFRED",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "BETFRED",
+   "BETFRED.COM"
+  ]
+ },
+ {
+  "canonical": "NATIONAL LOTTERY",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "NATIONAL LOTTERY",
+   "THE NATIONAL LOTTERY"
+  ]
+ },
+ {
+  "canonical": "BETWAY",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "BETWAY",
+   "BETWAY.COM"
+  ]
+ },
+ {
+  "canonical": "UNIBET",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "UNIBET",
+   "UNIBET UK"
+  ]
+ },
+ {
+  "canonical": "GALA BINGO",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "GALA BINGO",
+   "GALA SPINS"
+  ]
+ },
+ {
+  "canonical": "MECCA BINGO",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "MECCA BINGO",
+   "MECCA BINGO CLUB"
+  ]
+ },
+ {
+  "canonical": "PRIZE DRAW",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "PRIZE DRAW COMPETITIONS",
+   "RAFFLE HOUSE"
+  ]
+ },
+ {
+  "canonical": "CASINO",
+  "type": "GAMBLING",
+  "category": null,
+  "aliases": [
+   "GRAND CASINO",
+   "CASINO ONLINE"
+  ]
+ },
+ {
+  "canonical": "BRITISH GAS",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "BRITISH GAS",
+   "BRITISH GAS SERVICES"
+  ]
+ },
+ {
+  "canonical": "OCTOPUS ENERGY",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "OCTOPUS ENERGY",
+   "OCTOPUS ENERGY LTD"
+  ]
+ },
+ {
+  "canonical": "EDF",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "EDF ENERGY",
+   "EDF"
+  ]
+ },
+ {
+  "canonical": "E.ON NEXT",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "E.ON NEXT",
+   "EON NEXT"
+  ]
+ },
+ {
+  "canonical": "OVO",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "OVO ENERGY",
+   "OVO"
+  ]
+ },
+ {
+  "canonical": "SCOTTISH POWER",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "SCOTTISH POWER",
+   "SCOTTISHPOWER"
+  ]
+ },
+ {
+  "canonical": "THAMES WATER",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "THAMES WATER",
+   "THAMES WATER UTILITIES"
+  ]
+ },
+ {
+  "canonical": "UNITED UTILITIES",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "UNITED UTILITIES",
+   "UNITED UTILITIES WATER"
+  ]
+ },
+ {
+  "canonical": "ANGLIAN WATER",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "ANGLIAN WATER",
+   "ANGLIAN WATER SERVICES"
+  ]
+ },
+ {
+  "canonical": "YORKSHIRE WATER",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "YORKSHIRE WATER",
+   "YORKSHIRE WATER SERVICES"
+  ]
+ },
+ {
+  "canonical": "SOUTH STAFFS WATER",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "SOUTH STAFFS WATER",
+   "SOUTH STAFFORDSHIRE WATER"
+  ]
+ },
+ {
+  "canonical": "WELSH WATER",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "DWR CYMRU",
+   "WELSH WATER"
+  ]
+ },
+ {
+  "canonical": "BULB",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "BULB ENERGY",
+   "BULB"
+  ]
+ },
+ {
+  "canonical": "COUNCIL TAX",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "LEEDS CITY COUNCIL",
+   "SANDWELL MBC COUNCIL TAX"
+  ]
+ },
+ {
+  "canonical": "DVLA",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "DVLA",
+   "DVLA-AO57JCV"
+  ]
+ },
+ {
+  "canonical": "KLARNA",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "KLARNA",
+   "KLARNA BANK"
+  ]
+ },
+ {
+  "canonical": "CLEARPAY",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "CLEARPAY",
+   "CLEARPAY.CO.UK"
+  ]
+ },
+ {
+  "canonical": "CAR FINANCE",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "BLACK HORSE FINANCE",
+   "MOTONOVO FINANCE"
+  ]
+ },
+ {
+  "canonical": "MORTGAGE",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "NATIONWIDE MORTGAGE",
+   "HALIFAX MORTGAGE"
+  ]
+ },
+ {
+  "canonical": "CREDIT CARD",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "BARCLAYCARD",
+   "MBNA"
+  ]
+ },
+ {
+  "canonical": "NHS",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "NHSBSA PRESCRIPTION",
+   "NHS BUSINESS SERVICES AUTHORITY"
+  ]
+ },
+ {
+  "canonical": "NORTHUMBRIAN WATER",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "NORTHUMBRIAN WATER",
+   "NORTHUMBRIAN WATER LTD"
+  ]
+ },
+ {
+  "canonical": "UTILITA",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "UTILITA ENERGY",
+   "UTILITA"
+  ]
+ },
+ {
+  "canonical": "SHELL ENERGY",
+  "type": "BILL",
+  "category": null,
+  "aliases": [
+   "SHELL ENERGY",
+   "SHELL ENERGY RETAIL"
+  ]
+ },
+ {
+  "canonical": "NETFLIX UK STANDARD",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "NETFLIX UK STANDARD",
+   "NETFLIX"
+  ]
+ },
+ {
+  "canonical": "SPOTIFY PREMIUM UK",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "SPOTIFY PREMIUM UK",
+   "SPOTIFY"
+  ]
+ },
+ {
+  "canonical": "DISNEY UK STANDARD",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "DISNEY+ UK STANDARD",
+   "DISNEY+"
+  ]
+ },
+ {
+  "canonical": "AMAZON PRIME UK",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "AMAZON PRIME UK",
+   "AMAZON PRIME"
+  ]
+ },
+ {
+  "canonical": "APPLE TV UK",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "APPLE TV+ UK",
+   "APPLE TV+"
+  ]
+ },
+ {
+  "canonical": "NOW TV CINEMA ENTERTAINMENT",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "NOW TV (CINEMA / ENTERTAINMENT)"
+  ]
+ },
+ {
+  "canonical": "SKY STREAM TV",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "SKY STREAM & TV"
+  ]
+ },
+ {
+  "canonical": "YOUTUBE PREMIUM UK",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "YOUTUBE PREMIUM UK",
+   "YOUTUBE"
+  ]
+ },
+ {
+  "canonical": "AUDIBLE UK",
+  "type": "SUB",
+  "category": "Music & Audio",
+  "aliases": [
+   "AUDIBLE UK",
+   "AUDIBLE"
+  ]
+ },
+ {
+  "canonical": "BBC TV LICENCE",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "BBC TV LICENCE"
+  ]
+ },
+ {
+  "canonical": "DAZN UK SPORTS",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "DAZN UK SPORTS",
+   "DAZN SPORTS"
+  ]
+ },
+ {
+  "canonical": "PARAMOUNT UK STANDARD",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "PARAMOUNT+ UK STANDARD",
+   "PARAMOUNT+"
+  ]
+ },
+ {
+  "canonical": "DISCOVERY UK TNT SPORTS",
+  "type": "SUB",
+  "category": "Streaming",
+  "aliases": [
+   "DISCOVERY+ UK (TNT SPORTS)",
+   "DISCOVERY+ (TNT SPORTS)"
+  ]
+ },
+ {
+  "canonical": "THE GUARDIAN DIGITAL",
+  "type": "SUB",
+  "category": "News & Magazines",
+  "aliases": [
+   "THE GUARDIAN DIGITAL"
+  ]
+ },
+ {
+  "canonical": "PUREGYM MEMBERSHIP",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "PUREGYM MEMBERSHIP"
+  ]
+ },
+ {
+  "canonical": "THE GYM GROUP",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "THE GYM GROUP"
+  ]
+ },
+ {
+  "canonical": "DAVID LLOYD CLUBS",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "DAVID LLOYD CLUBS"
+  ]
+ },
+ {
+  "canonical": "JD GYMS UK",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "JD GYMS UK",
+   "JD GYMS"
+  ]
+ },
+ {
+  "canonical": "VIRGIN ACTIVE UK",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "VIRGIN ACTIVE UK",
+   "VIRGIN ACTIVE"
+  ]
+ },
+ {
+  "canonical": "STRAVA SUBSCRIPTION",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "STRAVA SUBSCRIPTION"
+  ]
+ },
+ {
+  "canonical": "MYFITNESSPAL PREMIUM",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "MYFITNESSPAL PREMIUM",
+   "MYFITNESSPAL"
+  ]
+ },
+ {
+  "canonical": "WHOOP 4 0 MEMBERSHIP",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "WHOOP 4.0 MEMBERSHIP"
+  ]
+ },
+ {
+  "canonical": "HEADSPACE MEDITATION",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "HEADSPACE MEDITATION"
+  ]
+ },
+ {
+  "canonical": "CALM PREMIUM",
+  "type": "SUB",
+  "category": "Fitness & Gym",
+  "aliases": [
+   "CALM PREMIUM",
+   "CALM"
+  ]
+ },
+ {
+  "canonical": "PLAYSTATION PLUS",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "PLAYSTATION PLUS",
+   "PLAYSTATION"
+  ]
+ },
+ {
+  "canonical": "XBOX GAME PASS ULTIMATE",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "XBOX GAME PASS ULTIMATE"
+  ]
+ },
+ {
+  "canonical": "NINTENDO SWITCH ONLINE",
+  "type": "SUB",
+  "category": "Gaming",
+  "aliases": [
+   "NINTENDO SWITCH ONLINE"
+  ]
+ },
+ {
+  "canonical": "CHATGPT PLUS",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "CHATGPT PLUS",
+   "CHATGPT"
+  ]
+ },
+ {
+  "canonical": "CLAUDE PRO ANTHROPIC",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "CLAUDE PRO (ANTHROPIC)"
+  ]
+ },
+ {
+  "canonical": "APPLE ICLOUD 200GB",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "APPLE ICLOUD+ (200GB)"
+  ]
+ },
+ {
+  "canonical": "GOOGLE ONE CLOUD AI",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "GOOGLE ONE (CLOUD / AI)"
+  ]
+ },
+ {
+  "canonical": "MICROSOFT 365 PERSONAL",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "MICROSOFT 365 PERSONAL"
+  ]
+ },
+ {
+  "canonical": "NORDVPN UK",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "NORDVPN UK",
+   "NORDVPN"
+  ]
+ },
+ {
+  "canonical": "EXPRESSVPN",
+  "type": "SUB",
+  "category": "AI & Tech",
+  "aliases": [
+   "EXPRESSVPN"
+  ]
+ },
+ {
+  "canonical": "ADOBE CREATIVE CLOUD",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "ADOBE CREATIVE CLOUD"
+  ]
+ },
+ {
+  "canonical": "CANVA PRO UK",
+  "type": "SUB",
+  "category": "Productivity",
+  "aliases": [
+   "CANVA PRO UK",
+   "CANVA PRO"
+  ]
+ },
+ {
+  "canonical": "DELIVEROO PLUS SILVER",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "DELIVEROO PLUS (SILVER)",
+   "DELIVEROO (SILVER)"
+  ]
+ },
+ {
+  "canonical": "UBER ONE UK",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "UBER ONE UK",
+   "UBER ONE"
+  ]
+ },
+ {
+  "canonical": "JUST EAT",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "JUST EAT+"
+  ]
+ },
+ {
+  "canonical": "HELLOFRESH UK",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "HELLOFRESH UK",
+   "HELLOFRESH"
+  ]
+ },
+ {
+  "canonical": "GOUSTO RECIPE BOX",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "GOUSTO RECIPE BOX"
+  ]
+ },
+ {
+  "canonical": "CLUB PRET SUBSCRIPTION",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "CLUB PRET SUBSCRIPTION"
+  ]
+ },
+ {
+  "canonical": "TESCO CLUBCARD PLUS",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "TESCO CLUBCARD PLUS",
+   "TESCO CLUBCARD"
+  ]
+ },
+ {
+  "canonical": "ASOS PREMIER UK",
+  "type": "SUB",
+  "category": "Food & Delivery",
+  "aliases": [
+   "ASOS PREMIER UK",
+   "ASOS PREMIER"
+  ]
+ },
+ {
+  "canonical": "EXPERIAN CREDITEXPERT",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "EXPERIAN CREDITEXPERT"
+  ]
+ },
+ {
+  "canonical": "CLEARSCORE PROTECT",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "CLEARSCORE PROTECT"
+  ]
+ },
+ {
+  "canonical": "EQUIFAX CREDIT REPORT SCORE",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "EQUIFAX CREDIT REPORT & SCORE"
+  ]
+ },
+ {
+  "canonical": "MONZO PERKS MAX",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "MONZO PERKS / MAX"
+  ]
+ },
+ {
+  "canonical": "REVOLUT PREMIUM METAL",
+  "type": "SUB",
+  "category": "Utilities",
+  "aliases": [
+   "REVOLUT PREMIUM / METAL",
+   "REVOLUT / METAL"
+  ]
+ }
+]

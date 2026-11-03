@@ -1,0 +1,6262 @@
+{
+ "seen": [
+  {
+   "text": "GOOGLE *NETFLIX COM LONDON BIRMINGHAM GB",
+   "canonical": "NETFLIX"
+  },
+  {
+   "text": "DEB NETFLIX NOTTINGHAM",
+   "canonical": "NETFLIX"
+  },
+  {
+   "text": "RECURRING PAYMENT NETFLIX.COM CORBY GB",
+   "canonical": "NETFLIX"
+  },
+  {
+   "text": "GOOLE *NETFLIX COM LONDON BRIST OL",
+   "canonical": "NETFLIX"
+  },
+  {
+   "text": "CARD SUBSCRIPTION TV.APPLE.COM GLASGOW",
+   "canonical": "APPLE TV"
+  },
+  {
+   "text": "RECURRING PAYMENT TV.APPLE.COM",
+   "canonical": "APPLE TV"
+  },
+  {
+   "text": "RECURRING PAYMENT APPLE.COM/BILL TV P1A2B3C4D5",
+   "canonical": "APPLE TV"
+  },
+  {
+   "text": "GOOGLE *APPLE VT+",
+   "canonical": "APPLE TV"
+  },
+  {
+   "text": "RECURRING PAYMENT NOWTV.COM LEEDS GB",
+   "canonical": "NOW TV"
+  },
+  {
+   "text": "Deb Now Entertainment 8008",
+   "canonical": "NOW TV"
+  },
+  {
+   "text": "D EB NOWTV.COM LTD",
+   "canonical": "NOW TV"
+  },
+  {
+   "text": "DIRECT DEBIT NOW ENTERTAINMENT 8008",
+   "canonical": "NOW TV"
+  },
+  {
+   "text": "D/D PARAMOUNT+ 44 20 7946 0000",
+   "canonical": "PARAMOUNT PLUS"
+  },
+  {
+   "text": "DEB PARAMOUNT+ BRISTOL",
+   "canonical": "PARAMOUNT PLUS"
+  },
+  {
+   "text": "PARAMOUNT PLUS MANCHESTER",
+   "canonical": "PARAMOUNT PLUS"
+  },
+  {
+   "text": "CARD PAYMENT TO PARAMOUNT+ PLC",
+   "canonical": "PARAMOUNT PLUS"
+  },
+  {
+   "text": "DIRECT DEBIT DAZN.COM BRISTOL",
+   "canonical": "DAZN"
+  },
+  {
+   "text": "CD DAZN LTD",
+   "canonical": "DAZN"
+  },
+  {
+   "text": "CARD PAYMET TO DAZN CARDIFF",
+   "canonical": "DAZN"
+  },
+  {
+   "text": "DA ZN.COM PLC",
+   "canonical": "DAZN"
+  },
+  {
+   "text": "CARD SUBSCRIPTION BRITBOX GBR",
+   "canonical": "BRITBOX"
+  },
+  {
+   "text": "RECURRING PAYMENT BRITBOX UK P1A2B3C4D5",
+   "canonical": "BRITBOX"
+  },
+  {
+   "text": "PAYPAL *BRITBOX LEEDS GB",
+   "canonical": "BRITBOX"
+  },
+  {
+   "text": "PAYPAL *BRITBOX LONDON GBR",
+   "canonical": "BRITBOX"
+  },
+  {
+   "text": "CARD PAYMENT TO DISCOVERY+ LTD",
+   "canonical": "DISCOVERY PLUS"
+  },
+  {
+   "text": "D/D DISCOVERY+ REF 1029384",
+   "canonical": "DISCOVERY PLUS"
+  },
+  {
+   "text": "VIS DISCOVERYPLUS LONDON GBR",
+   "canonical": "DISCOVERY PLUS"
+  },
+  {
+   "text": "Direct Debit Discovery+ Nottingham",
+   "canonical": "DISCOVERY PLUS"
+  },
+  {
+   "text": "CURZON UK",
+   "canonical": "CURZON HOME"
+  },
+  {
+   "text": "CARD SUBSCRIPTION CURZON HOME CINEMA PLC",
+   "canonical": "CURZON HOME"
+  },
+  {
+   "text": "UCRZON LODNON",
+   "canonical": "CURZON HOME"
+  },
+  {
+   "text": "GOOGLE *URZON LONDON GBR",
+   "canonical": "CURZON HOME"
+  },
+  {
+   "text": "DEB HAYU.COM P1A2B3C4D5",
+   "canonical": "HAYU"
+  },
+  {
+   "text": "CARD PAYMENT TO HAYU LONDON",
+   "canonical": "HAYU"
+  },
+  {
+   "text": "GOOGL E *HYAU GBR",
+   "canonical": "HAYU"
+  },
+  {
+   "text": "RECURRING PAYMENT HAYU.COM 8008",
+   "canonical": "HAYU"
+  },
+  {
+   "text": "Deb Shudder.com Ltd",
+   "canonical": "SHUDDER"
+  },
+  {
+   "text": "DEB SHUDDER.COM 44 20 7946 0000",
+   "canonical": "SHUDDER"
+  },
+  {
+   "text": "SHUDDER.COM LONDON GBR",
+   "canonical": "SHUDDER"
+  },
+  {
+   "text": "DD SHUDDER 1PA2B34D5",
+   "canonical": "SHUDDER"
+  },
+  {
+   "text": "CARD SUBSCRIPTION PLEX.TV BRISTOL",
+   "canonical": "PLEX"
+  },
+  {
+   "text": "PLEX PASS UK",
+   "canonical": "PLEX"
+  },
+  {
+   "text": "CD PLEX.TV BIRMINGHAM GB",
+   "canonical": "PLEX"
+  },
+  {
+   "text": "PAYPAL *P LX.TV P1A2B3C4D5",
+   "canonical": "PLEX"
+  },
+  {
+   "text": "CD DISCOVERY SPORTS GLASGOW",
+   "canonical": "TNT SPORTS"
+  },
+  {
+   "text": "GOOGLE *TNTSPORTS.CO.UK P1A2B3C4D5",
+   "canonical": "TNT SPORTS"
+  },
+  {
+   "text": "DEB TNT SPORT5",
+   "canonical": "TNT SPORTS"
+  },
+  {
+   "text": "PAYPAL *DISCOVERY SPORTS GLASGOW",
+   "canonical": "TNT SPORTS"
+  },
+  {
+   "text": "DIRECT DEBIT PRIME VIDEO GBR",
+   "canonical": "AMAZON PRIME"
+  },
+  {
+   "text": "CARD PAYMENT TO AMAZON PRIME* REF 1029384",
+   "canonical": "AMAZON PRIME"
+  },
+  {
+   "text": "CD PIRME VIDEO",
+   "canonical": "AMAZON PRIME"
+  },
+  {
+   "text": "PR IME IVDEO LONDON GBR",
+   "canonical": "AMAZON PRIME"
+  },
+  {
+   "text": "CD ITV HUB LONDON",
+   "canonical": "ITVX"
+  },
+  {
+   "text": "Itvx Premium Manchester",
+   "canonical": "ITVX"
+  },
+  {
+   "text": "GOOGLE *ITVX PREMIUM LEEDS GB",
+   "canonical": "ITVX"
+  },
+  {
+   "text": "DEB ITVX PREMIUM 8008",
+   "canonical": "ITVX"
+  },
+  {
+   "text": "CD SPRING PLUS TV 8008",
+   "canonical": "SPRING PLUS"
+  },
+  {
+   "text": "SPRINGPLUS CARDIFF",
+   "canonical": "SPRING PLUS"
+  },
+  {
+   "text": "VIS SPRING PLUS TV 44 20 794 000",
+   "canonical": "SPRING PLUS"
+  },
+  {
+   "text": "DIRECT DEBIT SPRINGPLUS OTTINGHAM",
+   "canonical": "SPRING PLUS"
+  },
+  {
+   "text": "LIONSGATE PLUS LEEDS GB",
+   "canonical": "STARZPLAY"
+  },
+  {
+   "text": "CD LIONSGATE PLUS LTD",
+   "canonical": "STARZPLAY"
+  },
+  {
+   "text": "CARD PAYMEN TTO STARZPLAY LEESD GB",
+   "canonical": "STARZPLAY"
+  },
+  {
+   "text": "DEB LIONSGATE PLUS",
+   "canonical": "STARZPLAY"
+  },
+  {
+   "text": "CD ACORN MEDIA 44 20 7946 0000",
+   "canonical": "ACORN TV"
+  },
+  {
+   "text": "DD ACORN TV P1A2B3C4D5",
+   "canonical": "ACORN TV"
+  },
+  {
+   "text": "VIS ACORN TV GBR",
+   "canonical": "ACORN TV"
+  },
+  {
+   "text": "ACORN TV",
+   "canonical": "ACORN TV"
+  },
+  {
+   "text": "VIS AMZ*AUDIBLE BRISTOL",
+   "canonical": "AUDIBLE"
+  },
+  {
+   "text": "DEB AMZ*AUDIBLE LONDON",
+   "canonical": "AUDIBLE"
+  },
+  {
+   "text": "PAYPAL *AUDIB LE UK PLC",
+   "canonical": "AUDIBLE"
+  },
+  {
+   "text": "AUDIBLE 8008",
+   "canonical": "AUDIBLE"
+  },
+  {
+   "text": "DD SOUNDCLOUD BRISTOL",
+   "canonical": "SOUNDCLOUD"
+  },
+  {
+   "text": "CD SOUNDCLOUD GLASGOW",
+   "canonical": "SOUNDCLOUD"
+  },
+  {
+   "text": "CARD PAYMENT TO SOUDNCLOUD MANCHESTER",
+   "canonical": "SOUNDCLOUD"
+  },
+  {
+   "text": "CD Soundcloud",
+   "canonical": "SOUNDCLOUD"
+  },
+  {
+   "text": "CARD PAYMENT TO AMAZON MUSIC UNLIMITED GBR",
+   "canonical": "AMAZON MUSIC"
+  },
+  {
+   "text": "RECURRING PAYMENT AMAZON MUSIC UNLIMITED GB",
+   "canonical": "AMAZON MUSIC"
+  },
+  {
+   "text": "PAYPAL *AMAZON MUSIC UNLIMITED LONDON",
+   "canonical": "AMAZON MUSIC"
+  },
+  {
+   "text": "RECURRING PAYMENT AMAZON MUSIC UNLIMITED MANCHESTER",
+   "canonical": "AMAZON MUSIC"
+  },
+  {
+   "text": "PAYPAL *QOBUZ",
+   "canonical": "QOBUZ"
+  },
+  {
+   "text": "GOOGLE *QOBUZ.COM",
+   "canonical": "QOBUZ"
+  },
+  {
+   "text": "RECURRING PAYMENT QOBUZ.COM UK",
+   "canonical": "QOBUZ"
+  },
+  {
+   "text": "QOBUZ.CM",
+   "canonical": "QOBUZ"
+  },
+  {
+   "text": "GOOGLE *STORYTEL BIRMINGHAM GB",
+   "canonical": "STORYTEL"
+  },
+  {
+   "text": "RECURRING PAYMENT STORYTEL LONDON GBR",
+   "canonical": "STORYTEL"
+  },
+  {
+   "text": "CARD PAMENT TO STORYTEL CARDIFF",
+   "canonical": "STORYTEL"
+  },
+  {
+   "text": "CD STRYTEL BRISOL",
+   "canonical": "STORYTEL"
+  },
+  {
+   "text": "DD NAPSTER",
+   "canonical": "NAPSTER"
+  },
+  {
+   "text": "NAPSTER.COM NOTTINGHAM",
+   "canonical": "NAPSTER"
+  },
+  {
+   "text": "CD N4PSTE R.COM GB",
+   "canonical": "NAPSTER"
+  },
+  {
+   "text": "DIRECT DEBIT NAPSTER.COM MANCHESTER",
+   "canonical": "NAPSTER"
+  },
+  {
+   "text": "Bandcamp.com Fan Cardiff",
+   "canonical": "BANDCAMP"
+  },
+  {
+   "text": "BANDCAMP.COM FAN",
+   "canonical": "BANDCAMP"
+  },
+  {
+   "text": "VIS BANDCAMP.COM FAN CORBY GB",
+   "canonical": "BANDCAMP"
+  },
+  {
+   "text": "D/D BANDCAMP FAN CLUB 8008",
+   "canonical": "BANDCAMP"
+  },
+  {
+   "text": "VIS TIDAL HIFI PLUS CORBY GB",
+   "canonical": "TIDAL HIFI"
+  },
+  {
+   "text": "CD TIDAL HIFI PLUS LEEDS GB",
+   "canonical": "TIDAL HIFI"
+  },
+  {
+   "text": "PAYPAL *TIDAL HIFI PLUS P1A2B3C4D5",
+   "canonical": "TIDAL HIFI"
+  },
+  {
+   "text": "CARD PAYMENT TO TIDAL HIFI PLUS 8008",
+   "canonical": "TIDAL HIFI"
+  },
+  {
+   "text": "CARD PAYMENT TO PODIMO NOTTINGHAM",
+   "canonical": "PODIMO"
+  },
+  {
+   "text": "PAYPAL *PODIMO UK 8008",
+   "canonical": "PODIMO"
+  },
+  {
+   "text": "PODIM0 K",
+   "canonical": "PODIMO"
+  },
+  {
+   "text": "DEB PODIOM 8008",
+   "canonical": "PODIMO"
+  },
+  {
+   "text": "DIRECT DEBIT EVERAND CARDIFF",
+   "canonical": "SCRIBD"
+  },
+  {
+   "text": "GOOGLE *SCRIBD",
+   "canonical": "SCRIBD"
+  },
+  {
+   "text": "SRCIBD L ONDON",
+   "canonical": "SCRIBD"
+  },
+  {
+   "text": "VIS EVERAND P1A2B 3C4D5",
+   "canonical": "SCRIBD"
+  },
+  {
+   "text": "VIS CHATGPT SUBSCRIPTION REF 1029384",
+   "canonical": "OPENAI"
+  },
+  {
+   "text": "CD OPENAI GLASGOW",
+   "canonical": "OPENAI"
+  },
+  {
+   "text": "DD OPENAI SAN FRANCISCO GB",
+   "canonical": "OPENAI"
+  },
+  {
+   "text": "DIRECT DEBIT OEPNAI SAN FRANCISCO BIRMINGHAM GB",
+   "canonical": "OPENAI"
+  },
+  {
+   "text": "Recurring Payment Anthropic Manchester",
+   "canonical": "ANTHROPIC"
+  },
+  {
+   "text": "CARD SUBSCRIPTION CLAUDE.AI SUBSCRIPTION LONDON GBR",
+   "canonical": "ANTHROPIC"
+  },
+  {
+   "text": "VIS CLAUDE.AI SUBSCRIPTION CORBY GB",
+   "canonical": "ANTHROPIC"
+  },
+  {
+   "text": "CARD SUBSCRIPTION CLAUDE.AI SUBSCRIPTION REF 1029384",
+   "canonical": "ANTHROPIC"
+  },
+  {
+   "text": "DIRECT DEBIT GITHUB.COM PLC",
+   "canonical": "GITHUB COPILOT"
+  },
+  {
+   "text": "Google *github Copilot Plc",
+   "canonical": "GITHUB COPILOT"
+  },
+  {
+   "text": "D /D GIHTUB",
+   "canonical": "GITHUB COPILOT"
+  },
+  {
+   "text": "Github Copilot GB",
+   "canonical": "GITHUB COPILOT"
+  },
+  {
+   "text": "DEB PERPLEXITY PLC",
+   "canonical": "PERPLEXITY"
+  },
+  {
+   "text": "CARD SUBSCRIPTION PERPLEXITY AI MANCHESTER",
+   "canonical": "PERPLEXITY"
+  },
+  {
+   "text": "PERPLEIXTY.AI REF 1029384",
+   "canonical": "PERPLEXITY"
+  },
+  {
+   "text": "DD PERPLEXITY.AI LONDON GBR",
+   "canonical": "PERPLEXITY"
+  },
+  {
+   "text": "ANYSPHERE CURSOR BIRMINGHAM GB",
+   "canonical": "CURSOR"
+  },
+  {
+   "text": "D/D CURSOR AI",
+   "canonical": "CURSOR"
+  },
+  {
+   "text": "CURSOR A1",
+   "canonical": "CURSOR"
+  },
+  {
+   "text": "Anysphere Cursor London",
+   "canonical": "CURSOR"
+  },
+  {
+   "text": "DEB HUGGINGFACE.CO LONDON GBR",
+   "canonical": "HUGGING FACE"
+  },
+  {
+   "text": "Vis Hugging Face",
+   "canonical": "HUGGING FACE"
+  },
+  {
+   "text": "DIRECT DEBIT HUGGING FACE",
+   "canonical": "HUGGING FACE"
+  },
+  {
+   "text": "GOOGLE *HUGGING FACE",
+   "canonical": "HUGGING FACE"
+  },
+  {
+   "text": "JASPER AI INC UK",
+   "canonical": "JASPER AI"
+  },
+  {
+   "text": "GOOGLE *JASPER AI INC REF 1029384",
+   "canonical": "JASPER AI"
+  },
+  {
+   "text": "DEB JASEPR AI INC BRISTOL",
+   "canonical": "JASPER AI"
+  },
+  {
+   "text": "CARD PAYMENT TO JASPER.AI CARDIFF",
+   "canonical": "JASPER AI"
+  },
+  {
+   "text": "RUNWAYML GB",
+   "canonical": "RUNWAY"
+  },
+  {
+   "text": "RECURRING PAYMENT RUNWAY AI CARDIFF",
+   "canonical": "RUNWAY"
+  },
+  {
+   "text": "VIS RUNWALM P1A2B3C4D5",
+   "canonical": "RUNWAY"
+  },
+  {
+   "text": "PAYPAL *RUNWAYML NOTTINGHAM",
+   "canonical": "RUNWAY"
+  },
+  {
+   "text": "SUNO AI GBR",
+   "canonical": "SUNO"
+  },
+  {
+   "text": "DIRECT DEBIT SUNO AI",
+   "canonical": "SUNO"
+  },
+  {
+   "text": "SUNO AI LONDON",
+   "canonical": "SUNO"
+  },
+  {
+   "text": "GOGOLE *SUNO AI CORB GB",
+   "canonical": "SUNO"
+  },
+  {
+   "text": "GOOGLE *STABILITY AI LTD",
+   "canonical": "STABILITY AI"
+  },
+  {
+   "text": "VIS STABILITY AI LTD REF 1029384",
+   "canonical": "STABILITY AI"
+  },
+  {
+   "text": "RECURRING PAYMENT STABILITY AI LTD UK",
+   "canonical": "STABILITY AI"
+  },
+  {
+   "text": "STABILITY.AI GBR",
+   "canonical": "STABILITY AI"
+  },
+  {
+   "text": "GAMMA TECHNOLOGIES",
+   "canonical": "GAMMA APP"
+  },
+  {
+   "text": "DEB GAMMA TECHNOLOGIES BIRMINGHAM GB",
+   "canonical": "GAMMA APP"
+  },
+  {
+   "text": "PAYPAL *GAMMA.APP LEEDS GB",
+   "canonical": "GAMMA APP"
+  },
+  {
+   "text": "RECURRING PAYMENT GAMMA.APP LEEDS GB",
+   "canonical": "GAMMA APP"
+  },
+  {
+   "text": "DD POE.COM",
+   "canonical": "POE"
+  },
+  {
+   "text": "QUORA POE CORBY GB",
+   "canonical": "POE"
+  },
+  {
+   "text": "PAYPAL *QUORA OPE LTD",
+   "canonical": "POE"
+  },
+  {
+   "text": "DEB POE.C0M GB",
+   "canonical": "POE"
+  },
+  {
+   "text": "MICROSOFT 365 FAMILY LONDON",
+   "canonical": "MICROSOFT 365"
+  },
+  {
+   "text": "CARD SUBSCRIPTION MICROSOFT 365",
+   "canonical": "MICROSOFT 365"
+  },
+  {
+   "text": "DIRECT DEIBT MSFT *MICROSOFT 365 GB",
+   "canonical": "MICROSOFT 365"
+  },
+  {
+   "text": "D/D MICROSOFT*365 GLASGOW",
+   "canonical": "MICROSOFT 365"
+  },
+  {
+   "text": "CD GOOGLE STORAGE",
+   "canonical": "GOOGLE ONE"
+  },
+  {
+   "text": "GOOGLE ONE MANCHESTER",
+   "canonical": "GOOGLE ONE"
+  },
+  {
+   "text": "CD GOOGL ESTORAGE MANHCESTER",
+   "canonical": "GOOGLE ONE"
+  },
+  {
+   "text": "DIRECT EDBTI GOOGLE STORAGE P1A2B3C4D5",
+   "canonical": "GOOGLE ONE"
+  },
+  {
+   "text": "ADOBE SYSTEMS CORBY GB",
+   "canonical": "ADOBE"
+  },
+  {
+   "text": "Paypal *adobe *creative Cloud GB",
+   "canonical": "ADOBE"
+  },
+  {
+   "text": "PAYP4L *ADOBE.COM CORB GB",
+   "canonical": "ADOBE"
+  },
+  {
+   "text": "RECURRING PAYMENT ADOBE BIRMIN GHAM GB",
+   "canonical": "ADOBE"
+  },
+  {
+   "text": "CARD PAYMENT TO DROPBOX* P1A2B3C4D5",
+   "canonical": "DROPBOX"
+  },
+  {
+   "text": "DROPBOX* LONDON",
+   "canonical": "DROPBOX"
+  },
+  {
+   "text": "PAYPAL *DROPBOX INTERNATIONAL P1A2B3C4D5",
+   "canonical": "DROPBOX"
+  },
+  {
+   "text": "CD DROPBOX P1C",
+   "canonical": "DROPBOX"
+  },
+  {
+   "text": "NOTION BIRMINGHAM GB",
+   "canonical": "NOTION"
+  },
+  {
+   "text": "DD NOTION.SO CARDIFF",
+   "canonical": "NOTION"
+  },
+  {
+   "text": "NOTION LABS GLASGOW",
+   "canonical": "NOTION"
+  },
+  {
+   "text": "CARD SUBSCRIPTION NOTION.SO GLASGOW",
+   "canonical": "NOTION"
+  },
+  {
+   "text": "GOOGLE *SLACK TECHNOLOGIES CARDIFF",
+   "canonical": "SLACK"
+  },
+  {
+   "text": "DEB SLACK.COM BRISTOL",
+   "canonical": "SLACK"
+  },
+  {
+   "text": "CD SLACK TECHNOLOGIES LONDON GBR",
+   "canonical": "SLACK"
+  },
+  {
+   "text": "CARD PAYMENT TO SLACK TECHNOLOGIES PLC",
+   "canonical": "SLACK"
+  },
+  {
+   "text": "GOOGLE *EVERNOTE CORP BIRMINGHAM GB",
+   "canonical": "EVERNOTE"
+  },
+  {
+   "text": "Deb Evernote Corp 44 20 7946 0000",
+   "canonical": "EVERNOTE"
+  },
+  {
+   "text": "DD EVERNOTE CORP CORBY GB",
+   "canonical": "EVERNOTE"
+  },
+  {
+   "text": "CD EVERNOTE PLC",
+   "canonical": "EVERNOTE"
+  },
+  {
+   "text": "DIRECT DEBIT NORDVPN.COM GB",
+   "canonical": "NORDVPN"
+  },
+  {
+   "text": "CD TEFINCOM NORDVPN 8008",
+   "canonical": "NORDVPN"
+  },
+  {
+   "text": "CARD SUBSCRIPTION TEFINCOM NORDVPN GBR",
+   "canonical": "NORDVPN"
+  },
+  {
+   "text": "DIRECT DEBIT NORDVPN.COM GBR",
+   "canonical": "NORDVPN"
+  },
+  {
+   "text": "CD EXPRESSVPN NOTTINGHAM",
+   "canonical": "EXPRESSVPN"
+  },
+  {
+   "text": "D/D EXPRESSVPN PLC",
+   "canonical": "EXPRESSVPN"
+  },
+  {
+   "text": "DD EXPRESSVPN MANCHESTER",
+   "canonical": "EXPRESSVPN"
+  },
+  {
+   "text": "Expressvpn London Gbr",
+   "canonical": "EXPRESSVPN"
+  },
+  {
+   "text": "VERCEL INC",
+   "canonical": "VERCEL"
+  },
+  {
+   "text": "VERCEL.COM LEEDS GB",
+   "canonical": "VERCEL"
+  },
+  {
+   "text": "D/D VERCEL.COM BRISTOL",
+   "canonical": "VERCEL"
+  },
+  {
+   "text": "Vercel Ltd",
+   "canonical": "VERCEL"
+  },
+  {
+   "text": "DEB SUPABASE PLC",
+   "canonical": "SUPABASE"
+  },
+  {
+   "text": "GOOGLE *SUPABASE P1A2B3C4D5",
+   "canonical": "SUPABASE"
+  },
+  {
+   "text": "PAYPAL *SUPABASE.COM REF 1029384",
+   "canonical": "SUPABASE"
+  },
+  {
+   "text": "SUPBAASE.CO MLONDON",
+   "canonical": "SUPABASE"
+  },
+  {
+   "text": "FIGMA INC NOTTINGHAM",
+   "canonical": "FIGMA"
+  },
+  {
+   "text": "PAYPAL *FIGMA 8008",
+   "canonical": "FIGMA"
+  },
+  {
+   "text": "DIRECT DEBIT FIGMA LNODON GBR",
+   "canonical": "FIGMA"
+  },
+  {
+   "text": "CD FIGMA INC NOTTINGHAM",
+   "canonical": "FIGMA"
+  },
+  {
+   "text": "RECURRING PAYMENT ATLASSIAN PTY BIRMINGHAM GB",
+   "canonical": "ATLASSIAN"
+  },
+  {
+   "text": "CD JIRA ATLASSIAN LONDON GBR",
+   "canonical": "ATLASSIAN"
+  },
+  {
+   "text": "CARD PAYMENT TO ATLASSIAN UK",
+   "canonical": "ATLASSIAN"
+  },
+  {
+   "text": "D/D JIRA ATLASSIAN LONDON GBR",
+   "canonical": "ATLASSIAN"
+  },
+  {
+   "text": "CARD PAYMENT TO MAILCHIMP MANCHESTER",
+   "canonical": "MAILCHIMP"
+  },
+  {
+   "text": "PAYPAL *MAILCHIMP LEEDS GB",
+   "canonical": "MAILCHIMP"
+  },
+  {
+   "text": "DEB MAILCHIMP.COM P1A2B3C4D5",
+   "canonical": "MAILCHIMP"
+  },
+  {
+   "text": "DIRECT DEBIT MAILCHIMP GLASGOW",
+   "canonical": "MAILCHIMP"
+  },
+  {
+   "text": "DEB WIX COM",
+   "canonical": "WIX"
+  },
+  {
+   "text": "CARD PAYMENT TO WIX PREMIUM PLC",
+   "canonical": "WIX"
+  },
+  {
+   "text": "RECURRING PAYMENT WIX COM LEEDS GB",
+   "canonical": "WIX"
+  },
+  {
+   "text": "VIS WIX.COM LONDON",
+   "canonical": "WIX"
+  },
+  {
+   "text": "NAMECHEAP.COM LONDON",
+   "canonical": "NAMECHEAP"
+  },
+  {
+   "text": "DEB NAMECHEAP INC BIRMINGHAM GB",
+   "canonical": "NAMECHEAP"
+  },
+  {
+   "text": "GOOGLE *NAMECHEA.PCOM BIRMINGHA M GB",
+   "canonical": "NAMECHEAP"
+  },
+  {
+   "text": "Google *namecheap Corby GB",
+   "canonical": "NAMECHEAP"
+  },
+  {
+   "text": "DIGITALOCEAN BRISTOL",
+   "canonical": "DIGITALOCEAN"
+  },
+  {
+   "text": "DEB DIGITAL OCEAN 8008",
+   "canonical": "DIGITALOCEAN"
+  },
+  {
+   "text": "GOOGLE *DIGITAL OCEA NOTTINGAHM",
+   "canonical": "DIGITALOCEAN"
+  },
+  {
+   "text": "DIGITALOECAN.COM",
+   "canonical": "DIGITALOCEAN"
+  },
+  {
+   "text": "HEROKU LEEDS GB",
+   "canonical": "HEROKU"
+  },
+  {
+   "text": "Heroku Cardiff",
+   "canonical": "HEROKU"
+  },
+  {
+   "text": "EROKU PLC",
+   "canonical": "HEROKU"
+  },
+  {
+   "text": "D/D HEROKU MANCHESTER",
+   "canonical": "HEROKU"
+  },
+  {
+   "text": "NETLIFY LEEDS GB",
+   "canonical": "NETLIFY"
+  },
+  {
+   "text": "DD NETLIFY",
+   "canonical": "NETLIFY"
+  },
+  {
+   "text": "D/D NETLIF CARDIFF",
+   "canonical": "NETLIFY"
+  },
+  {
+   "text": "RECURRING PAYMENT NETLIFY INC CORBY GB",
+   "canonical": "NETLIFY"
+  },
+  {
+   "text": "D/D CLOUDFLARE.COM CORBY GB",
+   "canonical": "CLOUDFLARE"
+  },
+  {
+   "text": "CARD PAYMENT TO CLOUDFLARE CORBY GB",
+   "canonical": "CLOUDFLARE"
+  },
+  {
+   "text": "D/D CLOUDFLARE.COM 8008",
+   "canonical": "CLOUDFLARE"
+  },
+  {
+   "text": "D/D CLOUDFLARE INC BRIST O",
+   "canonical": "CLOUDFLARE"
+  },
+  {
+   "text": "GOOGLE *SURFSHARK.COM 44 20 7946 0000",
+   "canonical": "SURFSHARK"
+  },
+  {
+   "text": "DEB SURFSHARK UK",
+   "canonical": "SURFSHARK"
+  },
+  {
+   "text": "CARD SUBSCRIPTION SURFSHARK.COM P1A2B3C4D5",
+   "canonical": "SURFSHARK"
+  },
+  {
+   "text": "SURFSH ARK.COM K",
+   "canonical": "SURFSHARK"
+  },
+  {
+   "text": "VIS DUOLINGO",
+   "canonical": "DUOLINGO"
+  },
+  {
+   "text": "DUOLINGO.COM MANCHESTER",
+   "canonical": "DUOLINGO"
+  },
+  {
+   "text": "PAYPAL *DUOLINGO",
+   "canonical": "DUOLINGO"
+  },
+  {
+   "text": "CAR SUBSCRIPTION DUOLINGO.COM 44 20 7946 0000",
+   "canonical": "DUOLINGO"
+  },
+  {
+   "text": "CD GRAMMARLY INC P1A2B3C4D5",
+   "canonical": "GRAMMARLY"
+  },
+  {
+   "text": "DD GRAMMARLY",
+   "canonical": "GRAMMARLY"
+  },
+  {
+   "text": "GRAMMARLY INC CORBY GB",
+   "canonical": "GRAMMARLY"
+  },
+  {
+   "text": "RECURRING PAYMENT GAMMARLY BIRMINGHAM GB",
+   "canonical": "GRAMMARLY"
+  },
+  {
+   "text": "LINKEDIN.COM GLASGOW",
+   "canonical": "LINKEDIN"
+  },
+  {
+   "text": "DEB LINKEDIN PREMIUM NOTTINGHAM",
+   "canonical": "LINKEDIN"
+  },
+  {
+   "text": "VIS LINKEDIN PREMIUM",
+   "canonical": "LINKEDIN"
+  },
+  {
+   "text": "PAYPAL *LINKEDI NPREM1UM GB",
+   "canonical": "LINKEDIN"
+  },
+  {
+   "text": "CARD SUBSCRIPTION SUBSTACK UK",
+   "canonical": "SUBSTACK"
+  },
+  {
+   "text": "DIRECT DEBIT SUBSTACK INC 8008",
+   "canonical": "SUBSTACK"
+  },
+  {
+   "text": "DEB SUBSTAC K",
+   "canonical": "SUBSTACK"
+  },
+  {
+   "text": "D/D SUBSTACK BRISTOL",
+   "canonical": "SUBSTACK"
+  },
+  {
+   "text": "DIRECT DEBIT AIRTABLE GLASGOW",
+   "canonical": "AIRTABLE"
+  },
+  {
+   "text": "DD Airtable.com Birmingham GB",
+   "canonical": "AIRTABLE"
+  },
+  {
+   "text": "AIRTABLE.COM",
+   "canonical": "AIRTABLE"
+  },
+  {
+   "text": "DEB AIRTABLE 80O8",
+   "canonical": "AIRTABLE"
+  },
+  {
+   "text": "CD TRELLO",
+   "canonical": "TRELLO"
+  },
+  {
+   "text": "DEB TRELLO GBR",
+   "canonical": "TRELLO"
+  },
+  {
+   "text": "CD TRELLO",
+   "canonical": "TRELLO"
+  },
+  {
+   "text": "C D TRELLO",
+   "canonical": "TRELLO"
+  },
+  {
+   "text": "POSTMAN.COM GB",
+   "canonical": "POSTMAN"
+  },
+  {
+   "text": "DEB POSTMAN GLASGOW",
+   "canonical": "POSTMAN"
+  },
+  {
+   "text": "POSTMN INC P1A2 B3C4D5",
+   "canonical": "POSTMAN"
+  },
+  {
+   "text": "VIS POSTMAN.COM",
+   "canonical": "POSTMAN"
+  },
+  {
+   "text": "Datadog Inc Manchester",
+   "canonical": "DATADOG"
+  },
+  {
+   "text": "CD DATADOG",
+   "canonical": "DATADOG"
+  },
+  {
+   "text": "CARD SUBSCRIPTION DATADOG CORBY GB",
+   "canonical": "DATADOG"
+  },
+  {
+   "text": "DD DATADOG INC LEEDS GB",
+   "canonical": "DATADOG"
+  },
+  {
+   "text": "CD STRIPE SUBSCRIPTION GLASGOW",
+   "canonical": "STRIPE ATLAS"
+  },
+  {
+   "text": "GOOGLE *STRIPE ATLAS GLASGOW",
+   "canonical": "STRIPE ATLAS"
+  },
+  {
+   "text": "VIS STRIPE SUBSCRIPTION LTD",
+   "canonical": "STRIPE ATLAS"
+  },
+  {
+   "text": "STRIPE ATLAS B1RINGHAM GB",
+   "canonical": "STRIPE ATLAS"
+  },
+  {
+   "text": "Paypal *xero P1a2b3c4d5",
+   "canonical": "XERO"
+  },
+  {
+   "text": "GOOGLE *XERO",
+   "canonical": "XERO"
+  },
+  {
+   "text": "DIRECT DEBIT XERO UK LIMITED BRISTOL",
+   "canonical": "XERO"
+  },
+  {
+   "text": "CD XERO.COM GBR",
+   "canonical": "XERO"
+  },
+  {
+   "text": "VIS ZAPIER INC CORBY GB",
+   "canonical": "ZAPIER"
+  },
+  {
+   "text": "VIS ZAPIER",
+   "canonical": "ZAPIER"
+  },
+  {
+   "text": "D/D ZAPIER INC PLC",
+   "canonical": "ZAPIER"
+  },
+  {
+   "text": "PAYPAL *ZAPIER INC",
+   "canonical": "ZAPIER"
+  },
+  {
+   "text": "DEB CALENDLY REF 1029384",
+   "canonical": "CALENDLY"
+  },
+  {
+   "text": "GOOGLE *CALENDLY LONDON GBR",
+   "canonical": "CALENDLY"
+  },
+  {
+   "text": "VIS CALEDNLY LLC GLASGOW",
+   "canonical": "CALENDLY"
+  },
+  {
+   "text": "PAYPAL *CALE NDLY",
+   "canonical": "CALENDLY"
+  },
+  {
+   "text": "DD OVERLEAF.COM LEEDS GB",
+   "canonical": "OVERLEAF"
+  },
+  {
+   "text": "VIS OVERLEAF.COM PLC",
+   "canonical": "OVERLEAF"
+  },
+  {
+   "text": "CARD AYMENT TO OVERLEA.FCOM CORBY GB",
+   "canonical": "OVERLEAF"
+  },
+  {
+   "text": "CD OVERLEAF GLAS6OW",
+   "canonical": "OVERLEAF"
+  },
+  {
+   "text": "DIRECT DEBIT MEDIUM.COM NOTTINGHAM",
+   "canonical": "MEDIUM"
+  },
+  {
+   "text": "PAYPAL *MEDIUM.COM LONDON",
+   "canonical": "MEDIUM"
+  },
+  {
+   "text": "VIS MEDIUM MEMBERSHIP LEEDS GB",
+   "canonical": "MEDIUM"
+  },
+  {
+   "text": "DD Medium Membership GB",
+   "canonical": "MEDIUM"
+  },
+  {
+   "text": "CARD SUBSCRIPTION PUREGYM MEMBERSHIP BIRMINGHAM GB",
+   "canonical": "PUREGYM"
+  },
+  {
+   "text": "PUREGYM BIRMINGHAM GB",
+   "canonical": "PUREGYM"
+  },
+  {
+   "text": "Puregym",
+   "canonical": "PUREGYM"
+  },
+  {
+   "text": "PAYPAL *PUREGYM MEMBERSHIP LTD",
+   "canonical": "PUREGYM"
+  },
+  {
+   "text": "D/D GYM GROUP 44 20 7946 0000",
+   "canonical": "THE GYM GROUP"
+  },
+  {
+   "text": "CD THE GYM LTD P1A2B3C4D5",
+   "canonical": "THE GYM GROUP"
+  },
+  {
+   "text": "DE B THE GYM GROUP LONDON",
+   "canonical": "THE GYM GROUP"
+  },
+  {
+   "text": "DIRECT DEBIT THE GYM LTD GBR",
+   "canonical": "THE GYM GROUP"
+  },
+  {
+   "text": "DEB DAVID LLOYD",
+   "canonical": "DAVID LLOYD"
+  },
+  {
+   "text": "DLL MEMBERSHIP",
+   "canonical": "DAVID LLOYD"
+  },
+  {
+   "text": "VIS DAVID LLOYD CLUBS CARDIFF",
+   "canonical": "DAVID LLOYD"
+  },
+  {
+   "text": "CARD SUBSCRIPTION DLL MEMBERSHIP MANCHESTER",
+   "canonical": "DAVID LLOYD"
+  },
+  {
+   "text": "DEB VIRGIN ACTIVE UK P1A2B3C4D5",
+   "canonical": "VIRGIN ACTIVE"
+  },
+  {
+   "text": "VIRGIN ACTIVE UK GBR",
+   "canonical": "VIRGIN ACTIVE"
+  },
+  {
+   "text": "VIRGIN ACTIVE UK REF 1029384",
+   "canonical": "VIRGIN ACTIVE"
+  },
+  {
+   "text": "GOOGLE *VIRGIN ACTIVE PLC",
+   "canonical": "VIRGIN ACTIVE"
+  },
+  {
+   "text": "DD ANYTIME FITNESS",
+   "canonical": "ANYTIME FITNESS"
+  },
+  {
+   "text": "CD ANYTIME FITNESS 8008",
+   "canonical": "ANYTIME FITNESS"
+  },
+  {
+   "text": "VIS ANYTIME FITNESS UK REF 1029384",
+   "canonical": "ANYTIME FITNESS"
+  },
+  {
+   "text": "VIS ANYTIM3 FITNESS UK GB",
+   "canonical": "ANYTIME FITNESS"
+  },
+  {
+   "text": "Paypal *nuffield Health Fitness Bristol",
+   "canonical": "NUFFIELD HEALTH"
+  },
+  {
+   "text": "RECURRING PAYMENT NUFFIELD HEALTH FITNESS LONDON",
+   "canonical": "NUFFIELD HEALTH"
+  },
+  {
+   "text": "CARD SUBSCRIPTION NUFFIELD HEALTH FITNESS LONDON GBR",
+   "canonical": "NUFFIELD HEALTH"
+  },
+  {
+   "text": "EDB NUFFIELD HEALTH",
+   "canonical": "NUFFIELD HEALTH"
+  },
+  {
+   "text": "DEB STRAVA.COM CARDIFF",
+   "canonical": "STRAVA"
+  },
+  {
+   "text": "DIRECT DEBIT STRAVA.COM CORBY GB",
+   "canonical": "STRAVA"
+  },
+  {
+   "text": "PAYPAL *STRAVA CORBY GB",
+   "canonical": "STRAVA"
+  },
+  {
+   "text": "SRTAVA INC G8",
+   "canonical": "STRAVA"
+  },
+  {
+   "text": "DD HEADSPACE.COM CARDIFF",
+   "canonical": "HEADSPACE"
+  },
+  {
+   "text": "D/D HEADSPACE INC P1A2B3C4D5",
+   "canonical": "HEADSPACE"
+  },
+  {
+   "text": "DD HEADSPACE LONDON GR8",
+   "canonical": "HEADSPACE"
+  },
+  {
+   "text": "IVS HEADSPACE B RISTOL",
+   "canonical": "HEADSPACE"
+  },
+  {
+   "text": "CALM PREMIUM BIRMINGHAM GB",
+   "canonical": "CALM"
+  },
+  {
+   "text": "RECURRING PAYMENT CALM APP CORBY GB",
+   "canonical": "CALM"
+  },
+  {
+   "text": "DEB CAL M RPEMIUM NOTTINGHAM",
+   "canonical": "CALM"
+  },
+  {
+   "text": "CD CALM PREMIUM CORBY GB",
+   "canonical": "CALM"
+  },
+  {
+   "text": "CD JD GYM LEEDS GB",
+   "canonical": "JD GYMS"
+  },
+  {
+   "text": "PAYPAL *JD GYMS NOTTINGHAM",
+   "canonical": "JD GYMS"
+  },
+  {
+   "text": "C DJD GYMS LTD GB",
+   "canonical": "JD GYMS"
+  },
+  {
+   "text": "VIS JD GYMS LTD LEEDS GB",
+   "canonical": "JD GYMS"
+  },
+  {
+   "text": "PAYPAL *THIRD SPACE CORBY GB",
+   "canonical": "THIRD SPACE"
+  },
+  {
+   "text": "VIS THIRD SPACE LONDON LEEDS GB",
+   "canonical": "THIRD SPACE"
+  },
+  {
+   "text": "THIRD SPACE LONDON GBR",
+   "canonical": "THIRD SPACE"
+  },
+  {
+   "text": "CARD SUBSCRIPTION THIRD SPACE LONDON",
+   "canonical": "THIRD SPACE"
+  },
+  {
+   "text": "CARD PAYMENT TO F45 STUDIO BRISTOL",
+   "canonical": "F45"
+  },
+  {
+   "text": "DIRECT DEBIT F45 TRAINING P1A2B3C4D5",
+   "canonical": "F45"
+  },
+  {
+   "text": "PAYPAL *F45 TRAININ",
+   "canonical": "F45"
+  },
+  {
+   "text": "RECURRING PAYMENT F45 TRAINING MANCHESTER",
+   "canonical": "F45"
+  },
+  {
+   "text": "BARRYS BOOTCAMP PLC",
+   "canonical": "BARRYS"
+  },
+  {
+   "text": "CD BARRYS BOOTCAMP LEEDS GB",
+   "canonical": "BARRYS"
+  },
+  {
+   "text": "DIR3CT DEBIT B ARRYS BOOTCAMP LEEDS GB",
+   "canonical": "BARRYS"
+  },
+  {
+   "text": "DD BARRYS UK LTD",
+   "canonical": "BARRYS"
+  },
+  {
+   "text": "DIRECT DEBIT SNAP FITNESS UK LTD",
+   "canonical": "SNAP FITNESS"
+  },
+  {
+   "text": "Google *snap Fitness UK Leeds GB",
+   "canonical": "SNAP FITNESS"
+  },
+  {
+   "text": "RECURRING PYMENT SNAP FITNESS UK LONDON",
+   "canonical": "SNAP FITNESS"
+  },
+  {
+   "text": "SNAP FITNESS CARDIFF",
+   "canonical": "SNAP FITNESS"
+  },
+  {
+   "text": "PAYPAL *1REBEL LONDON",
+   "canonical": "1REBEL"
+  },
+  {
+   "text": "CD 1REBEL REF 1029384",
+   "canonical": "1REBEL"
+  },
+  {
+   "text": "GOOGLE *1RBEL BIRMINGHAM GB",
+   "canonical": "1REBEL"
+  },
+  {
+   "text": "CARD SUB SRCIPTION 1REBEL LONDON",
+   "canonical": "1REBEL"
+  },
+  {
+   "text": "CARD PAYMENT TO FITBIT",
+   "canonical": "FITBIT PREMIUM"
+  },
+  {
+   "text": "CD FITBIT BRISTOL",
+   "canonical": "FITBIT PREMIUM"
+  },
+  {
+   "text": "FITBIT",
+   "canonical": "FITBIT PREMIUM"
+  },
+  {
+   "text": "Vis Fitbit",
+   "canonical": "FITBIT PREMIUM"
+  },
+  {
+   "text": "CD WEIGHT WATCHERS UK",
+   "canonical": "WEIGHT WATCHERS"
+  },
+  {
+   "text": "RECURRING PAYMENT WEIGHT WATCHERS UK MANCHESTER",
+   "canonical": "WEIGHT WATCHERS"
+  },
+  {
+   "text": "CARD SUBSCRIPTION WW KU 44 20 7946 0000",
+   "canonical": "WEIGHT WATCHERS"
+  },
+  {
+   "text": "PAYPAL *WEIGHT WATCHERS UK NOTTINGHAM",
+   "canonical": "WEIGHT WATCHERS"
+  },
+  {
+   "text": "GOOGLE *XBOX LIVE GOLD 8008",
+   "canonical": "XBOX GAME PASS"
+  },
+  {
+   "text": "DD XBOX GAME PASS LTD",
+   "canonical": "XBOX GAME PASS"
+  },
+  {
+   "text": "DEB XBOX GAME PASS 8008",
+   "canonical": "XBOX GAME PASS"
+  },
+  {
+   "text": "MICROSOFT XBOX LTD",
+   "canonical": "XBOX GAME PASS"
+  },
+  {
+   "text": "Recurring Payment Nintendo Online Glasgow",
+   "canonical": "NINTENDO ONLINE"
+  },
+  {
+   "text": "GOOGLE *NINTENDO ONLINE LTD",
+   "canonical": "NINTENDO ONLINE"
+  },
+  {
+   "text": "PAYPAL *NINTENDO ONLINE NOTITNGHAM",
+   "canonical": "NINTENDO ONLINE"
+  },
+  {
+   "text": "RECURRING PAYMENT NINTENDO ESHOP SUB 8008",
+   "canonical": "NINTENDO ONLINE"
+  },
+  {
+   "text": "ELECTRONIC ARTS EA PLAY P1A2B3C4D5",
+   "canonical": "EA PLAY"
+  },
+  {
+   "text": "CARD SUBSCRIPTION ELECTRONIC ARTS EA PLAY CORBY GB",
+   "canonical": "EA PLAY"
+  },
+  {
+   "text": "DD ELECTRONIC ARTS EA PLAY BIRMINGHAM GB",
+   "canonical": "EA PLAY"
+  },
+  {
+   "text": "ELECTRONIC ARTS EA PLAY BIRMINGHAM GB",
+   "canonical": "EA PLAY"
+  },
+  {
+   "text": "DIRECT DEBIT UBISOFT PLUS 44 20 7946 0000",
+   "canonical": "UBISOFT PLUS"
+  },
+  {
+   "text": "DD UBISOFT+ 8008",
+   "canonical": "UBISOFT PLUS"
+  },
+  {
+   "text": "CD UBISOFT PLUS LONDON 6BR",
+   "canonical": "UBISOFT PLUS"
+  },
+  {
+   "text": "VS UBISOFT+ G",
+   "canonical": "UBISOFT PLUS"
+  },
+  {
+   "text": "VIS BLIZZARD WOW CORBY GB",
+   "canonical": "WORLD OF WARCRAFT"
+  },
+  {
+   "text": "CARD SUBSCRIPTION BLIZZARD ENTERTAINMENT SUB GBR",
+   "canonical": "WORLD OF WARCRAFT"
+  },
+  {
+   "text": "DEB BLIZZARD ENTERTAINMENT SUB GB",
+   "canonical": "WORLD OF WARCRAFT"
+  },
+  {
+   "text": "GOGOLE *BL IZZARD ENTERTAINMENT SUB 8008",
+   "canonical": "WORLD OF WARCRAFT"
+  },
+  {
+   "text": "VIS APPLE.COM/BILL ARCADE",
+   "canonical": "APPLE ARCADE"
+  },
+  {
+   "text": "CD APPLE ARCADE",
+   "canonical": "APPLE ARCADE"
+  },
+  {
+   "text": "CARD SU BSCRIPTION APPLE.COM/BILL ARCADE REF 1029384",
+   "canonical": "APPLE ARCADE"
+  },
+  {
+   "text": "CD APPLE.COM/BILL ACRADE",
+   "canonical": "APPLE ARCADE"
+  },
+  {
+   "text": "DEB NVIDIA GEFORCE NOW NOTTINGHAM",
+   "canonical": "GEFORCE NOW"
+  },
+  {
+   "text": "DEB GEFORCE NOW CARDIFF",
+   "canonical": "GEFORCE NOW"
+  },
+  {
+   "text": "CD Nvidia Geforce Now Leeds GB",
+   "canonical": "GEFORCE NOW"
+  },
+  {
+   "text": "PAYPAL *NVIDIA GEFORCE OW",
+   "canonical": "GEFORCE NOW"
+  },
+  {
+   "text": "HUMBLE CHOICE",
+   "canonical": "HUMBLE CHOICE"
+  },
+  {
+   "text": "VIS HUMBLE CHOICE GB",
+   "canonical": "HUMBLE CHOICE"
+  },
+  {
+   "text": "DEB HUMB LE BUNDLE CHOIEC GBR",
+   "canonical": "HUMBLE CHOICE"
+  },
+  {
+   "text": "CD HUMBLE CHOICE LONDON",
+   "canonical": "HUMBLE CHOICE"
+  },
+  {
+   "text": "RECURRING PAYMENT FFXIV SUBSCRIPTION NOTTINGHAM",
+   "canonical": "FINAL FANTASY XIV"
+  },
+  {
+   "text": "VIS FFXIV SUBSCRIPTION NOTTINGHAM",
+   "canonical": "FINAL FANTASY XIV"
+  },
+  {
+   "text": "DEB FFXIV SUBSCRIPTION LEEDS GB",
+   "canonical": "FINAL FANTASY XIV"
+  },
+  {
+   "text": "S QURAE ENIX FFXIV 44 20 7946 0000",
+   "canonical": "FINAL FANTASY XIV"
+  },
+  {
+   "text": "RECURRING PAYMENT MINECRAFT REALMS BIRMINGHAM GB",
+   "canonical": "MINECRAFT REALMS"
+  },
+  {
+   "text": "DD MOJANG REALMS BIRMINGHAM GB",
+   "canonical": "MINECRAFT REALMS"
+  },
+  {
+   "text": "RECURRING PAYMENT MINECAFT REALMS GB",
+   "canonical": "MINECRAFT REALMS"
+  },
+  {
+   "text": "VIS MO JANG REALMS K",
+   "canonical": "MINECRAFT REALMS"
+  },
+  {
+   "text": "GOOGLE *TELEGRAPH MEDIA GROUP P1A2B3C4D5",
+   "canonical": "TELEGRAPH"
+  },
+  {
+   "text": "VIS THE TELEGRAPH 44 20 7946 0000",
+   "canonical": "TELEGRAPH"
+  },
+  {
+   "text": "THE ELEGRAPH PLC",
+   "canonical": "TELEGRAPH"
+  },
+  {
+   "text": "THE TELEGRAPH GB",
+   "canonical": "TELEGRAPH"
+  },
+  {
+   "text": "D/d Ft.com 8008",
+   "canonical": "FINANCIAL TIMES"
+  },
+  {
+   "text": "FT.COM PLC",
+   "canonical": "FINANCIAL TIMES"
+  },
+  {
+   "text": "CD FT.COM CORBY GB",
+   "canonical": "FINANCIAL TIMES"
+  },
+  {
+   "text": "GOOGLE *FT SUBSCRIPTION BIRMINGHAM GB",
+   "canonical": "FINANCIAL TIMES"
+  },
+  {
+   "text": "THE ECONOMIST 8008",
+   "canonical": "THE ECONOMIST"
+  },
+  {
+   "text": "The Economist Ltd",
+   "canonical": "THE ECONOMIST"
+  },
+  {
+   "text": "CARD PAYMENT TO THE ECONOMIST 8008",
+   "canonical": "THE ECONOMIST"
+  },
+  {
+   "text": "DIRECT DEBIT THE ECONOMIST 44 20 7946 0000",
+   "canonical": "THE ECONOMIST"
+  },
+  {
+   "text": "Paypal *nytimes London Gbr",
+   "canonical": "NEW YORK TIMES"
+  },
+  {
+   "text": "GOOGLE *NEW YORK TIMES DIGITAL 8008",
+   "canonical": "NEW YORK TIMES"
+  },
+  {
+   "text": "PAYPAL *NYTIMES NOTTINGHAM",
+   "canonical": "NEW YORK TIMES"
+  },
+  {
+   "text": "DEB NYTIMES",
+   "canonical": "NEW YORK TIMES"
+  },
+  {
+   "text": "CD PRIVATE EYE CORBY GB",
+   "canonical": "PRIVATE EYE"
+  },
+  {
+   "text": "CD PRIVATE EYE BIRMINGHAM GB",
+   "canonical": "PRIVATE EYE"
+  },
+  {
+   "text": "CARD SUBSCRIPTION PRIVATE EYE MAGAZINE GB",
+   "canonical": "PRIVATE EYE"
+  },
+  {
+   "text": "PRIVATE EYE UK",
+   "canonical": "PRIVATE EYE"
+  },
+  {
+   "text": "PAYPAL *WHICH MAGAZINE GBR",
+   "canonical": "WHICH"
+  },
+  {
+   "text": "D/D WHICH? LIMITED GBR",
+   "canonical": "WHICH"
+  },
+  {
+   "text": "WHICH.CO.UK PLC",
+   "canonical": "WHICH"
+  },
+  {
+   "text": "GOOGLE *WHICH MAGAZINE P1A2B3C4D5",
+   "canonical": "WHICH"
+  },
+  {
+   "text": "DIRECT DEBIT READLY LONDON GBR",
+   "canonical": "READLY"
+  },
+  {
+   "text": "CD READLY AB",
+   "canonical": "READLY"
+  },
+  {
+   "text": "GOOGEL *READLY AB 8008",
+   "canonical": "READLY"
+  },
+  {
+   "text": "DEB RE4DLY AB 44 20 7496 0000",
+   "canonical": "READLY"
+  },
+  {
+   "text": "RECURRING PAYMENT APPLE NEWS+",
+   "canonical": "APPLE NEWS"
+  },
+  {
+   "text": "Card Subscription Apple.com/bill News Ref 1029384",
+   "canonical": "APPLE NEWS"
+  },
+  {
+   "text": "DD APPLE.COM/BILL NEW5 GB",
+   "canonical": "APPLE NEWS"
+  },
+  {
+   "text": "APPLE NEWS+ CORBY GB",
+   "canonical": "APPLE NEWS"
+  },
+  {
+   "text": "THE SPECTATOR",
+   "canonical": "THE SPECTATOR"
+  },
+  {
+   "text": "SPECTATOR MAGAZINE PLC",
+   "canonical": "THE SPECTATOR"
+  },
+  {
+   "text": "D/D SPECTATO MAGAZINE LONDON",
+   "canonical": "THE SPECTATOR"
+  },
+  {
+   "text": "THE SPECTATOR",
+   "canonical": "THE SPECTATOR"
+  },
+  {
+   "text": "D/D BLOOMBERG SUBSCRIPTION LTD",
+   "canonical": "BLOOMBERG"
+  },
+  {
+   "text": "D/D BLOOMBERG SUBSCRIPTION GLASGOW",
+   "canonical": "BLOOMBERG"
+  },
+  {
+   "text": "BLOMBERG SUB SCRIPTION CORBY GB",
+   "canonical": "BLOOMBERG"
+  },
+  {
+   "text": "D BL OOMBERG SUBSCRIPTION",
+   "canonical": "BLOOMBERG"
+  },
+  {
+   "text": "VIS WSJ.COM LTD",
+   "canonical": "WALL STREET JOURNAL"
+  },
+  {
+   "text": "DEB WALL STREET JOURNAL LEEDS GB",
+   "canonical": "WALL STREET JOURNAL"
+  },
+  {
+   "text": "GOOGLE *WSJ.COM GB",
+   "canonical": "WALL STREET JOURNAL"
+  },
+  {
+   "text": "CARD PAYMENT TO WSJ.COM LONDON GBR",
+   "canonical": "WALL STREET JOURNAL"
+  },
+  {
+   "text": "DD Dennis Publishing Week P1a2b3c4d5",
+   "canonical": "THE WEEK"
+  },
+  {
+   "text": "DIRECT DEBIT THE WEEK MAGAZINE GBR",
+   "canonical": "THE WEEK"
+  },
+  {
+   "text": "DEB THE WEEK AGAZNE BRISTOL",
+   "canonical": "THE WEEK"
+  },
+  {
+   "text": "DD THE WEEK MAGAZINE 8008",
+   "canonical": "THE WEEK"
+  },
+  {
+   "text": "DELIVEROO PLUS CORBY GB",
+   "canonical": "DELIVEROO PLUS"
+  },
+  {
+   "text": "CARD PAYMENT TO ROO PLUS MEMBERSHIP PLC",
+   "canonical": "DELIVEROO PLUS"
+  },
+  {
+   "text": "DD DELIVEROO PLUS 8 008",
+   "canonical": "DELIVEROO PLUS"
+  },
+  {
+   "text": "GOOGLE *DELIVEROO PLUS BIRMINGHAM GB",
+   "canonical": "DELIVEROO PLUS"
+  },
+  {
+   "text": "GOUSTO GLASGOW",
+   "canonical": "GOUSTO"
+  },
+  {
+   "text": "GOUSTO.CO.UK",
+   "canonical": "GOUSTO"
+  },
+  {
+   "text": "GOUSTO.CO.UK BRISTOL",
+   "canonical": "GOUSTO"
+  },
+  {
+   "text": "D/D GOUSTO PLC",
+   "canonical": "GOUSTO"
+  },
+  {
+   "text": "GOOGLE *MINDFUL CHEF LTD REF 1029384",
+   "canonical": "MINDFUL CHEF"
+  },
+  {
+   "text": "DEB MINDFUL CHEF LTD CARDIFF",
+   "canonical": "MINDFUL CHEF"
+  },
+  {
+   "text": "VIS MINDFUL CHEF LTD LONDON GBR",
+   "canonical": "MINDFUL CHEF"
+  },
+  {
+   "text": "RECURRING PAYMENT MINDFUL CHEF LTD",
+   "canonical": "MINDFUL CHEF"
+  },
+  {
+   "text": "Vis Pret A Manger Club 44 20 7946 0000",
+   "canonical": "PRET CLUB"
+  },
+  {
+   "text": "CARD SUBSCRIPTION PRET CLUB SUBSCRIPTION 8008",
+   "canonical": "PRET CLUB"
+  },
+  {
+   "text": "RECURRING PAYMENT PRET A MANGER CLUB LTD",
+   "canonical": "PRET CLUB"
+  },
+  {
+   "text": "PRET A MANGER CLUB",
+   "canonical": "PRET CLUB"
+  },
+  {
+   "text": "ODDBOX LTD LEEDS GB",
+   "canonical": "ODDBOX"
+  },
+  {
+   "text": "VIS ODDBOX REF 1029384",
+   "canonical": "ODDBOX"
+  },
+  {
+   "text": "DD ODDBOX BIRIMNGHAM GB",
+   "canonical": "ODDBOX"
+  },
+  {
+   "text": "Google *oddbox",
+   "canonical": "ODDBOX"
+  },
+  {
+   "text": "CARD PAYMENT TO RIVERFORD ORGANIC 8008",
+   "canonical": "RIVERFORD"
+  },
+  {
+   "text": "DEB RIVERFORD BOX PLC",
+   "canonical": "RIVERFORD"
+  },
+  {
+   "text": "CARD PAYMENT TO RIVERFORD ORGANIC REF 1029384",
+   "canonical": "RIVERFORD"
+  },
+  {
+   "text": "RIVERFORD BOX BRISTOL",
+   "canonical": "RIVERFORD"
+  },
+  {
+   "text": "Recurring Payment Clubcard Plus P1a2b3c4d5",
+   "canonical": "TESCO CLUBCARD PLUS"
+  },
+  {
+   "text": "RECURRING PAYMENT CLUBCARD PLUS CORBY GB",
+   "canonical": "TESCO CLUBCARD PLUS"
+  },
+  {
+   "text": "GOOGLE *TESCO CLUBCARD PLUS GBR",
+   "canonical": "TESCO CLUBCARD PLUS"
+  },
+  {
+   "text": "RECURRIN G P AYMENT TESCO CLUBCARD PLUS",
+   "canonical": "TESCO CLUBCARD PLUS"
+  },
+  {
+   "text": "D/d Wine Society Membership 44 20 7946 0000",
+   "canonical": "WINE SOCIETY"
+  },
+  {
+   "text": "The Wine Society",
+   "canonical": "WINE SOCIETY"
+  },
+  {
+   "text": "PAYPAL *WINE SOCIET Y MEMBERSHP CORBY GB",
+   "canonical": "WINE SOCIETY"
+  },
+  {
+   "text": "DD WINE SOCI3TY MEMBERSHIP GB",
+   "canonical": "WINE SOCIETY"
+  },
+  {
+   "text": "DD Bloom & Wild Ltd",
+   "canonical": "BLOOM AND WILD"
+  },
+  {
+   "text": "BLOOM & WILD LONDON GBR",
+   "canonical": "BLOOM AND WILD"
+  },
+  {
+   "text": "G0OGLE *BLOOM AND WILD SUB CORBY GB",
+   "canonical": "BLOOM AND WILD"
+  },
+  {
+   "text": "PAYPAL *B1OOM & WILD NOTTINGHAM",
+   "canonical": "BLOOM AND WILD"
+  },
+  {
+   "text": "CHARLIE BIGHAMS BRISTOL",
+   "canonical": "CHARLIE BIGHAM"
+  },
+  {
+   "text": "CD Charlie Bighams Box Birmingham GB",
+   "canonical": "CHARLIE BIGHAM"
+  },
+  {
+   "text": "CD CHARLIE BIGHAMS CARDFF",
+   "canonical": "CHARLIE BIGHAM"
+  },
+  {
+   "text": "CHARLIE BIG HAMS",
+   "canonical": "CHARLIE BIGHAM"
+  },
+  {
+   "text": "CARD SUBSCRIPTION VODAFONE LTD",
+   "canonical": "VODAFONE"
+  },
+  {
+   "text": "CD VODAFONE P1A2B3C4D5",
+   "canonical": "VODAFONE"
+  },
+  {
+   "text": "CARD SUBSCRIPTION VODAF0NE LTD PA2B3C4D5",
+   "canonical": "VODAFONE"
+  },
+  {
+   "text": "GOOGLE *VODAFONE LIMTIED BRISTOL",
+   "canonical": "VODAFONE"
+  },
+  {
+   "text": "DIRECT DEBIT EE DEVICE PAYMENT BRISTOL",
+   "canonical": "EE"
+  },
+  {
+   "text": "VIS EE MOBILE LONDON GBR",
+   "canonical": "EE"
+  },
+  {
+   "text": "EE Device Payment Bristol",
+   "canonical": "EE"
+  },
+  {
+   "text": "EE NOTTINGHAM",
+   "canonical": "EE"
+  },
+  {
+   "text": "D/D GIFFGAFF.COM UK",
+   "canonical": "GIFFGAFF"
+  },
+  {
+   "text": "D/D GIFFGAFF.COM CORBY GB",
+   "canonical": "GIFFGAFF"
+  },
+  {
+   "text": "GIFGFAFF LTD LTD",
+   "canonical": "GIFFGAFF"
+  },
+  {
+   "text": "VIS GIFFGAFF LTD BIRMINGHAM GB",
+   "canonical": "GIFFGAFF"
+  },
+  {
+   "text": "GOOGLE *LEBARA CORBY GB",
+   "canonical": "LEBARA"
+  },
+  {
+   "text": "D/D LEBARA UK LTD",
+   "canonical": "LEBARA"
+  },
+  {
+   "text": "PAYPA L *LEBARA MOBILE MNACHESTER",
+   "canonical": "LEBARA"
+  },
+  {
+   "text": "EDB LEABRA UK 8008",
+   "canonical": "LEBARA"
+  },
+  {
+   "text": "LYCAMOBILE CARDIFF",
+   "canonical": "LYCAMOBILE"
+  },
+  {
+   "text": "DD LYCAMOBILE UK UK",
+   "canonical": "LYCAMOBILE"
+  },
+  {
+   "text": "D/D LYCA MOBILE M ANCHESTER",
+   "canonical": "LYCAMOBILE"
+  },
+  {
+   "text": "CARD PAYMEN TTO LYCA MOBILE LONDON",
+   "canonical": "LYCAMOBILE"
+  },
+  {
+   "text": "RECURRING PAYMENT SKY MOBILE UK PLC",
+   "canonical": "SKY MOBILE"
+  },
+  {
+   "text": "PAYPAL *SKY MOBILE LONDON",
+   "canonical": "SKY MOBILE"
+  },
+  {
+   "text": "VIS SKY MOBILE 0808",
+   "canonical": "SKY MOBILE"
+  },
+  {
+   "text": "VI SKY MOB1LE UK CORBY GB",
+   "canonical": "SKY MOBILE"
+  },
+  {
+   "text": "GOOGLE *SMARTY MOBILE",
+   "canonical": "SMARTY"
+  },
+  {
+   "text": "D/D SMARTY",
+   "canonical": "SMARTY"
+  },
+  {
+   "text": "GOOGLE *SMARTY.CO.UK LTD",
+   "canonical": "SMARTY"
+  },
+  {
+   "text": "SMARTY PCL",
+   "canonical": "SMARTY"
+  },
+  {
+   "text": "Google *idmobile 44 20 7946 0000",
+   "canonical": "ID MOBILE"
+  },
+  {
+   "text": "ID MOBILE MANCHESTER",
+   "canonical": "ID MOBILE"
+  },
+  {
+   "text": "CARD PAYME NT TO ID MOBIE",
+   "canonical": "ID MOBILE"
+  },
+  {
+   "text": "RECURRING PAYMENT IDMB0ILE",
+   "canonical": "ID MOBILE"
+  },
+  {
+   "text": "BT GROUP GBR",
+   "canonical": "BT"
+  },
+  {
+   "text": "GOOGLE *BT GROUP",
+   "canonical": "BT"
+  },
+  {
+   "text": "D/D B PLC LTD",
+   "canonical": "BT"
+  },
+  {
+   "text": "D/D BT BRODBAND BIRIMNGHAM GB",
+   "canonical": "BT"
+  },
+  {
+   "text": "DEB SKY TALK LEEDS GB",
+   "canonical": "SKY BROADBAND"
+  },
+  {
+   "text": "DIRECT DEBIT SKY TALK UK",
+   "canonical": "SKY BROADBAND"
+  },
+  {
+   "text": "CARD PAYMENT TO SKY TALK MANCHESTER",
+   "canonical": "SKY BROADBAND"
+  },
+  {
+   "text": "DIRECT DEBIT SYK 8ROADBAND",
+   "canonical": "SKY BROADBAND"
+  },
+  {
+   "text": "VIRGIN MEDIA 44 20 7946 0000",
+   "canonical": "VIRGIN MEDIA"
+  },
+  {
+   "text": "VIRGIN MEDIA PYMTS PLC",
+   "canonical": "VIRGIN MEDIA"
+  },
+  {
+   "text": "CARD PAYMENT TO VIRGINMEDIA.COM 44 20 794 0000",
+   "canonical": "VIRGIN MEDIA"
+  },
+  {
+   "text": "VIS VIRGIN MEDIA PMTS MANCHESTER",
+   "canonical": "VIRGIN MEDIA"
+  },
+  {
+   "text": "DD TALK TALK UK",
+   "canonical": "TALKTALK"
+  },
+  {
+   "text": "TALKTALK TELECOM CARDIFF",
+   "canonical": "TALKTALK"
+  },
+  {
+   "text": "D/D TALKTALK 44 20 7946 0000",
+   "canonical": "TALKTALK"
+  },
+  {
+   "text": "T ALKTA LK LTD",
+   "canonical": "TALKTALK"
+  },
+  {
+   "text": "GOOGLE *HYPEROPTIC LTD",
+   "canonical": "HYPEROPTIC"
+  },
+  {
+   "text": "DIRECT DEBIT HYPEROPTIC LTD",
+   "canonical": "HYPEROPTIC"
+  },
+  {
+   "text": "HYPEROPTIC LTD UK",
+   "canonical": "HYPEROPTIC"
+  },
+  {
+   "text": "CD HYPEORPTI C LONDON",
+   "canonical": "HYPEROPTIC"
+  },
+  {
+   "text": "GOOGLE *NOW BB LTD",
+   "canonical": "NOW BROADBAND"
+  },
+  {
+   "text": "RECURRING PAYMENT NOW BB",
+   "canonical": "NOW BROADBAND"
+  },
+  {
+   "text": "GOOGLE *NOW BB GBR",
+   "canonical": "NOW BROADBAND"
+  },
+  {
+   "text": "PAYPAL *NOW BROADBAND CORBY GB",
+   "canonical": "NOW BROADBAND"
+  },
+  {
+   "text": "CD SMARTY HOME BROADBAND LONDON",
+   "canonical": "SMARTY BROADBAND"
+  },
+  {
+   "text": "D/D SMARTY HOME BROADBAND LONDON",
+   "canonical": "SMARTY BROADBAND"
+  },
+  {
+   "text": "SMARTY HOM BROADBAND LONDON",
+   "canonical": "SMARTY BROADBAND"
+  },
+  {
+   "text": "Smarty Home Broadband London Gbr",
+   "canonical": "SMARTY BROADBAND"
+  },
+  {
+   "text": "CD VIDEOWAVE LEEDS GB",
+   "canonical": "VIDEOWAVE"
+  },
+  {
+   "text": "CARD PAYMENT TO VIDEOWAVE LTD 8008",
+   "canonical": "VIDEOWAVE"
+  },
+  {
+   "text": "ECURRING PAYMNT VIDEOWAVE PLC",
+   "canonical": "VIDEOWAVE"
+  },
+  {
+   "text": "VIDEOWAVE LTD PLC",
+   "canonical": "VIDEOWAVE"
+  },
+  {
+   "text": "DEB TRUESPEED COMMUNICATIONS GBR",
+   "canonical": "TRUESPEED"
+  },
+  {
+   "text": "TRUESPEED MANCHESTER",
+   "canonical": "TRUESPEED"
+  },
+  {
+   "text": "RTUESPEED P1A2B3C4D5",
+   "canonical": "TRUESPEED"
+  },
+  {
+   "text": "RECURRIN PAYMENT TRUESPEED LEEDS GB",
+   "canonical": "TRUESPEED"
+  },
+  {
+   "text": "PAYPAL *DIRECTLINE.COM PLC",
+   "canonical": "DIRECT LINE"
+  },
+  {
+   "text": "DIRECT LINE INSURANCE MANCHESTER",
+   "canonical": "DIRECT LINE"
+  },
+  {
+   "text": "VIS DIRECT LINE BRISTOL",
+   "canonical": "DIRECT LINE"
+  },
+  {
+   "text": "DEB DIRECT LINE INSURANCE REF 1029384",
+   "canonical": "DIRECT LINE"
+  },
+  {
+   "text": "GOOGLE *ADMIRAL GROUP LEEDS GB",
+   "canonical": "ADMIRAL"
+  },
+  {
+   "text": "CD ADMIRAL INSURANCE LTD",
+   "canonical": "ADMIRAL"
+  },
+  {
+   "text": "CARD PAYMENT TO ADMIRAL GROUP BIRMINGHAM GB",
+   "canonical": "ADMIRAL"
+  },
+  {
+   "text": "CARD PAYMENT TO ADMIRAL IN SURANCE GLASGOW",
+   "canonical": "ADMIRAL"
+  },
+  {
+   "text": "CARD PAYMENT TO AVIVA LIFE P1A2B3C4D5",
+   "canonical": "AVIVA"
+  },
+  {
+   "text": "AVIVA",
+   "canonical": "AVIVA"
+  },
+  {
+   "text": "VIS VAIVA",
+   "canonical": "AVIVA"
+  },
+  {
+   "text": "D/D AVIVA INSURANCE",
+   "canonical": "AVIVA"
+  },
+  {
+   "text": "GOOGLE *VITALITY LIFE LONDON GBR",
+   "canonical": "VITALITY"
+  },
+  {
+   "text": "DD VITALITY LIFE 8008",
+   "canonical": "VITALITY"
+  },
+  {
+   "text": "CD VITAITY LIFE LONDON GBR",
+   "canonical": "VITALITY"
+  },
+  {
+   "text": "DIRECT DEBIT VITALITY H3ALTH 80 08",
+   "canonical": "VITALITY"
+  },
+  {
+   "text": "BUPA P1A2B3C4D5",
+   "canonical": "BUPA"
+  },
+  {
+   "text": "DD BUPA HEALTH",
+   "canonical": "BUPA"
+  },
+  {
+   "text": "CARD SUBSCRIPTION BUPA P1A2B3C4D5",
+   "canonical": "BUPA"
+  },
+  {
+   "text": "BUPA GB",
+   "canonical": "BUPA"
+  },
+  {
+   "text": "CD HASTINGS DIRECT REF 1029384",
+   "canonical": "HASTINGS"
+  },
+  {
+   "text": "PAYPAL *HASTINGS INSURANCE CARDIFF",
+   "canonical": "HASTINGS"
+  },
+  {
+   "text": "PAYPAL *HASTINGS INSURANCE GLASGOW",
+   "canonical": "HASTINGS"
+  },
+  {
+   "text": "HASTINGS DIRECT P1A2B3C4D5",
+   "canonical": "HASTINGS"
+  },
+  {
+   "text": "D/D CHURCHILL INSURANCE GB",
+   "canonical": "CHURCHILL"
+  },
+  {
+   "text": "Card Payment TO Churchill",
+   "canonical": "CHURCHILL"
+  },
+  {
+   "text": "CHURCHILL INUSRANCE REF 1029384",
+   "canonical": "CHURCHILL"
+  },
+  {
+   "text": "DEB CHURCHI1L INSURANCE BRISTOL",
+   "canonical": "CHURCHILL"
+  },
+  {
+   "text": "CARD PAYMENT TO PETPLAN BRISTOL",
+   "canonical": "PETPLAN"
+  },
+  {
+   "text": "DEB PETPLAN INSURANCE PLC",
+   "canonical": "PETPLAN"
+  },
+  {
+   "text": "D/D PETPLAN INSURNCE",
+   "canonical": "PETPLAN"
+  },
+  {
+   "text": "DD Petplan Insurance Ref 1029384",
+   "canonical": "PETPLAN"
+  },
+  {
+   "text": "MANYPETS P1A2B3C4D5",
+   "canonical": "MANYPETS"
+  },
+  {
+   "text": "DIRECT DEBIT MANYPETS LEEDS GB",
+   "canonical": "MANYPETS"
+  },
+  {
+   "text": "CARD SUBSCR1PTI ON MANYPETS WELLNESS BIRMINGHAM GB",
+   "canonical": "MANYPETS"
+  },
+  {
+   "text": "CARD SUBSCRIPTION MANYPETS WELLNESS",
+   "canonical": "MANYPETS"
+  },
+  {
+   "text": "D/D AUTOMOBILE ASSOCIATION",
+   "canonical": "AA"
+  },
+  {
+   "text": "GOOGLE *AUTOMOBILE ASSOCIATION REF 1029384",
+   "canonical": "AA"
+  },
+  {
+   "text": "GOOGLE *THE AA BRISTOL",
+   "canonical": "AA"
+  },
+  {
+   "text": "V IS THE AA",
+   "canonical": "AA"
+  },
+  {
+   "text": "Deb Forester Life Glasgow",
+   "canonical": "FORESTER LIFE"
+  },
+  {
+   "text": "CARD PAYMENT TO FORESTERS LIFE GB",
+   "canonical": "FORESTER LIFE"
+  },
+  {
+   "text": "F0RESTER LIFE CARDIFF",
+   "canonical": "FORESTER LIFE"
+  },
+  {
+   "text": "RECURRING PAYMENT OFRESTER LIFE LONDO",
+   "canonical": "FORESTER LIFE"
+  },
+  {
+   "text": "DEB LEGAL & GENERAL REF 1029384",
+   "canonical": "LEGAL AND GENERAL"
+  },
+  {
+   "text": "CD LEGAL & GENERAL",
+   "canonical": "LEGAL AND GENERAL"
+  },
+  {
+   "text": "RE CURRING PAYMENT LEGAL AND GENERAL ASSURANCE",
+   "canonical": "LEGAL AND GENERAL"
+  },
+  {
+   "text": "DIRECT DEBIT LEGAL & GENE RA MANCHESTER",
+   "canonical": "LEGAL AND GENERAL"
+  },
+  {
+   "text": "DEB LIFE360 TILE",
+   "canonical": "TILE"
+  },
+  {
+   "text": "CD LIFE360 TILE CARDIFF",
+   "canonical": "TILE"
+  },
+  {
+   "text": "CARD SUBSCRIPTION LIFE360 TILE BIRMINGHAM GB",
+   "canonical": "TILE"
+  },
+  {
+   "text": "PAYPAL *LIFE360 ITLE PLC",
+   "canonical": "TILE"
+  },
+  {
+   "text": "Google *ring.com Protect",
+   "canonical": "RING PROTECT"
+  },
+  {
+   "text": "CARD PAYMENT TO RING PROTECT LEEDS GB",
+   "canonical": "RING PROTECT"
+  },
+  {
+   "text": "DIRECT DEBIT RING.COM PROTECT LONDON",
+   "canonical": "RING PROTECT"
+  },
+  {
+   "text": "GOOGLE *RING PROTECT LTD",
+   "canonical": "RING PROTECT"
+  },
+  {
+   "text": "NORTON LIFELOCK BIRMINGHAM GB",
+   "canonical": "NORTON"
+  },
+  {
+   "text": "CARD PAYMENT TO NORTON LIFELOCK",
+   "canonical": "NORTON"
+  },
+  {
+   "text": "VIS NORTON LIFE1OCK GLAS GOW",
+   "canonical": "NORTON"
+  },
+  {
+   "text": "CARD PAYMENT TO NORTON 360 MANCHESTER",
+   "canonical": "NORTON"
+  },
+  {
+   "text": "RECURRING PAYMENT EXPERIAN CREDITEXPERT CORBY GB",
+   "canonical": "EXPERIAN"
+  },
+  {
+   "text": "VIS EXPERIAN CREDITEXPERT 44 20 7946 0000",
+   "canonical": "EXPERIAN"
+  },
+  {
+   "text": "CARD SUBSCRIPTION EXPERIAN LTD CORBY GB",
+   "canonical": "EXPERIAN"
+  },
+  {
+   "text": "DIRECT DEBIT EXPERIAN CREDITEXPERT GLASGOW",
+   "canonical": "EXPERIAN"
+  },
+  {
+   "text": "CLEARSCORE",
+   "canonical": "CLEARSCORE"
+  },
+  {
+   "text": "CARD SUBSCRIPTION CLEARSCORE BRISTOL",
+   "canonical": "CLEARSCORE"
+  },
+  {
+   "text": "CARD SUBSCRI PTION CLEARCORE PROTECT GLASGOW",
+   "canonical": "CLEARSCORE"
+  },
+  {
+   "text": "CADR PAYMENT TO CLEARSCORE 44 20 7946 0000",
+   "canonical": "CLEARSCORE"
+  },
+  {
+   "text": "SQ *TESCO EXTRA",
+   "canonical": "TESCO"
+  },
+  {
+   "text": "CARD TRANSACTION TESCO EXPRESS GLASGOW",
+   "canonical": "TESCO"
+  },
+  {
+   "text": "VI TESC OSTORES",
+   "canonical": "TESCO"
+  },
+  {
+   "text": "PAYPAL *TESO EXTRA LTD",
+   "canonical": "TESCO"
+  },
+  {
+   "text": "SAINSBURYS LTD",
+   "canonical": "SAINSBURYS"
+  },
+  {
+   "text": "ZETTLE *SAINSBURYS S/MKTS GBR",
+   "canonical": "SAINSBURYS"
+  },
+  {
+   "text": "SAINSBURYS S/MKTS NOTTINGAHM",
+   "canonical": "SAINSBURYS"
+  },
+  {
+   "text": "CARD PAMYEN T TO SAINSBURYS S/MKTS NOTTINGHAM",
+   "canonical": "SAINSBURYS"
+  },
+  {
+   "text": "SUMUP *ASDA SUPERSTORE LONDON GBR",
+   "canonical": "ASDA"
+  },
+  {
+   "text": "CARD TRANSACTION ASDA CORBY GB",
+   "canonical": "ASDA"
+  },
+  {
+   "text": "DC ASDA NOTTINGHAM",
+   "canonical": "ASDA"
+  },
+  {
+   "text": "PYPAL *ASDA SUPERSTROE",
+   "canonical": "ASDA"
+  },
+  {
+   "text": "POS MORRISONS BIRMINGHAM GB",
+   "canonical": "MORRISONS"
+  },
+  {
+   "text": "CARD TRANSACTION MORRISONS LEEDS GB",
+   "canonical": "MORRISONS"
+  },
+  {
+   "text": "POS MORRISONS 4420 7946 0000",
+   "canonical": "MORRISONS"
+  },
+  {
+   "text": "CARD PAYMENT TO MORRISONS REF 1029384",
+   "canonical": "MORRISONS"
+  },
+  {
+   "text": "VIS LIDL GLASGOW",
+   "canonical": "LIDL"
+  },
+  {
+   "text": "SUMUP *LIDL GB GB",
+   "canonical": "LIDL"
+  },
+  {
+   "text": "Vis Lidl UK London Gbr",
+   "canonical": "LIDL"
+  },
+  {
+   "text": "LILD",
+   "canonical": "LIDL"
+  },
+  {
+   "text": "PAYPAL *WAITROSE GROCERY GB",
+   "canonical": "WAITROSE"
+  },
+  {
+   "text": "VIS WAITROSE GROCERY LEEDS GB",
+   "canonical": "WAITROSE"
+  },
+  {
+   "text": "DEB WAITRSOE UK",
+   "canonical": "WAITROSE"
+  },
+  {
+   "text": "WAITROSE GROCERY LONDNO",
+   "canonical": "WAITROSE"
+  },
+  {
+   "text": "VIS CO-OP FOOD CARDIFF",
+   "canonical": "CO-OP"
+  },
+  {
+   "text": "DEB CENTRAL COOP PLC",
+   "canonical": "CO-OP"
+  },
+  {
+   "text": "SQ *CENTRAL COOP CARDIFF",
+   "canonical": "CO-OP"
+  },
+  {
+   "text": "SQ *CENTRA COOP GLASGOW",
+   "canonical": "CO-OP"
+  },
+  {
+   "text": "M AND S FOOD REF 1029384",
+   "canonical": "M&S FOOD"
+  },
+  {
+   "text": "MARKS & SPENCER GBR",
+   "canonical": "M&S FOOD"
+  },
+  {
+   "text": "CARD TRANSCTION MARKS & SP ENCER",
+   "canonical": "M&S FOOD"
+  },
+  {
+   "text": "CONTACTLESS MARKS & SPENCER REF 1029384",
+   "canonical": "M&S FOOD"
+  },
+  {
+   "text": "PAYPAL *ICELAND GB",
+   "canonical": "ICELAND"
+  },
+  {
+   "text": "ICELAND FOODS LONDON GBR",
+   "canonical": "ICELAND"
+  },
+  {
+   "text": "POS ICELAND LEEDS BG",
+   "canonical": "ICELAND"
+  },
+  {
+   "text": "SQ *ICELAND BIRMINGHAM GB",
+   "canonical": "ICELAND"
+  },
+  {
+   "text": "CONTACTLESS COSTCUTTER STORE NOTTINGHAM",
+   "canonical": "COSTCUTTER"
+  },
+  {
+   "text": "COSTCUTTER STORE PLC",
+   "canonical": "COSTCUTTER"
+  },
+  {
+   "text": "ZETTL3 *COSTCUTTER STORE 44 20 7946 0000",
+   "canonical": "COSTCUTTER"
+  },
+  {
+   "text": "CD COSTCUTTER STORE",
+   "canonical": "COSTCUTTER"
+  },
+  {
+   "text": "DEB NISA CARDIFF",
+   "canonical": "NISA"
+  },
+  {
+   "text": "CONTACTLESS NISA LOCAL CARDIFF",
+   "canonical": "NISA"
+  },
+  {
+   "text": "SQ *NIAS LOACL GLASGOW",
+   "canonical": "NISA"
+  },
+  {
+   "text": "SQ *NISA LOCAL CARDIFF",
+   "canonical": "NISA"
+  },
+  {
+   "text": "SQ *FARMFOODS LTD GBR",
+   "canonical": "FARMFOODS"
+  },
+  {
+   "text": "SQ *FARMFOODS CORBY GB",
+   "canonical": "FARMFOODS"
+  },
+  {
+   "text": "DEB FARMFODOS LTD",
+   "canonical": "FARMFOODS"
+  },
+  {
+   "text": "SUMUP *FARMFOODS",
+   "canonical": "FARMFOODS"
+  },
+  {
+   "text": "SQ *B&M RETAIL UK",
+   "canonical": "B&M"
+  },
+  {
+   "text": "SQ *B&M RETAIL BRISTOL",
+   "canonical": "B&M"
+  },
+  {
+   "text": "SUMPU *8 AND M PLC",
+   "canonical": "B&M"
+  },
+  {
+   "text": "DEB B&M BARGAINS PLC",
+   "canonical": "B&M"
+  },
+  {
+   "text": "PAYPAL *HOME BARGAINS LTD",
+   "canonical": "HOME BARGAINS"
+  },
+  {
+   "text": "PAYPAL *HOME BARGAINS",
+   "canonical": "HOME BARGAINS"
+  },
+  {
+   "text": "ZETTLE *HOME BARGAINS P1 A2B3C4D5",
+   "canonical": "HOME BARGAINS"
+  },
+  {
+   "text": "CD HOME BARGAINS GBR",
+   "canonical": "HOME BARGAINS"
+  },
+  {
+   "text": "Card Transaction Boots Pharmacy",
+   "canonical": "BOOTS"
+  },
+  {
+   "text": "BOOTS",
+   "canonical": "BOOTS"
+  },
+  {
+   "text": "ZETLTE *BOOTS CORBY GB",
+   "canonical": "BOOTS"
+  },
+  {
+   "text": "BOOTS NOTTINGHAM",
+   "canonical": "BOOTS"
+  },
+  {
+   "text": "DEB SUPERDRUG 8008",
+   "canonical": "SUPERDRUG"
+  },
+  {
+   "text": "POS SUPERDRUG GLASGOW",
+   "canonical": "SUPERDRUG"
+  },
+  {
+   "text": "CONTACTLESS SUP3RDRUG STORES MANCHESTER",
+   "canonical": "SUPERDRUG"
+  },
+  {
+   "text": "Zettle *superdrug",
+   "canonical": "SUPERDRUG"
+  },
+  {
+   "text": "Whsmith Leeds GB",
+   "canonical": "WHSMITH"
+  },
+  {
+   "text": "WH SMITH NOTTINGHAM",
+   "canonical": "WHSMITH"
+  },
+  {
+   "text": "AYPAL *WH SMITH",
+   "canonical": "WHSMITH"
+  },
+  {
+   "text": "WHSMITH HIG HSTREET GLASG0W",
+   "canonical": "WHSMITH"
+  },
+  {
+   "text": "CD ARGOS LONDON GBR",
+   "canonical": "ARGOS"
+  },
+  {
+   "text": "ARGOS RETAIL CORBY GB",
+   "canonical": "ARGOS"
+  },
+  {
+   "text": "PA YPAL *ARGOS 8008",
+   "canonical": "ARGOS"
+  },
+  {
+   "text": "ZETTLE *AROS LTD NOTTINGHAM",
+   "canonical": "ARGOS"
+  },
+  {
+   "text": "VIS CURRYS LEEDS GB",
+   "canonical": "CURRYS"
+  },
+  {
+   "text": "Deb Currys PC World",
+   "canonical": "CURRYS"
+  },
+  {
+   "text": "Contactless Currys",
+   "canonical": "CURRYS"
+  },
+  {
+   "text": "VIS CURRYS PC WORLD CARDIFF",
+   "canonical": "CURRYS"
+  },
+  {
+   "text": "ZETTLE *WICKES LONDON GBR",
+   "canonical": "WICKES"
+  },
+  {
+   "text": "DEB WICKES P1A2B3C4D5",
+   "canonical": "WICKES"
+  },
+  {
+   "text": "WICKES BRISTOL",
+   "canonical": "WICKES"
+  },
+  {
+   "text": "SUMUP *WICEKS LTD",
+   "canonical": "WICKES"
+  },
+  {
+   "text": "DUNELM MILL",
+   "canonical": "DUNELM"
+  },
+  {
+   "text": "CD DUNELM MILL CARDIFF",
+   "canonical": "DUNELM"
+  },
+  {
+   "text": "POS DUNELM",
+   "canonical": "DUNELM"
+  },
+  {
+   "text": "ZETTLE *DUNELM MILL GBR",
+   "canonical": "DUNELM"
+  },
+  {
+   "text": "PRIMARK STORES",
+   "canonical": "PRIMARK"
+  },
+  {
+   "text": "ZETTLE *PRIMARK REF 1029384",
+   "canonical": "PRIMARK"
+  },
+  {
+   "text": "CONTACTLES PRIMARK STORES LTD",
+   "canonical": "PRIMARK"
+  },
+  {
+   "text": "VIS PRIMARK CARDIFF",
+   "canonical": "PRIMARK"
+  },
+  {
+   "text": "ZETTLE *TJX UK GB",
+   "canonical": "TK MAXX"
+  },
+  {
+   "text": "CARD TRANSACTION TK MAXX MANCHESTER",
+   "canonical": "TK MAXX"
+  },
+  {
+   "text": "CARD TRANSACTION TK MAXX LONDON",
+   "canonical": "TK MAXX"
+  },
+  {
+   "text": "TKMAXX 44 20 7946 00 00",
+   "canonical": "TK MAXX"
+  },
+  {
+   "text": "JD SPORTS FASHION",
+   "canonical": "JD SPORTS"
+  },
+  {
+   "text": "JD SPORTS FASHION BRISTOL",
+   "canonical": "JD SPORTS"
+  },
+  {
+   "text": "DEB JD SPORTS CARDIFF",
+   "canonical": "JD SPORTS"
+  },
+  {
+   "text": "CONTACTLESS JD SPORTS FASH ION",
+   "canonical": "JD SPORTS"
+  },
+  {
+   "text": "PAYPAL *AMZNMktplace GB",
+   "canonical": "AMAZON MARKETPLACE"
+  },
+  {
+   "text": "POS AMZNMktplace",
+   "canonical": "AMAZON MARKETPLACE"
+  },
+  {
+   "text": "PAYPAL *AMAZON.CO.UK LEESD GB",
+   "canonical": "AMAZON MARKETPLACE"
+  },
+  {
+   "text": "CARD TRANSACTION AMAZON MARKETPLACE GB",
+   "canonical": "AMAZON MARKETPLACE"
+  },
+  {
+   "text": "CD PAYPAL *EBAY 44 20 7946 0000",
+   "canonical": "EBAY"
+  },
+  {
+   "text": "VIS PAYPAL *EBAY",
+   "canonical": "EBAY"
+  },
+  {
+   "text": "CARD PAYMENT TO EBAY UK 8008",
+   "canonical": "EBAY"
+  },
+  {
+   "text": "SQ *EBAY LTD",
+   "canonical": "EBAY"
+  },
+  {
+   "text": "VINTED UAB CARDIFF",
+   "canonical": "VINTED"
+  },
+  {
+   "text": "VINTED 8008",
+   "canonical": "VINTED"
+  },
+  {
+   "text": "CARD TRANSACTION VINTED 44 20 7946 0000",
+   "canonical": "VINTED"
+  },
+  {
+   "text": "Sumup *vinted 44 20 7946 0000",
+   "canonical": "VINTED"
+  },
+  {
+   "text": "BOOHOO.COM NOTTINGHAM",
+   "canonical": "BOOHOO"
+  },
+  {
+   "text": "POS BOOHOO CARDIFF",
+   "canonical": "BOOHOO"
+  },
+  {
+   "text": "VIS BOOHOO",
+   "canonical": "BOOHOO"
+  },
+  {
+   "text": "POS OOHOO CORBY GB",
+   "canonical": "BOOHOO"
+  },
+  {
+   "text": "CARD PAYMENT TO SHEIN.COM GLASGOW",
+   "canonical": "SHEIN"
+  },
+  {
+   "text": "CD SHEIN NOTTINGHAM",
+   "canonical": "SHEIN"
+  },
+  {
+   "text": "IS SHEIN.COM UK",
+   "canonical": "SHEIN"
+  },
+  {
+   "text": "Pos Shein.com P1a2b3c4d5",
+   "canonical": "SHEIN"
+  },
+  {
+   "text": "SUMUP *SPECSAVERS OPTICIANS REF 1029384",
+   "canonical": "SPECSAVERS"
+  },
+  {
+   "text": "ZETTLE *SPECSAVERS OPTICIANS CARDIFF",
+   "canonical": "SPECSAVERS"
+  },
+  {
+   "text": "Deb Specsavers Glasgow",
+   "canonical": "SPECSAVERS"
+  },
+  {
+   "text": "PAYPAL *SPECSAVERS OPTICIANS ANCHESTER",
+   "canonical": "SPECSAVERS"
+  },
+  {
+   "text": "SUMUP *CARD FACTORY REF 1029384",
+   "canonical": "CARD FACTORY"
+  },
+  {
+   "text": "CARD FACTORY",
+   "canonical": "CARD FACTORY"
+  },
+  {
+   "text": "DEB CARD FACTORY PLC",
+   "canonical": "CARD FACTORY"
+  },
+  {
+   "text": "CONTACTLESS CRD FACTOR YPLC",
+   "canonical": "CARD FACTORY"
+  },
+  {
+   "text": "CONTACTLESS THE RANGE",
+   "canonical": "THE RANGE"
+  },
+  {
+   "text": "DEB THE RANGE LTD BRISTOL",
+   "canonical": "THE RANGE"
+  },
+  {
+   "text": "TEH RANGE",
+   "canonical": "THE RANGE"
+  },
+  {
+   "text": "CD THE RANGE 8008",
+   "canonical": "THE RANGE"
+  },
+  {
+   "text": "MATALAN CORBY GB",
+   "canonical": "MATALAN"
+  },
+  {
+   "text": "VIS MATALAN RETAIL 44 20 7946 0000",
+   "canonical": "MATALAN"
+  },
+  {
+   "text": "DB MATALAN CARDIFF",
+   "canonical": "MATALAN"
+  },
+  {
+   "text": "PAYPAL *MATALAN GB",
+   "canonical": "MATALAN"
+  },
+  {
+   "text": "VIS RIVER ISLAND CLOTHING BRISTOL",
+   "canonical": "RIVER ISLAND"
+  },
+  {
+   "text": "RIVER ISLAND 44 20 7946 0000",
+   "canonical": "RIVER ISLAND"
+  },
+  {
+   "text": "RIVER ISLAND CLOHING NOTTINGHAM",
+   "canonical": "RIVER ISLAND"
+  },
+  {
+   "text": "PO5 RIER ISLAND CLOTHING",
+   "canonical": "RIVER ISLAND"
+  },
+  {
+   "text": "DEB GREGGS 8008",
+   "canonical": "GREGGS"
+  },
+  {
+   "text": "CONTACTLESS GREGGS 8008",
+   "canonical": "GREGGS"
+  },
+  {
+   "text": "PO5 GREGGS PLC 44 20 7946 0000",
+   "canonical": "GREGGS"
+  },
+  {
+   "text": "VIS G REGGS 808",
+   "canonical": "GREGGS"
+  },
+  {
+   "text": "DEB CAFFE NERO LTD",
+   "canonical": "CAFFE NERO"
+  },
+  {
+   "text": "POS CAFFE NERO LONDON GBR",
+   "canonical": "CAFFE NERO"
+  },
+  {
+   "text": "Paypal *caffe Nero Ltd",
+   "canonical": "CAFFE NERO"
+  },
+  {
+   "text": "SQ *CAFFÃˆ NERO CORBY GB",
+   "canonical": "CAFFE NERO"
+  },
+  {
+   "text": "SQ *PRET A MANGER LONDON GBR",
+   "canonical": "PRET"
+  },
+  {
+   "text": "ZETTLE *PRET A MANGER LTD GB",
+   "canonical": "PRET"
+  },
+  {
+   "text": "ZETTLE *PRET A AGER LTD CORBY GB",
+   "canonical": "PRET"
+  },
+  {
+   "text": "SQ *PRET A MANGER LTD BRISTOL",
+   "canonical": "PRET"
+  },
+  {
+   "text": "POS MCDONALDS CORBY GB",
+   "canonical": "MCDONALDS"
+  },
+  {
+   "text": "DEB MC DONALDS GLASGOW",
+   "canonical": "MCDONALDS"
+  },
+  {
+   "text": "POS MCDONALDS RESTAURANT GLASGOW",
+   "canonical": "MCDONALDS"
+  },
+  {
+   "text": "MCDONALDS RESTAURANT LONDON GBR",
+   "canonical": "MCDONALDS"
+  },
+  {
+   "text": "SUMUP *KFC",
+   "canonical": "KFC"
+  },
+  {
+   "text": "KFC UK GBR",
+   "canonical": "KFC"
+  },
+  {
+   "text": "KENTUCKY FRIED CHICKEN LONDON",
+   "canonical": "KFC"
+  },
+  {
+   "text": "CARD PAYMNT TO KENTUCKY FRIED CHICKEN CORBY GB",
+   "canonical": "KFC"
+  },
+  {
+   "text": "SQ *BURGER KING LEEDS GB",
+   "canonical": "BURGER KING"
+  },
+  {
+   "text": "BURGER KING",
+   "canonical": "BURGER KING"
+  },
+  {
+   "text": "Card Transaction Burger King Corby GB",
+   "canonical": "BURGER KING"
+  },
+  {
+   "text": "CARD TRANSACTION BURGER KING UK GB",
+   "canonical": "BURGER KING"
+  },
+  {
+   "text": "DEB SUBWAY LONDON GBR",
+   "canonical": "SUBWAY"
+  },
+  {
+   "text": "SUBWAY GBR",
+   "canonical": "SUBWAY"
+  },
+  {
+   "text": "PAYPA *SUBWAY SANDWICHES GLA SGOW",
+   "canonical": "SUBWAY"
+  },
+  {
+   "text": "CD SUB WAY",
+   "canonical": "SUBWAY"
+  },
+  {
+   "text": "CD NANDOS MANCHESTER",
+   "canonical": "NANDOS"
+  },
+  {
+   "text": "CONTACTLESS NANDOS CHICKEN",
+   "canonical": "NANDOS"
+  },
+  {
+   "text": "C ONTACTLESS NANDOS RESTAURANT LONDON GBR",
+   "canonical": "NANDOS"
+  },
+  {
+   "text": "PAYPAL *NANDOS RESTAURANT CARDFF",
+   "canonical": "NANDOS"
+  },
+  {
+   "text": "DEB WETHERSPOON GLASGOW",
+   "canonical": "WETHERSPOON"
+  },
+  {
+   "text": "CARD TRANSACTION WETHERSPOONS PUB GB",
+   "canonical": "WETHERSPOON"
+  },
+  {
+   "text": "CD WE THERSPO ON GB",
+   "canonical": "WETHERSPOON"
+  },
+  {
+   "text": "PAYAPL *WETHERSPOO GB",
+   "canonical": "WETHERSPOON"
+  },
+  {
+   "text": "VIS PIZZA HUT CARDIFF",
+   "canonical": "PIZZA HUT"
+  },
+  {
+   "text": "CARD PAYMENT TO PIZZA HUT LTD",
+   "canonical": "PIZZA HUT"
+  },
+  {
+   "text": "VIS PIZZA HUT",
+   "canonical": "PIZZA HUT"
+  },
+  {
+   "text": "CARD PAYMENT TO PIZZA HUT LONDON GBR",
+   "canonical": "PIZZA HUT"
+  },
+  {
+   "text": "ZETTLE *WAGAMAMA LTD",
+   "canonical": "WAGAMAMA"
+  },
+  {
+   "text": "Deb Wagamama Ltd Corby GB",
+   "canonical": "WAGAMAMA"
+  },
+  {
+   "text": "ZETTLE *WAGAMAMA LTD LTD",
+   "canonical": "WAGAMAMA"
+  },
+  {
+   "text": "Card Payment TO Wagamama 8008",
+   "canonical": "WAGAMAMA"
+  },
+  {
+   "text": "CD PIZZAEXPRESS CORBY GB",
+   "canonical": "PIZZA EXPRESS"
+  },
+  {
+   "text": "Pizza Express 44 20 7946 0000",
+   "canonical": "PIZZA EXPRESS"
+  },
+  {
+   "text": "SUMUP *PIZZA EXPRESS",
+   "canonical": "PIZZA EXPRESS"
+  },
+  {
+   "text": "CD PIZZAEXPRESS TD",
+   "canonical": "PIZZA EXPRESS"
+  },
+  {
+   "text": "Vis Leon Leeds GB",
+   "canonical": "LEON"
+  },
+  {
+   "text": "Paypal *leon Restaurants Birmingham GB",
+   "canonical": "LEON"
+  },
+  {
+   "text": "CD LEON RESTAURANTS GB",
+   "canonical": "LEON"
+  },
+  {
+   "text": "LEON RESTAURANTS CARDIFF",
+   "canonical": "LEON"
+  },
+  {
+   "text": "ITSU LTD CORBY GB",
+   "canonical": "ITSU"
+  },
+  {
+   "text": "DEB ITSU LTD GB",
+   "canonical": "ITSU"
+  },
+  {
+   "text": "VIS I SU LTD",
+   "canonical": "ITSU"
+  },
+  {
+   "text": "ITSU LTD LEED GB",
+   "canonical": "ITSU"
+  },
+  {
+   "text": "SQ *wasabi",
+   "canonical": "WASABI"
+  },
+  {
+   "text": "PAYPAL *WASABI SUSHI BRISTOL",
+   "canonical": "WASABI"
+  },
+  {
+   "text": "DEB WASABI 8008",
+   "canonical": "WASABI"
+  },
+  {
+   "text": "CD WASABI",
+   "canonical": "WASABI"
+  },
+  {
+   "text": "CD DISHOOM BRISTOL",
+   "canonical": "DISHOOM"
+  },
+  {
+   "text": "POS DISHOOM LTD P1A2B3C4D5",
+   "canonical": "DISHOOM"
+  },
+  {
+   "text": "DEB DISHOOM LTD PLC",
+   "canonical": "DISHOOM"
+  },
+  {
+   "text": "CARD PAYMENT TO DISHOOM LTD REF 1029384",
+   "canonical": "DISHOOM"
+  },
+  {
+   "text": "ZETTLE *PREZZO",
+   "canonical": "PREZZO"
+  },
+  {
+   "text": "CARD TRANSACTION PREZZO",
+   "canonical": "PREZZO"
+  },
+  {
+   "text": "Prezzo Glasgow",
+   "canonical": "PREZZO"
+  },
+  {
+   "text": "CARD TRANSACTION PREZZO PLC",
+   "canonical": "PREZZO"
+  },
+  {
+   "text": "SQ *ZIZZI RESTAURANTS LEEDS GB",
+   "canonical": "ZIZZI"
+  },
+  {
+   "text": "VIS ZIZZI LONDON GBR",
+   "canonical": "ZIZZI"
+  },
+  {
+   "text": "CD IZZI NOTTINGHAM",
+   "canonical": "ZIZZI"
+  },
+  {
+   "text": "ZETTLE *ZIZZI RESTAURANTS UK",
+   "canonical": "ZIZZI"
+  },
+  {
+   "text": "SUMUP *HARVESTER LONDON",
+   "canonical": "HARVESTER"
+  },
+  {
+   "text": "HARVESTER LTD",
+   "canonical": "HARVESTER"
+  },
+  {
+   "text": "CARD TRANSACTION HARVE STER MANCHESTER",
+   "canonical": "HARVESTER"
+  },
+  {
+   "text": "SU MUP *HARVESTER UK",
+   "canonical": "HARVESTER"
+  },
+  {
+   "text": "SQ *TOBY CARVERY LTD P1A2B3C4D5",
+   "canonical": "TOBY CARVERY"
+  },
+  {
+   "text": "CARD PAYMENT TO TOBY CARVERY",
+   "canonical": "TOBY CARVERY"
+  },
+  {
+   "text": "TOBY CARVERY LTD",
+   "canonical": "TOBY CARVERY"
+  },
+  {
+   "text": "T0BY CARVERY LTD LEEDS GB",
+   "canonical": "TOBY CARVERY"
+  },
+  {
+   "text": "POS ROSE AND CROWN INN LONDON GBR",
+   "canonical": "ROSE AND CROWN"
+  },
+  {
+   "text": "CONTACTLESS ROSE AND CROWN INN REF 1029384",
+   "canonical": "ROSE AND CROWN"
+  },
+  {
+   "text": "CARD PAYMENT TO ROSE & CROWN 44 20 7946 0000",
+   "canonical": "ROSE AND CROWN"
+  },
+  {
+   "text": "ROSE & CROWN GLASGOW",
+   "canonical": "ROSE AND CROWN"
+  },
+  {
+   "text": "Plough Inn",
+   "canonical": "THE PLOUGH"
+  },
+  {
+   "text": "PLOUGH INN BRISTOL",
+   "canonical": "THE PLOUGH"
+  },
+  {
+   "text": "CONTATLESS PLOUGH INN CARDIFF",
+   "canonical": "THE PLOUGH"
+  },
+  {
+   "text": "PLOUH INN 6B",
+   "canonical": "THE PLOUGH"
+  },
+  {
+   "text": "VIS THE TEA ROOMS P1A2B3C4D5",
+   "canonical": "TEA ROOM"
+  },
+  {
+   "text": "VILLAGE TEA ROOM",
+   "canonical": "TEA ROOM"
+  },
+  {
+   "text": "CD COTTAGE TEA ROOMS NOTINGHAM",
+   "canonical": "TEA ROOM"
+  },
+  {
+   "text": "CARD TRASACTION THE TEA ROOMS BIRMINGHAM GB",
+   "canonical": "TEA ROOM"
+  },
+  {
+   "text": "SUMUP *THE GOLDEN FRY PLC",
+   "canonical": "CHIPPY"
+  },
+  {
+   "text": "PAYPAL *FISH AND CHIP SHOP BRISTOL",
+   "canonical": "CHIPPY"
+  },
+  {
+   "text": "Pos Fish And Chip Shop Manchester",
+   "canonical": "CHIPPY"
+  },
+  {
+   "text": "PAYPAL *THE GOLDEN FRY CORBY GB",
+   "canonical": "CHIPPY"
+  },
+  {
+   "text": "SUMUP *KEBAB CORNER",
+   "canonical": "KEBAB HOUSE"
+  },
+  {
+   "text": "ISTANBUL KEBAB LONDON",
+   "canonical": "KEBAB HOUSE"
+  },
+  {
+   "text": "DEB ISTANBUL KBEAB LONDON GBR",
+   "canonical": "KEBAB HOUSE"
+  },
+  {
+   "text": "VIS KEBAB HOUSE REF 1029384",
+   "canonical": "KEBAB HOUSE"
+  },
+  {
+   "text": "ZETTLE *JUST EAT ORDER BRISTOL",
+   "canonical": "JUST EAT ORDER"
+  },
+  {
+   "text": "CD JUST-EAT.CO.UK MANCHESTER",
+   "canonical": "JUST EAT ORDER"
+  },
+  {
+   "text": "Vis Just-eat.co.uk",
+   "canonical": "JUST EAT ORDER"
+  },
+  {
+   "text": "PAYPAL *JUST EAT",
+   "canonical": "JUST EAT ORDER"
+  },
+  {
+   "text": "ZETTLE *DELIVEROO.CO.UK MANCHESTER",
+   "canonical": "DELIVEROO ORDER"
+  },
+  {
+   "text": "DELIVEROO P1A2B3C4D5",
+   "canonical": "DELIVEROO ORDER"
+  },
+  {
+   "text": "POS DELIVEROO PLC",
+   "canonical": "DELIVEROO ORDER"
+  },
+  {
+   "text": "SQ *3DLIVEROO ORDER LTD",
+   "canonical": "DELIVEROO ORDER"
+  },
+  {
+   "text": "BP OIL",
+   "canonical": "BP"
+  },
+  {
+   "text": "CARD PAYMENT TO BP PETROL PLC",
+   "canonical": "BP"
+  },
+  {
+   "text": "BP EPTRLO GBR",
+   "canonical": "BP"
+  },
+  {
+   "text": "CONTACTLESS BP PETROL CORBY GB",
+   "canonical": "BP"
+  },
+  {
+   "text": "SQ *SHELL SERVICE STATION GLASGOW",
+   "canonical": "SHELL"
+  },
+  {
+   "text": "Shell Manchester",
+   "canonical": "SHELL"
+  },
+  {
+   "text": "CARD PAYMENT TO SHELL SERVI CE STATION",
+   "canonical": "SHELL"
+  },
+  {
+   "text": "DEB SHELL SERVICE STATION GBR",
+   "canonical": "SHELL"
+  },
+  {
+   "text": "PAYPAL *JET PETROL",
+   "canonical": "JET"
+  },
+  {
+   "text": "JET PETROL LTD",
+   "canonical": "JET"
+  },
+  {
+   "text": "JET FILLING STATION LTD",
+   "canonical": "JET"
+  },
+  {
+   "text": "CONTACTLESS JET GARAGE",
+   "canonical": "JET"
+  },
+  {
+   "text": "Pos Gulf Oil",
+   "canonical": "GULF"
+  },
+  {
+   "text": "Contactless Gulf Oil Leeds GB",
+   "canonical": "GULF"
+  },
+  {
+   "text": "PAYPAL *GULF FILLING STATION GLASGOW",
+   "canonical": "GULF"
+  },
+  {
+   "text": "ZETTLE *GUF PETROL UK",
+   "canonical": "GULF"
+  },
+  {
+   "text": "VIS MURCO BIRMINGHAM GB",
+   "canonical": "MURCO"
+  },
+  {
+   "text": "POS MURCO CORBY GB",
+   "canonical": "MURCO"
+  },
+  {
+   "text": "CD MUCO 8008",
+   "canonical": "MURCO"
+  },
+  {
+   "text": "CD MURCO LEEDS GB",
+   "canonical": "MURCO"
+  },
+  {
+   "text": "PAYPAL *APPLEGREEN UK BIRMINGHAM GB",
+   "canonical": "APPLEGREEN"
+  },
+  {
+   "text": "CARD PAYMENT TO APPLEGREEN UK",
+   "canonical": "APPLEGREEN"
+  },
+  {
+   "text": "SQ *APPLEGREEN UK CORBY GB",
+   "canonical": "APPLEGREEN"
+  },
+  {
+   "text": "DEB APLEGREEN 8008",
+   "canonical": "APPLEGREEN"
+  },
+  {
+   "text": "SUMUP *MFG LTD",
+   "canonical": "MFG"
+  },
+  {
+   "text": "POS MFG PETROL CORBY GB",
+   "canonical": "MFG"
+  },
+  {
+   "text": "POS MFG PETROL GB",
+   "canonical": "MFG"
+  },
+  {
+   "text": "MFG",
+   "canonical": "MFG"
+  },
+  {
+   "text": "SQ *MOTO HOSPITALITY MANCHESTER",
+   "canonical": "MOTO"
+  },
+  {
+   "text": "MOTO WARWICK BIRMINGHAM GB",
+   "canonical": "MOTO"
+  },
+  {
+   "text": "MOTO HOSPITALITY LTD",
+   "canonical": "MOTO"
+  },
+  {
+   "text": "SUMUP *MO TO SERVICES OLNDON",
+   "canonical": "MOTO"
+  },
+  {
+   "text": "ZETTLE *WELCOME BREAK SERVICES UK",
+   "canonical": "WELCOME BREAK"
+  },
+  {
+   "text": "CARD TRANSACTION WELCOME BREAK CORBY GB",
+   "canonical": "WELCOME BREAK"
+  },
+  {
+   "text": "WELCOME BREAK SERVICES CARD1FF",
+   "canonical": "WELCOME BREAK"
+  },
+  {
+   "text": "DEB WELCOME BREAK SERVICES BRISTOL",
+   "canonical": "WELCOME BREAK"
+  },
+  {
+   "text": "CARD TRANSACTION ROADCHEF SERVICES LEEDS GB",
+   "canonical": "ROADCHEF"
+  },
+  {
+   "text": "VIS ROADCHEF SERVICES 44 20 7946 0000",
+   "canonical": "ROADCHEF"
+  },
+  {
+   "text": "SQ *RODACHEF SERVICE5 GBR",
+   "canonical": "ROADCHEF"
+  },
+  {
+   "text": "PAYPAL *ROADCHEF R3F 1 029384",
+   "canonical": "ROADCHEF"
+  },
+  {
+   "text": "CONTACTLESS TFL LEEDS GB",
+   "canonical": "TFL"
+  },
+  {
+   "text": "ZETTLE *TFL LEEDS GB",
+   "canonical": "TFL"
+  },
+  {
+   "text": "PAYP4L *TFL.GOV.UK BRISTOL",
+   "canonical": "TFL"
+  },
+  {
+   "text": "TRANSPORT FOR LONODN GLASGOW",
+   "canonical": "TFL"
+  },
+  {
+   "text": "NATIONAL EXPRESS P1A2B3C4D5",
+   "canonical": "NATIONAL EXPRESS"
+  },
+  {
+   "text": "SUMUP *NATIONAL EXPRESS COACHES",
+   "canonical": "NATIONAL EXPRESS"
+  },
+  {
+   "text": "ZETTLE *NATIONAL EXPRESS UK",
+   "canonical": "NATIONAL EXPRESS"
+  },
+  {
+   "text": "VIS NATIONAL EXRESS COACHES MANCHESTER",
+   "canonical": "NATIONAL EXPRESS"
+  },
+  {
+   "text": "DEB FIRST BUS BRISTOL",
+   "canonical": "FIRST BUS"
+  },
+  {
+   "text": "DEB FIRST BUS LEEDS GB",
+   "canonical": "FIRST BUS"
+  },
+  {
+   "text": "CARD APYMENT TO FIR STGROUP UK",
+   "canonical": "FIRST BUS"
+  },
+  {
+   "text": "SUMUP *FIRSTGROPU REF 1023984",
+   "canonical": "FIRST BUS"
+  },
+  {
+   "text": "VIS UBER TRIP GBR",
+   "canonical": "UBER TRIP"
+  },
+  {
+   "text": "CONTACTLESS UBER BV TRIP BIRMINGHAM GB",
+   "canonical": "UBER TRIP"
+  },
+  {
+   "text": "DEB UBER BV TRIP UK",
+   "canonical": "UBER TRIP"
+  },
+  {
+   "text": "DEB BUER *TR1P 44 20 7946 0000",
+   "canonical": "UBER TRIP"
+  },
+  {
+   "text": "CD BOLT.EU GB",
+   "canonical": "BOLT"
+  },
+  {
+   "text": "PAYPAL *BOLT RIDE UK",
+   "canonical": "BOLT"
+  },
+  {
+   "text": "ZETTLE *BOL T TCHNOLOGY LTD",
+   "canonical": "BOLT"
+  },
+  {
+   "text": "CARD PAYMENT O BOLT TECHNOLOGY P1A2B34CD5",
+   "canonical": "BOLT"
+  },
+  {
+   "text": "Addison Lee Gbr",
+   "canonical": "ADDISON LEE"
+  },
+  {
+   "text": "CONTACTLESS ADDISON LEE PLC LTD",
+   "canonical": "ADDISON LEE"
+  },
+  {
+   "text": "VIS ADDISO N LEE LTD",
+   "canonical": "ADDISON LEE"
+  },
+  {
+   "text": "CONTACLESS ADDISON LEE PLC NOTTINGHAM",
+   "canonical": "ADDISON LEE"
+  },
+  {
+   "text": "VIS LONDON NORTH EASTERN RAILWAY CARDIFF",
+   "canonical": "LNER"
+  },
+  {
+   "text": "DEB LNER TICKETS",
+   "canonical": "LNER"
+  },
+  {
+   "text": "NER",
+   "canonical": "LNER"
+  },
+  {
+   "text": "LODON NORTH EASTERN RAILWAY P1A2B3CD5",
+   "canonical": "LNER"
+  },
+  {
+   "text": "DEB GWR",
+   "canonical": "GWR"
+  },
+  {
+   "text": "GREAT WESTERN RAILWAY 44 20 7946 0000",
+   "canonical": "GWR"
+  },
+  {
+   "text": "CARD PAYMENT TO GWR TICKETS MANCHESTER",
+   "canonical": "GWR"
+  },
+  {
+   "text": "GREAT WESTERN RAILWY",
+   "canonical": "GWR"
+  },
+  {
+   "text": "AVANTI WEST COAST LONDON",
+   "canonical": "AVANTI"
+  },
+  {
+   "text": "PAYPAL *AVANTI GBR",
+   "canonical": "AVANTI"
+  },
+  {
+   "text": "AVANTI WEST COAST BRISTL",
+   "canonical": "AVANTI"
+  },
+  {
+   "text": "AVANTI WEST COAST PLC",
+   "canonical": "AVANTI"
+  },
+  {
+   "text": "DEB NORTHERN RAIL GBR",
+   "canonical": "NORTHERN RAIL"
+  },
+  {
+   "text": "SQ *NORTHERN TRAINS LONDON",
+   "canonical": "NORTHERN RAIL"
+  },
+  {
+   "text": "Northern Trains London",
+   "canonical": "NORTHERN RAIL"
+  },
+  {
+   "text": "SUMUP *NORTHERN AIL BIRMINGHAM GB",
+   "canonical": "NORTHERN RAIL"
+  },
+  {
+   "text": "ZETTLE *SCOTRAIL TICKETS P1A2B3C4D5",
+   "canonical": "SCOTRAIL"
+  },
+  {
+   "text": "POS SCOTRAIL TICKETS 8008",
+   "canonical": "SCOTRAIL"
+  },
+  {
+   "text": "SQ *SCOTRAIL TICEKTS GLASGO",
+   "canonical": "SCOTRAIL"
+  },
+  {
+   "text": "SUMUP *SOCTARIL REF 1029384",
+   "canonical": "SCOTRAIL"
+  },
+  {
+   "text": "POS RYANAIR DAC",
+   "canonical": "RYANAIR"
+  },
+  {
+   "text": "RYANAIR",
+   "canonical": "RYANAIR"
+  },
+  {
+   "text": "CARD TRANSACTION RYANAIR UK",
+   "canonical": "RYANAIR"
+  },
+  {
+   "text": "ZETTLE *RYANAIR DAC MANCHESTER",
+   "canonical": "RYANAIR"
+  },
+  {
+   "text": "PAYPAL *BRITISH AIRWAYS LTD",
+   "canonical": "BRITISH AIRWAYS"
+  },
+  {
+   "text": "CARD TRANSACTION BA.COM LTD",
+   "canonical": "BRITISH AIRWAYS"
+  },
+  {
+   "text": "Pos British Airways Corby GB",
+   "canonical": "BRITISH AIRWAYS"
+  },
+  {
+   "text": "CARD PAYENT TO BRITISH AIWAYS LEEDS GB",
+   "canonical": "BRITISH AIRWAYS"
+  },
+  {
+   "text": "ZETTLE *LIME RIDE 8008",
+   "canonical": "LIME"
+  },
+  {
+   "text": "CONTACTLESS LIME BIKE MANCHESTER",
+   "canonical": "LIME"
+  },
+  {
+   "text": "PAYPAL *LIME IBKE MANCHESTER",
+   "canonical": "LIME"
+  },
+  {
+   "text": "ZETTLE *LIME BIKE",
+   "canonical": "LIME"
+  },
+  {
+   "text": "Pos Ncp Ltd Manchester",
+   "canonical": "NCP"
+  },
+  {
+   "text": "SUMUP *NCP CAR PARKS GBR",
+   "canonical": "NCP"
+  },
+  {
+   "text": "CD NCP CAR PARKS LONDON GBR",
+   "canonical": "NCP"
+  },
+  {
+   "text": "DEB NCP CAR PARKS 44 20 7946 O000",
+   "canonical": "NCP"
+  },
+  {
+   "text": "PAYPAL *RINGGO.CO.UK 8008",
+   "canonical": "RINGGO"
+  },
+  {
+   "text": "Contactless Ringgo",
+   "canonical": "RINGGO"
+  },
+  {
+   "text": "RINGGO 008",
+   "canonical": "RINGGO"
+  },
+  {
+   "text": "CARD TRANSACTION RINGGO PARKING P1A2B3C4D5",
+   "canonical": "RINGGO"
+  },
+  {
+   "text": "SQ *ECP PARKING CARDIFF",
+   "canonical": "EURO CAR PARKS"
+  },
+  {
+   "text": "CARD PAYMENT TO ECP PARKING",
+   "canonical": "EURO CAR PARKS"
+  },
+  {
+   "text": "SQ *ECP PARKING",
+   "canonical": "EURO CAR PARKS"
+  },
+  {
+   "text": "EURO CAR PR4KS GBR",
+   "canonical": "EURO CAR PARKS"
+  },
+  {
+   "text": "POS ODEON LTD GBR",
+   "canonical": "CINEMA"
+  },
+  {
+   "text": "CD Odeon Corby GB",
+   "canonical": "CINEMA"
+  },
+  {
+   "text": "ODEON CINEMAS",
+   "canonical": "CINEMA"
+  },
+  {
+   "text": "CD ODEON CINEMAS",
+   "canonical": "CINEMA"
+  },
+  {
+   "text": "POS VUE ENTERTAINMENT CARDIFF",
+   "canonical": "VUE"
+  },
+  {
+   "text": "CARD PAYMENT TO VUE ENTERTAINMENT REF 1029384",
+   "canonical": "VUE"
+  },
+  {
+   "text": "ZETTLE *VUE CINEMA UK",
+   "canonical": "VUE"
+  },
+  {
+   "text": "ZETTLE *VUE ENTERTAINMENT CORBY GB",
+   "canonical": "VUE"
+  },
+  {
+   "text": "PAYPAL *CINEWORLD CINEMAS 8008",
+   "canonical": "CINEWORLD"
+  },
+  {
+   "text": "CD CINEWORLD CINEMAS MANCHESTER",
+   "canonical": "CINEWORLD"
+  },
+  {
+   "text": "DEB CINEWORLD LOND0N",
+   "canonical": "CINEWORLD"
+  },
+  {
+   "text": "DEB CINEWORLD MACNHESTER",
+   "canonical": "CINEWORLD"
+  },
+  {
+   "text": "Card Payment TO Ticketmaster UK 44 20 7946 0000",
+   "canonical": "TICKETMASTER"
+  },
+  {
+   "text": "TICKETMASTER UK",
+   "canonical": "TICKETMASTER"
+  },
+  {
+   "text": "TICKEMTASTER UK 44 20 794 60000",
+   "canonical": "TICKETMASTER"
+  },
+  {
+   "text": "CAR TRANSACTIO NTICKETMASTER UK PLC",
+   "canonical": "TICKETMASTER"
+  },
+  {
+   "text": "CARD TRANSACTION BOOKING COM BV CORBY GB",
+   "canonical": "BOOKING"
+  },
+  {
+   "text": "BOOKING COM BV NOTTINGHAM",
+   "canonical": "BOOKING"
+  },
+  {
+   "text": "DEB BOOKIGN.COM MANCHESTER",
+   "canonical": "BOOKING"
+  },
+  {
+   "text": "ZETTLE *BOOKING.COM GB",
+   "canonical": "BOOKING"
+  },
+  {
+   "text": "VIS HAIR SALON GLASGOW",
+   "canonical": "HAIRDRESSER"
+  },
+  {
+   "text": "SUMUP *HEADLINERS HAIR CORBY GB",
+   "canonical": "HAIRDRESSER"
+  },
+  {
+   "text": "DEB HAIR SALON BIRMINGHAM GB",
+   "canonical": "HAIRDRESSER"
+  },
+  {
+   "text": "PO S EHADLINERS HAIR LONDON GBR",
+   "canonical": "HAIRDRESSER"
+  },
+  {
+   "text": "VIS DRY CLEANERS GLASGOW",
+   "canonical": "DRY CLEANER"
+  },
+  {
+   "text": "DRY CLEANERS CARDIFF",
+   "canonical": "DRY CLEANER"
+  },
+  {
+   "text": "CD DRY CLEANERS CARD IFF",
+   "canonical": "DRY CLEANER"
+  },
+  {
+   "text": "SUMUP *DRY CLEANERS",
+   "canonical": "DRY CLEANER"
+  },
+  {
+   "text": "DEB CHINESE TAKEAWAY",
+   "canonical": "TAKEAWAY"
+  },
+  {
+   "text": "DEB CURRY HOUSE GB",
+   "canonical": "TAKEAWAY"
+  },
+  {
+   "text": "VIS CHIN ESE TAKEAWAY 44 20 7946 0000",
+   "canonical": "TAKEAWAY"
+  },
+  {
+   "text": "DEB CURRY HOUSE LONDON GBR",
+   "canonical": "TAKEAWAY"
+  },
+  {
+   "text": "VETS4PETS 8008",
+   "canonical": "VET"
+  },
+  {
+   "text": "POS VETERINARY CENTRE CARDIFF",
+   "canonical": "VET"
+  },
+  {
+   "text": "VIS VETS4PETS LTD",
+   "canonical": "VET"
+  },
+  {
+   "text": "SQ *vets4pets Leeds GB",
+   "canonical": "VET"
+  },
+  {
+   "text": "CARD PAYMENT TO DENTIST CARDIFF",
+   "canonical": "DENTIST"
+  },
+  {
+   "text": "DEB DENTAL PRACTICE",
+   "canonical": "DENTIST"
+  },
+  {
+   "text": "SUMUP *DENTAL PRACTICE GB",
+   "canonical": "DENTIST"
+  },
+  {
+   "text": "CARD TRANSACTION DENTAL PRACTICE BRISTOL",
+   "canonical": "DENTIST"
+  },
+  {
+   "text": "Card Transaction News And Food Centre GB",
+   "canonical": "CORNER SHOP"
+  },
+  {
+   "text": "CORNER STORE GLASGOW",
+   "canonical": "CORNER SHOP"
+  },
+  {
+   "text": "CD NEWS AND FOOD CENTRE LEEDS GB",
+   "canonical": "CORNER SHOP"
+  },
+  {
+   "text": "SQ *news And Food Centre Ref 1029384",
+   "canonical": "CORNER SHOP"
+  },
+  {
+   "text": "VIS WILLIAM HILL LTD",
+   "canonical": "WILLIAM HILL"
+  },
+  {
+   "text": "WILLIAMHILL.COM 44 20 7946 0000",
+   "canonical": "WILLIAM HILL"
+  },
+  {
+   "text": "CD WILLIAMHILL.COM CARDIFF",
+   "canonical": "WILLIAM HILL"
+  },
+  {
+   "text": "CD IWLLIAM HILL ONLINE P1A2B3CD45",
+   "canonical": "WILLIAM HILL"
+  },
+  {
+   "text": "CD LADBROKES GB",
+   "canonical": "LADBROKES"
+  },
+  {
+   "text": "Deb Ladbrokes Betting 44 20 7946 0000",
+   "canonical": "LADBROKES"
+  },
+  {
+   "text": "POS LADBROKES CORAL UK",
+   "canonical": "LADBROKES"
+  },
+  {
+   "text": "CARD PAYMEN T TO LADBROKES",
+   "canonical": "LADBROKES"
+  },
+  {
+   "text": "CARD PAYMENT TO PADDYPOWER.COM 8008",
+   "canonical": "PADDY POWER"
+  },
+  {
+   "text": "CD PADDYPOWER.COM",
+   "canonical": "PADDY POWER"
+  },
+  {
+   "text": "CARD PAY M ENT TO PADDYPOWER.COM GBR",
+   "canonical": "PADDY POWER"
+  },
+  {
+   "text": "IVS PADDYPOWER.COM P1A2B3C4D5",
+   "canonical": "PADDY POWER"
+  },
+  {
+   "text": "CD BETFRED.COM GLASGOW",
+   "canonical": "BETFRED"
+  },
+  {
+   "text": "Vis Betfred.com Glasgow",
+   "canonical": "BETFRED"
+  },
+  {
+   "text": "VIS BEFTED UK",
+   "canonical": "BETFRED"
+  },
+  {
+   "text": "CD BETFRED.COM",
+   "canonical": "BETFRED"
+  },
+  {
+   "text": "CD NATIONAL LOTTERY",
+   "canonical": "NATIONAL LOTTERY"
+  },
+  {
+   "text": "CAMELOT NATIONAL LOTTERY 44 20 7946 0000",
+   "canonical": "NATIONAL LOTTERY"
+  },
+  {
+   "text": "NATIONAL L OTTERY NOTTINGHAM",
+   "canonical": "NATIONAL LOTTERY"
+  },
+  {
+   "text": "PO5 NATIONAL LOTTERY 8008",
+   "canonical": "NATIONAL LOTTERY"
+  },
+  {
+   "text": "DEB BETWAY.COM UK",
+   "canonical": "BETWAY"
+  },
+  {
+   "text": "BETWAY UK",
+   "canonical": "BETWAY"
+  },
+  {
+   "text": "DBE BETWAY",
+   "canonical": "BETWAY"
+  },
+  {
+   "text": "B3WTAY.COM",
+   "canonical": "BETWAY"
+  },
+  {
+   "text": "UNIBET LTD",
+   "canonical": "UNIBET"
+  },
+  {
+   "text": "UNIBET",
+   "canonical": "UNIBET"
+  },
+  {
+   "text": "CARD PAYMENT TO UNIBET UK NOTTINGHAM",
+   "canonical": "UNIBET"
+  },
+  {
+   "text": "CD UIBNET UK CARDIFF",
+   "canonical": "UNIBET"
+  },
+  {
+   "text": "GALA BINGO P1A2B3C4D5",
+   "canonical": "GALA BINGO"
+  },
+  {
+   "text": "GALA BINGO",
+   "canonical": "GALA BINGO"
+  },
+  {
+   "text": "DEB GALA SPINS GBR",
+   "canonical": "GALA BINGO"
+  },
+  {
+   "text": "6ALA BINGO GLASGOW",
+   "canonical": "GALA BINGO"
+  },
+  {
+   "text": "CD MECCA BINGO 8008",
+   "canonical": "MECCA BINGO"
+  },
+  {
+   "text": "Pos Mecca Bingo Club Plc",
+   "canonical": "MECCA BINGO"
+  },
+  {
+   "text": "POS MECCA BIGNO CLUB BIMRINGHAM GB",
+   "canonical": "MECCA BINGO"
+  },
+  {
+   "text": "MECCA BIGNO NTOTINGHAM",
+   "canonical": "MECCA BINGO"
+  },
+  {
+   "text": "CD RAFFLE HOUSE LTD",
+   "canonical": "PRIZE DRAW"
+  },
+  {
+   "text": "CARD PAYMENT TO RAFFLE HOUSE LONDON",
+   "canonical": "PRIZE DRAW"
+  },
+  {
+   "text": "DEB PRZE DRAW COMPETITIONS GB",
+   "canonical": "PRIZE DRAW"
+  },
+  {
+   "text": "RAFFLE HOUSE",
+   "canonical": "PRIZE DRAW"
+  },
+  {
+   "text": "DEB LUCKY CASINO",
+   "canonical": "CASINO"
+  },
+  {
+   "text": "CD LUCKY CASINO GB",
+   "canonical": "CASINO"
+  },
+  {
+   "text": "VIS ACSINO ONLINE BIRMINGHAM GB",
+   "canonical": "CASINO"
+  },
+  {
+   "text": "VIS LUCKY CASINO LONDON",
+   "canonical": "CASINO"
+  },
+  {
+   "text": "DD BRITISH GAS SERVICES LEEDS GB",
+   "canonical": "BRITISH GAS"
+  },
+  {
+   "text": "STANDING ORDER BRITISH GAS ENERGY UK",
+   "canonical": "BRITISH GAS"
+  },
+  {
+   "text": "BRITISH GAS SERVIC ES LT",
+   "canonical": "BRITISH GAS"
+  },
+  {
+   "text": "D/D BRITISH GAS CORB GB",
+   "canonical": "BRITISH GAS"
+  },
+  {
+   "text": "OCTOPUS ENERGY GBR",
+   "canonical": "OCTOPUS ENERGY"
+  },
+  {
+   "text": "DIRECT DEBIT TO OCTOPUS ENERGY GLASGOW",
+   "canonical": "OCTOPUS ENERGY"
+  },
+  {
+   "text": "Bacs Octopus Energy Ltd",
+   "canonical": "OCTOPUS ENERGY"
+  },
+  {
+   "text": "STANDING ORDER OCTOPU S ENERGY LTD",
+   "canonical": "OCTOPUS ENERGY"
+  },
+  {
+   "text": "BACS EDF ENERGY CARDIFF",
+   "canonical": "EDF"
+  },
+  {
+   "text": "Direct Debit Edf Energy Customers",
+   "canonical": "EDF"
+  },
+  {
+   "text": "STANDING ORDER EDF 44 20 7946 0000",
+   "canonical": "EDF"
+  },
+  {
+   "text": "EDF ENERGY P1A2B3C4D5",
+   "canonical": "EDF"
+  },
+  {
+   "text": "E.ON NEXT ENERGY GB",
+   "canonical": "E.ON NEXT"
+  },
+  {
+   "text": "D/D E.ON NEXT GBR",
+   "canonical": "E.ON NEXT"
+  },
+  {
+   "text": "D DE.ON NEXT UK",
+   "canonical": "E.ON NEXT"
+  },
+  {
+   "text": "BACS EON NEXT GBR",
+   "canonical": "E.ON NEXT"
+  },
+  {
+   "text": "BACS OVO ENERGY LTD GLASGOW",
+   "canonical": "OVO"
+  },
+  {
+   "text": "D/D OVO ENERGY PLC",
+   "canonical": "OVO"
+  },
+  {
+   "text": "DD OOV ENERGY CARDIFF",
+   "canonical": "OVO"
+  },
+  {
+   "text": "STANDING ORDER OVO GLASGOW",
+   "canonical": "OVO"
+  },
+  {
+   "text": "DD SCOTTISH POWER BRISTOL",
+   "canonical": "SCOTTISH POWER"
+  },
+  {
+   "text": "SP ENERGY LTD",
+   "canonical": "SCOTTISH POWER"
+  },
+  {
+   "text": "DIRECT DEBIT TO SCOTTISH POWER REF 1029384",
+   "canonical": "SCOTTISH POWER"
+  },
+  {
+   "text": "DD SCOTTISHPOWER LONDON",
+   "canonical": "SCOTTISH POWER"
+  },
+  {
+   "text": "D/D THAMES WATER UTILITIES BIRMINGHAM GB",
+   "canonical": "THAMES WATER"
+  },
+  {
+   "text": "THAMES WATER MANCHESTER",
+   "canonical": "THAMES WATER"
+  },
+  {
+   "text": "STANDING ORDER THAMES WATER UTILITIES GLASGOW",
+   "canonical": "THAMES WATER"
+  },
+  {
+   "text": "DIRECT DEBIT THAMES WATER UTILITIES",
+   "canonical": "THAMES WATER"
+  },
+  {
+   "text": "DIRECT DEBIT TO UNITED UTILITIES WATER BIRMINGHAM GB",
+   "canonical": "UNITED UTILITIES"
+  },
+  {
+   "text": "STANDING ORDER UNITED UTILITIES WATER LEEDS GB",
+   "canonical": "UNITED UTILITIES"
+  },
+  {
+   "text": "D/D UNITED UTILITIES WATER GBR",
+   "canonical": "UNITED UTILITIES"
+  },
+  {
+   "text": "DD UNITED UTILITIES 44 20 7946 0000",
+   "canonical": "UNITED UTILITIES"
+  },
+  {
+   "text": "ANGLIAN WATER SERVICES GBR",
+   "canonical": "ANGLIAN WATER"
+  },
+  {
+   "text": "Anglian Water Services 8008",
+   "canonical": "ANGLIAN WATER"
+  },
+  {
+   "text": "STANDIG ORDER ANGLIAN WATER BRISTOL",
+   "canonical": "ANGLIAN WATER"
+  },
+  {
+   "text": "STANDING ORDER ANGLIAN WATER PLC",
+   "canonical": "ANGLIAN WATER"
+  },
+  {
+   "text": "YORKSHIRE WATER LONDON",
+   "canonical": "YORKSHIRE WATER"
+  },
+  {
+   "text": "DD YORKSHIRE WATER SERVICES",
+   "canonical": "YORKSHIRE WATER"
+  },
+  {
+   "text": "BACS YORKSHIRE WATER RBISTOL",
+   "canonical": "YORKSHIRE WATER"
+  },
+  {
+   "text": "DIRECT DEBIT TO YORKSIRE WATER NOTTINGHAM",
+   "canonical": "YORKSHIRE WATER"
+  },
+  {
+   "text": "DD SOUTH STAFFS WATER LEEDS GB",
+   "canonical": "SOUTH STAFFS WATER"
+  },
+  {
+   "text": "SOUTH STAFFS WATER GBR",
+   "canonical": "SOUTH STAFFS WATER"
+  },
+  {
+   "text": "BACS SOUTH STAFFS WATER BRISTOL",
+   "canonical": "SOUTH STAFFS WATER"
+  },
+  {
+   "text": "DIRECT DEBIT TO SOUTH STAFFS WATER BIRMINGHAM GB",
+   "canonical": "SOUTH STAFFS WATER"
+  },
+  {
+   "text": "WELSH WATER LONDON",
+   "canonical": "WELSH WATER"
+  },
+  {
+   "text": "DIRECT DEBIT TO WELSH WATER",
+   "canonical": "WELSH WATER"
+  },
+  {
+   "text": "WELSH W4TER BRISTOL",
+   "canonical": "WELSH WATER"
+  },
+  {
+   "text": "BAC DWR CYMRU BISTOL",
+   "canonical": "WELSH WATER"
+  },
+  {
+   "text": "BULB ENERGY NOTTINGHAM",
+   "canonical": "BULB"
+  },
+  {
+   "text": "DIRECT DEBIT BULB ENERGY 44 20 7946 0000",
+   "canonical": "BULB"
+  },
+  {
+   "text": "DIRECT DEBIT BU1B ENERGY REF 1029384",
+   "canonical": "BULB"
+  },
+  {
+   "text": "D/d Bulb Plc",
+   "canonical": "BULB"
+  },
+  {
+   "text": "D/D LEEDS CITY COUNCIL REF 1029384",
+   "canonical": "COUNCIL TAX"
+  },
+  {
+   "text": "DD SANDWELL MBC COUNCIL TAX BIRMINGHAM GB",
+   "canonical": "COUNCIL TAX"
+  },
+  {
+   "text": "DIRECT EDBIT TO COUNCIL TAX BIRMINGHM GB",
+   "canonical": "COUNCIL TAX"
+  },
+  {
+   "text": "DIRECT DEBIT BIRMINGHAM CITY COUNCIL 8008",
+   "canonical": "COUNCIL TAX"
+  },
+  {
+   "text": "DD DVLA-AO57JCV",
+   "canonical": "DVLA"
+  },
+  {
+   "text": "STANDING ORDER DVLA 44 20 7946 0000",
+   "canonical": "DVLA"
+  },
+  {
+   "text": "DIRECT DEBIT TO DVLA-AO57JCV 8008",
+   "canonical": "DVLA"
+  },
+  {
+   "text": "DVLA VEHICLE TA BIRMINGHAM GB",
+   "canonical": "DVLA"
+  },
+  {
+   "text": "KLARNA BANK GB",
+   "canonical": "KLARNA"
+  },
+  {
+   "text": "DIRECT DEBIT TO KLARNA BANK CORBY GB",
+   "canonical": "KLARNA"
+  },
+  {
+   "text": "STANDING ORDER KLRNA LEEDS GB",
+   "canonical": "KLARNA"
+  },
+  {
+   "text": "DIREC DEBIT TO K1ARNA BANK CARDIFF",
+   "canonical": "KLARNA"
+  },
+  {
+   "text": "CLEARPAY FINANCE LONDON GBR",
+   "canonical": "CLEARPAY"
+  },
+  {
+   "text": "DIRECT DEBIT TO CLEARPAY GLASGOW",
+   "canonical": "CLEARPAY"
+  },
+  {
+   "text": "DIRECT DEBIT CLEARAPY.CO.U K LONDON",
+   "canonical": "CLEARPAY"
+  },
+  {
+   "text": "STANDING ORDER CLEARPAY L ONDON GRB",
+   "canonical": "CLEARPAY"
+  },
+  {
+   "text": "DD BLACK HORSE FINANCE GB",
+   "canonical": "CAR FINANCE"
+  },
+  {
+   "text": "STANDING ORDER BLACK HORSE FINANCE GBR",
+   "canonical": "CAR FINANCE"
+  },
+  {
+   "text": "D/D B1ACK HOSRE FINANCE",
+   "canonical": "CAR FINANCE"
+  },
+  {
+   "text": "BACS MOTONOVO FINANCE",
+   "canonical": "CAR FINANCE"
+  },
+  {
+   "text": "D/D HALIFAX MORTGAGE 8008",
+   "canonical": "MORTGAGE"
+  },
+  {
+   "text": "DIRECT DEBIT TO MORTGAGE PAYMENT LONDON GBR",
+   "canonical": "MORTGAGE"
+  },
+  {
+   "text": "NATI ONWIDE MORTGAGE",
+   "canonical": "MORTGAGE"
+  },
+  {
+   "text": "D/D MORTGAGE PAYMENT PLC",
+   "canonical": "MORTGAGE"
+  },
+  {
+   "text": "DIRECT DEBIT TO MBNA PLC",
+   "canonical": "CREDIT CARD"
+  },
+  {
+   "text": "STANDING ORDER CREDIT CARD PAYMENT PLC",
+   "canonical": "CREDIT CARD"
+  },
+  {
+   "text": "DIRECT DEBIT MBNA PLC",
+   "canonical": "CREDIT CARD"
+  },
+  {
+   "text": "DIRECT DEBIT TO MBNA MANHCESTER",
+   "canonical": "CREDIT CARD"
+  },
+  {
+   "text": "Direct Debit TO Nhsbsa Prescription Gbr",
+   "canonical": "NHS"
+  },
+  {
+   "text": "DIRECT DEBIT TO NHS BUSINESS SERVICES AUTHORITY GBR",
+   "canonical": "NHS"
+  },
+  {
+   "text": "D/d Nhs Business Services Authority GB",
+   "canonical": "NHS"
+  },
+  {
+   "text": "DIRCET DEBIT TO NHS BUSINESS SERVICES AUTHORITY 44 20 7946 0000",
+   "canonical": "NHS"
+  },
+  {
+   "text": "NORTHUMBRIAN WATER LTD",
+   "canonical": "NORTHUMBRIAN WATER"
+  },
+  {
+   "text": "DIRECT DEBIT TO NORTHUMBRIAN WATER LTD REF 1029384",
+   "canonical": "NORTHUMBRIAN WATER"
+  },
+  {
+   "text": "DIRECT DEBIT TO NORTHUMBRIAN WATER GBR",
+   "canonical": "NORTHUMBRIAN WATER"
+  },
+  {
+   "text": "D /D NORTHUMBRIAN WATER LTD 44 20 7946 0000",
+   "canonical": "NORTHUMBRIAN WATER"
+  },
+  {
+   "text": "Bacs Utilita Energy Manchester",
+   "canonical": "UTILITA"
+  },
+  {
+   "text": "DIRECT DEBIT TO UTILITA GLASGOW",
+   "canonical": "UTILITA"
+  },
+  {
+   "text": "IRDECT DEBIT TO UTILITA ENERGY",
+   "canonical": "UTILITA"
+  },
+  {
+   "text": "UTILI",
+   "canonical": "UTILITA"
+  },
+  {
+   "text": "DD SHELL ENERGY RETAIL GLASGOW",
+   "canonical": "SHELL ENERGY"
+  },
+  {
+   "text": "BACS SHELL ENERGY RETAIL GB",
+   "canonical": "SHELL ENERGY"
+  },
+  {
+   "text": "SHELL ENERGY RETAIL GLASGOW",
+   "canonical": "SHELL ENERGY"
+  },
+  {
+   "text": "STANDING ORDER SHELL ENE RGY BIRMINGHAM GB",
+   "canonical": "SHELL ENERGY"
+  }
+ ],
+ "unseen": [
+  {
+   "text": "PAYPAL *CRUNCHYROLL LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "CRUNCHYROLL",
+   "canonical": null
+  },
+  {
+   "text": "CD CRUNCHYROLL.COM 8008",
+   "canonical": null
+  },
+  {
+   "text": "CD CRUNCHYROLL.COM",
+   "canonical": null
+  },
+  {
+   "text": "DEB CRUNCHYROLL.COM UK",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION CRUNCHYROLL LTD",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT CRUNCHYROLL CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT CRUNCHYROLL.COM",
+   "canonical": null
+  },
+  {
+   "text": "VIS CRUNCHYROLL 8008",
+   "canonical": null
+  },
+  {
+   "text": "CRUNCHYROLL.COM LTD",
+   "canonical": null
+  },
+  {
+   "text": "CRUNCHYROLL.COM BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "DEB CRUNCHYROLL.COM",
+   "canonical": null
+  },
+  {
+   "text": "CRUNCHYROLL.COM BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO CRUNCHYROLL.COM GBR",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT CRUNCHYROLL.COM LONDON",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *CRUNCHYROLL.COM",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT CRUNCHYROLL.COM CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D CRUNCHYROLL.COM UK",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO CRUNCHYROLL",
+   "canonical": null
+  },
+  {
+   "text": "DD CRUNCHYROLL MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "Recurring Payment Crunchyroll Birmingham GB",
+   "canonical": null
+  },
+  {
+   "text": "CRUNCHYROLL NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "D/d Sky TV Ltd",
+   "canonical": null
+  },
+  {
+   "text": "SKY TV LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "SKY UK LIMITED CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO SKY DIGITAL BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D SKY DIGITAL PLC",
+   "canonical": null
+  },
+  {
+   "text": "Card Payment TO Sky TV",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO SKY UK LIMITED",
+   "canonical": null
+  },
+  {
+   "text": "SKY TV",
+   "canonical": null
+  },
+  {
+   "text": "Recurring Payment Sky TV Corby GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *SKY TV P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "SKY TV GBR",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT SKY DIGITAL P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "Card Subscription Sky TV Cardiff",
+   "canonical": null
+  },
+  {
+   "text": "D/D SKY TV",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT SKY UK LIMITED NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "SKY TV REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT SKY DIGITAL LONDON",
+   "canonical": null
+  },
+  {
+   "text": "Sky Digital",
+   "canonical": null
+  },
+  {
+   "text": "SKY DIGITAL",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION SKY UK LIMITED GBR",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT SKY DIGITAL GBR",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *SKY TV REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "CD Funimation",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *FUNIMATION LONDON",
+   "canonical": null
+  },
+  {
+   "text": "FUNIMATION MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "DEB FUNIMATION",
+   "canonical": null
+  },
+  {
+   "text": "Card Subscription Funimation Global Ltd",
+   "canonical": null
+  },
+  {
+   "text": "FUNIMATION",
+   "canonical": null
+  },
+  {
+   "text": "FUNIMATION GLOBAL LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT FUNIMATION LTD",
+   "canonical": null
+  },
+  {
+   "text": "DD FUNIMATION",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT FUNIMATION GLOBAL UK",
+   "canonical": null
+  },
+  {
+   "text": "CD FUNIMATION GLOBAL CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "CD FUNIMATION LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "DEB FUNIMATION UK",
+   "canonical": null
+  },
+  {
+   "text": "DEB FUNIMATION GLOBAL 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "VIS FUNIMATION GLOBAL UK",
+   "canonical": null
+  },
+  {
+   "text": "FUNIMATION LTD",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT FUNIMATION GLOBAL NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *FUNIMATION CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D FUNIMATION GLOBAL 8008",
+   "canonical": null
+  },
+  {
+   "text": "FUNIMATION 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *FUNIMATION",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT FUNIMATION REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION SPOTIFY P1A2B3 BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "DEB PAYPAL *SPOTIFY",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *SPOTIFY AB LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "D/D SPOTIFY AB CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "Card Subscription Spotify UK Leeds GB",
+   "canonical": null
+  },
+  {
+   "text": "CD SPOTIFY AB REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "CD SPOTIFY P1A2B3 LONDON",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT PAYPAL *SPOTIFY",
+   "canonical": null
+  },
+  {
+   "text": "DEB SPOTIFY UK UK",
+   "canonical": null
+  },
+  {
+   "text": "VIS SPOTIFY P1A2B3 GBR",
+   "canonical": null
+  },
+  {
+   "text": "DEB SPOTIFY P1A2B3 PLC",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT SPOTIFY P1A2B3",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT SPOTIFY AB",
+   "canonical": null
+  },
+  {
+   "text": "SPOTIFY LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION SPOTIFY P1A2B3",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *SPOTIFY AB 8008",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *SPOTIFY AB LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "CD PAYPAL *SPOTIFY REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "CD PAYPAL *SPOTIFY GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "DEB PAYPAL *SPOTIFY MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION SPOTIFY P1A2B3 GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT SPOTIFY UK",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *DEEZER SA GB",
+   "canonical": null
+  },
+  {
+   "text": "Recurring Payment Deezer SA Bristol",
+   "canonical": null
+  },
+  {
+   "text": "DD Deezer",
+   "canonical": null
+  },
+  {
+   "text": "DEEZER LONDON",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT DEEZER LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "VIS DEEZER.COM 8008",
+   "canonical": null
+  },
+  {
+   "text": "VIS DEEZER.COM BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "CD DEEZER SA 8008",
+   "canonical": null
+  },
+  {
+   "text": "CD DEEZER.COM LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT DEEZER.COM UK",
+   "canonical": null
+  },
+  {
+   "text": "DEEZER SA BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "DEEZER SA REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "VIS DEEZER SA CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *DEEZER.COM GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT DEEZER SA",
+   "canonical": null
+  },
+  {
+   "text": "DD DEEZER CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "CD DEEZER SA",
+   "canonical": null
+  },
+  {
+   "text": "D/D DEEZER SA CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO DEEZER NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION DEEZER NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *DEEZER.COM 8008",
+   "canonical": null
+  },
+  {
+   "text": "CD DEEZER GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "VIS MIDJOURNEY INC GBR",
+   "canonical": null
+  },
+  {
+   "text": "MIDJOURNEY 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "MIDJOURNEY MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "DD MIDJOURNEY INC LTD",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT MIDJOURNEY.COM REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "MIDJOURNEY.COM 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT MIDJOURNEY INC MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "D/D MIDJOURNEY.COM",
+   "canonical": null
+  },
+  {
+   "text": "Card Subscription Midjourney Inc Manchester",
+   "canonical": null
+  },
+  {
+   "text": "DD MIDJOURNEY REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "Midjourney.com Corby GB",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT MIDJOURNEY.COM MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "MIDJOURNEY INC LTD",
+   "canonical": null
+  },
+  {
+   "text": "D/D MIDJOURNEY CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "DD Midjourney Birmingham GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *MIDJOURNEY INC GBR",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *MIDJOURNEY.COM NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *MIDJOURNEY 8008",
+   "canonical": null
+  },
+  {
+   "text": "MIDJOURNEY NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "MIDJOURNEY INC CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION MIDJOURNEY.COM 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "DEB MIDJOURNEY INC 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "DEB REPLIT INC LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT REPLIT.COM BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "REPLIT.COM BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "CD REPLIT NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO REPLIT INC MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "DD REPLIT.COM LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO REPLIT PLC",
+   "canonical": null
+  },
+  {
+   "text": "Card Subscription Replit London",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *REPLIT 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "DD REPLIT.COM P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *REPLIT INC MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "VIS REPLIT NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *REPLIT UK",
+   "canonical": null
+  },
+  {
+   "text": "DD REPLIT INC LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT REPLIT INC PLC",
+   "canonical": null
+  },
+  {
+   "text": "D/d Replit.com Cardiff",
+   "canonical": null
+  },
+  {
+   "text": "DD REPLIT 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "D/D REPLIT.COM REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "Replit.com Nottingham",
+   "canonical": null
+  },
+  {
+   "text": "VIS REPLIT INC GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "REPLIT PLC",
+   "canonical": null
+  },
+  {
+   "text": "REPLIT INC NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT TODOIST 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT TODOIST 8008",
+   "canonical": null
+  },
+  {
+   "text": "Card Payment TO Todoist.com Ref 1029384",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *DOIST UK",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *TODOIST.COM LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "DOIST CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *TODOIST.COM GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "VIS TODOIST CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "TODOIST.COM",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT DOIST GBR",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *TODOIST.COM LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT DOIST",
+   "canonical": null
+  },
+  {
+   "text": "Google *doist P1a2b3c4d5",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *TODOIST.COM",
+   "canonical": null
+  },
+  {
+   "text": "DEB TODOIST.COM GB",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *DOIST GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION DOIST CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "Doist London Gbr",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT TODOIST.COM",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION DOIST GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION DOIST MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *DOIST MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "CD LINEAR",
+   "canonical": null
+  },
+  {
+   "text": "Linear Cardiff",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO LINEAR.APP GB",
+   "canonical": null
+  },
+  {
+   "text": "CD LINEAR.APP REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *LINEAR 8008",
+   "canonical": null
+  },
+  {
+   "text": "DD LINEAR.APP LONDON",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *LINEAR BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT LINEAR ORBIT INC 8008",
+   "canonical": null
+  },
+  {
+   "text": "DD LINEAR ORBIT INC GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION LINEAR",
+   "canonical": null
+  },
+  {
+   "text": "CD LINEAR.APP UK",
+   "canonical": null
+  },
+  {
+   "text": "LINEAR.APP 8008",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *LINEAR BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "DD LINEAR ORBIT INC CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "DD LINEAR BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "DD LINEAR ORBIT INC LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *LINEAR",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION LINEAR MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "D/D LINEAR",
+   "canonical": null
+  },
+  {
+   "text": "DEB LINEAR LONDON",
+   "canonical": null
+  },
+  {
+   "text": "CD LINEAR.APP",
+   "canonical": null
+  },
+  {
+   "text": "DD LINEAR.APP CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO SQUARESPACE MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "CD SQUARESPACE GBR",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *SQUARESPACE INC LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *SQUARESPACE INC 8008",
+   "canonical": null
+  },
+  {
+   "text": "DD SQUARESPACE 8008",
+   "canonical": null
+  },
+  {
+   "text": "VIS SQUARESPACE",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *SQUARESPACE MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION SQUARESPACE INC",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION SQUARESPACE LTD",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *SQSP UK",
+   "canonical": null
+  },
+  {
+   "text": "CD SQUARESPACE UK",
+   "canonical": null
+  },
+  {
+   "text": "SQSP LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT SQUARESPACE INC NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "DD SQUARESPACE LONDON",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *SQUARESPACE INC LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT SQUARESPACE BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO SQSP REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO SQUARESPACE INC GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "DD SQSP LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "Direct Debit Squarespace Inc London",
+   "canonical": null
+  },
+  {
+   "text": "Squarespace",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT SQSP LONDON",
+   "canonical": null
+  },
+  {
+   "text": "CD BITWARDEN LTD",
+   "canonical": null
+  },
+  {
+   "text": "Bitwarden Inc Glasgow",
+   "canonical": null
+  },
+  {
+   "text": "CD Bitwarden Inc Ltd",
+   "canonical": null
+  },
+  {
+   "text": "Bitwarden Inc Birmingham GB",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *BITWARDEN PLC",
+   "canonical": null
+  },
+  {
+   "text": "D/D BITWARDEN MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "Card Payment TO Bitwarden Inc",
+   "canonical": null
+  },
+  {
+   "text": "D/D BITWARDEN INC LONDON",
+   "canonical": null
+  },
+  {
+   "text": "BITWARDEN GB",
+   "canonical": null
+  },
+  {
+   "text": "DD BITWARDEN INC PLC",
+   "canonical": null
+  },
+  {
+   "text": "CD BITWARDEN LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *BITWARDEN INC 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "BITWARDEN INC NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT BITWARDEN INC 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "BITWARDEN BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "CD BITWARDEN",
+   "canonical": null
+  },
+  {
+   "text": "DEB BITWARDEN INC MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "D/D BITWARDEN BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT BITWARDEN INC MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "BITWARDEN",
+   "canonical": null
+  },
+  {
+   "text": "VIS BITWARDEN INC CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION BITWARDEN 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "D/d Protonmail Leeds GB",
+   "canonical": null
+  },
+  {
+   "text": "CD PROTONMAIL LONDON",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *PROTONMAIL GBR",
+   "canonical": null
+  },
+  {
+   "text": "CD PROTONMAIL UK",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO PROTON.ME LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION PROTON AG GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO PROTON.ME GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION PROTON.ME NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "PROTONMAIL LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "PROTONMAIL PLC",
+   "canonical": null
+  },
+  {
+   "text": "PROTON AG GB",
+   "canonical": null
+  },
+  {
+   "text": "Proton.me Bristol",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT PROTON AG CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT PROTONMAIL LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D PROTON.ME LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "D/D PROTON.ME LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "DD PROTONMAIL LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "PROTONMAIL GBR",
+   "canonical": null
+  },
+  {
+   "text": "D/D PROTONMAIL UK",
+   "canonical": null
+  },
+  {
+   "text": "CD Proton AG Nottingham",
+   "canonical": null
+  },
+  {
+   "text": "CD PROTON.ME P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "PROTON.ME BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "LASTPASS.COM NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *LASTPASS.COM BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "DEB LASTPASS BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "DEB LASTPASS.COM",
+   "canonical": null
+  },
+  {
+   "text": "LASTPASS.COM LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "Lastpass UK",
+   "canonical": null
+  },
+  {
+   "text": "Direct Debit Lastpass Bristol",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO LASTPASS MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION LASTPASS.COM GB",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION LASTPASS.COM CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D LASTPASS CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *LASTPASS.COM NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO LASTPASS.COM",
+   "canonical": null
+  },
+  {
+   "text": "LASTPASS.COM PLC",
+   "canonical": null
+  },
+  {
+   "text": "VIS LASTPASS.COM CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT LASTPASS.COM PLC",
+   "canonical": null
+  },
+  {
+   "text": "CD LASTPASS P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "CD LASTPASS.COM GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "VIS LASTPASS.COM",
+   "canonical": null
+  },
+  {
+   "text": "DD LASTPASS.COM LONDON",
+   "canonical": null
+  },
+  {
+   "text": "VIS LASTPASS GB",
+   "canonical": null
+  },
+  {
+   "text": "LASTPASS GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "D/d Sentry.io GB",
+   "canonical": null
+  },
+  {
+   "text": "DD FUNCTIONAL SOFTWARE SENTRY BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO FUNCTIONAL SOFTWARE SENTRY GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *FUNCTIONAL SOFTWARE SENTRY BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D FUNCTIONAL SOFTWARE SENTRY",
+   "canonical": null
+  },
+  {
+   "text": "DEB FUNCTIONAL SOFTWARE SENTRY LTD",
+   "canonical": null
+  },
+  {
+   "text": "SENTRY.IO CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *FUNCTIONAL SOFTWARE SENTRY LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "Paypal *sentry.io",
+   "canonical": null
+  },
+  {
+   "text": "SENTRY.IO LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "FUNCTIONAL SOFTWARE SENTRY MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "Card Subscription Functional Software Sentry Gbr",
+   "canonical": null
+  },
+  {
+   "text": "SENTRY.IO NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "SENTRY.IO LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO FUNCTIONAL SOFTWARE SENTRY GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "CD FUNCTIONAL SOFTWARE SENTRY",
+   "canonical": null
+  },
+  {
+   "text": "Recurring Payment Functional Software Sentry 8008",
+   "canonical": null
+  },
+  {
+   "text": "DD SENTRY.IO 8008",
+   "canonical": null
+  },
+  {
+   "text": "DEB FUNCTIONAL SOFTWARE SENTRY",
+   "canonical": null
+  },
+  {
+   "text": "FUNCTIONAL SOFTWARE SENTRY GB",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *SENTRY.IO GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO SENTRY.IO REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "DEB MYFITNESSPAL PREMIUM",
+   "canonical": null
+  },
+  {
+   "text": "MYFITNESSPAL PREMIUM NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *MYFITNESSPAL GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION MYFITNESSPAL 8008",
+   "canonical": null
+  },
+  {
+   "text": "DD Myfitnesspal Premium Plc",
+   "canonical": null
+  },
+  {
+   "text": "VIS MYFITNESSPAL 8008",
+   "canonical": null
+  },
+  {
+   "text": "Myfitnesspal",
+   "canonical": null
+  },
+  {
+   "text": "DD MYFITNESSPAL PLC",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *MYFITNESSPAL",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT MYFITNESSPAL",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *MYFITNESSPAL",
+   "canonical": null
+  },
+  {
+   "text": "VIS MYFITNESSPAL PREMIUM 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "VIS MYFITNESSPAL",
+   "canonical": null
+  },
+  {
+   "text": "MYFITNESSPAL PREMIUM CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *MYFITNESSPAL PREMIUM LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "MYFITNESSPAL PREMIUM",
+   "canonical": null
+  },
+  {
+   "text": "D/D MYFITNESSPAL GBR",
+   "canonical": null
+  },
+  {
+   "text": "CD Myfitnesspal Bristol",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT MYFITNESSPAL MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "DD MYFITNESSPAL GBR",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION MYFITNESSPAL PREMIUM LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT MYFITNESSPAL CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *PELOTON PLC",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *PELOTON INTERACTIVE BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "PELOTON",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *PELOTON.COM LTD",
+   "canonical": null
+  },
+  {
+   "text": "VIS PELOTON.COM MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *PELOTON BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT PELOTON.COM",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *PELOTON LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "PELOTON INTERACTIVE CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D PELOTON",
+   "canonical": null
+  },
+  {
+   "text": "CD PELOTON 8008",
+   "canonical": null
+  },
+  {
+   "text": "PELOTON INTERACTIVE",
+   "canonical": null
+  },
+  {
+   "text": "Deb Peloton.com 8008",
+   "canonical": null
+  },
+  {
+   "text": "DEB PELOTON.COM CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "CD PELOTON INTERACTIVE CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *PELOTON INTERACTIVE",
+   "canonical": null
+  },
+  {
+   "text": "DD PELOTON INTERACTIVE",
+   "canonical": null
+  },
+  {
+   "text": "PELOTON.COM P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "PELOTON INTERACTIVE BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "PELOTON INTERACTIVE 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "DD Peloton.com London Gbr",
+   "canonical": null
+  },
+  {
+   "text": "Google *peloton Interactive Bristol",
+   "canonical": null
+  },
+  {
+   "text": "D/D WHOOP BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "D/D WHOOP INC NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "WHOOP MEMBERSHIP",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT WHOOP",
+   "canonical": null
+  },
+  {
+   "text": "D/D WHOOP MEMBERSHIP MANCHESTER",
+   "canonical": null
+  },
+  {
+   "text": "WHOOP MEMBERSHIP NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "DEB WHOOP INC BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "WHOOP INC P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "D/D WHOOP INC GBR",
+   "canonical": null
+  },
+  {
+   "text": "WHOOP INC LTD",
+   "canonical": null
+  },
+  {
+   "text": "WHOOP MEMBERSHIP LONDON",
+   "canonical": null
+  },
+  {
+   "text": "WHOOP MEMBERSHIP BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION WHOOP INC BRISTOL",
+   "canonical": null
+  },
+  {
+   "text": "DEB WHOOP 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "WHOOP INC GB",
+   "canonical": null
+  },
+  {
+   "text": "DD WHOOP 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "DD WHOOP INC GBR",
+   "canonical": null
+  },
+  {
+   "text": "CD WHOOP MEMBERSHIP",
+   "canonical": null
+  },
+  {
+   "text": "D/D WHOOP INC LTD",
+   "canonical": null
+  },
+  {
+   "text": "Card Subscription Whoop London Gbr",
+   "canonical": null
+  },
+  {
+   "text": "CARD PAYMENT TO WHOOP MEMBERSHIP 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *WHOOP INC CARDIFF",
+   "canonical": null
+  },
+  {
+   "text": "D/D DISCORD.COM NITRO 8008",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION DISCORD NITRO LTD",
+   "canonical": null
+  },
+  {
+   "text": "VIS DISCORD NITRO BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT DISCORD.COM NITRO 44 20 7946 0000",
+   "canonical": null
+  },
+  {
+   "text": "CD DISCORD NITRO NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION DISCORD NITRO REF 1029384",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *DISCORD NITRO GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *DISCORD.COM NITRO GLASGOW",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *DISCORD NITRO BIRMINGHAM GB",
+   "canonical": null
+  },
+  {
+   "text": "D/D DISCORD.COM NITRO",
+   "canonical": null
+  },
+  {
+   "text": "CARD SUBSCRIPTION DISCORD.COM NITRO LONDON",
+   "canonical": null
+  },
+  {
+   "text": "D/D DISCORD.COM NITRO LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "VIS DISCORD.COM NITRO CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "CD DISCORD NITRO P1A2B3C4D5",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *DISCORD.COM NITRO LTD",
+   "canonical": null
+  },
+  {
+   "text": "RECURRING PAYMENT DISCORD NITRO GB",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *DISCORD NITRO LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "GOOGLE *DISCORD.COM NITRO LONDON GBR",
+   "canonical": null
+  },
+  {
+   "text": "DEB DISCORD.COM NITRO NOTTINGHAM",
+   "canonical": null
+  },
+  {
+   "text": "Discord Nitro UK",
+   "canonical": null
+  },
+  {
+   "text": "Discord.com Nitro Leeds GB",
+   "canonical": null
+  },
+  {
+   "text": "VIS DISCORD NITRO CORBY GB",
+   "canonical": null
+  },
+  {
+   "text": "DIRECT DEBIT RIOT PREMIUM LEEDS GB",
+   "canonical": null
+  },
+  {
+   "text": "RIOT PREMIUM",
+   "canonical": null
+  },
+  {
+   "text": "DD Riot Games Pass Glasgow",
+   "canonical": null
+  },
+  {
+   "text": "PAYPAL *RIOT GAMES PASS",
+   "canonical": null
+  }
+ ]
+}

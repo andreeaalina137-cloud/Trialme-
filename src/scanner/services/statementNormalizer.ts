@@ -32,7 +32,9 @@ export function repairBankMerchantAbbreviations(value: string): string {
     .replace(/\bTALK\s*[- ]?TALK(?:\s+TELECOM\s*T?)?\b/gi, 'TALKTALK')
     .replace(/\bLEBARA(?:\s+MOBILE)?(?:\s+(?:LIMITED|LTD|UK))?\b/gi, 'LEBARA')
     .replace(/\b(?:DIRECT\s+DEBIT\s+|D\/D\s+|DD\s+)02\b/gi, 'DIRECT DEBIT O2')
-    .replace(/\bAPPL?[IE1][E1]?\.COM\/BI[L1]{1,2}\b/gi, 'APPLE.COM/BILL');
+    .replace(/\bAPPL?[IE1][E1]?\.COM\/BI[L1]{1,2}\b/gi, 'APPLE.COM/BILL')
+    .replace(/\bAPPLECOMBILL\b/gi, 'APPLE.COM/BILL')
+    .replace(/\bEONNEXT\b/gi, 'E.ON NEXT');
 }
 
 export function normalizeStatementLines(lines: string[]): string[] {

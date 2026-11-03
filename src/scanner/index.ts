@@ -65,6 +65,15 @@ export {
   DEFAULT_RECURRENCE_OPTIONS,
 } from './services/recurrenceMathEngine';
 export {
+  buildOcrDocumentFromTesseract,
+  parseStatementFromOcrDocument,
+  detectSpatialColumnsFromOcr,
+  classifyOcrColumn,
+  deduplicateOcrTokens,
+  sanitizeBbox,
+  ocrTokensToSpatialGlyphs,
+} from './services/ocrScannerBridge';
+export {
   FLAG_SUMMARY_ROW,
   FLAG_INVALID_DATE,
   FLAG_DUPLICATE,
@@ -107,6 +116,13 @@ export type {
   RecurrenceClassification,
   RecurrenceSummary,
   SpatialTransactionRow,
+  OcrBbox,
+  OcrToken,
+  OcrStructuredLine,
+  OcrRowEvidence,
+  OcrDocument,
+  AILabel,
+  AITransactionEvidence,
 } from './types/scanner.types';
 export type {
   StatementDateFormat,
@@ -126,6 +142,20 @@ export type {
   MerchantAmbiguity,
   FingerprintOptions,
 } from './services/merchantFingerprint';
+export {
+  initAISemanticModel,
+  isAIModelReady,
+  isAIEnabled,
+  setAIEnabled,
+  getAIModelStatus,
+  classifyTransactionWithAI,
+  parseModelBinary,
+  embedText as embedTextWithAI,
+  tokenizeWordPiece,
+} from './services/aiSemanticClassifier';
+export type {
+  AIModelStatus,
+} from './services/aiSemanticClassifier';
 export type {
   RecurrenceOptions,
 } from './services/recurrenceMathEngine';

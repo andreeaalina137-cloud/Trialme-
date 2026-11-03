@@ -66,7 +66,7 @@ export function classifyUKPaymentType(line: string): UKPaymentType {
 }
 
 const PREFIX_PATTERN =
-  /\b(?:CARD\s+SUBSCRIPTION|RECURRING\s+CARD\s+PURCHASE|PREAPPROVED\s+PAYMENT(?:\s+BILL\s+USER\s+PAYMENT)?|BILL\s+USER\s+PAYMENT|AUTOMATIC\s+PAYMENT|RECURRING\s+PAYMENT|SUBSCRIPTION\s+PAYMENT|EXPRESS\s+CHECKOUT\s+PAYMENT|OUTWARD\s+DIRECT\s+DEBIT|DIRECT\s+DEBIT\s+PAYMENT(?:\s+TO)?|DIRECT\s+DEBIT\s+TO|DIRECT\s+DEBIT|POINT\s+OF\s+SALE|CARD\s+PAYMENT\s+TO|D\/D|DDR|C\/L|OUTWARD\s+FASTER\s+PAYMENT|INWARD\s+FASTER\s+PAYMENT|FASTER\s+PAYMENT(?:\s+TO)?|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|STANDING\s+ORDER|BILL\s+PAYMENT|POS|BACS|VIS|DEB|DD|CĂTRE|CATRE|CARD|REFERINȚĂ|REFERINTA|CURSUL)\b|PAYPAL\s*\*/gi;
+  /\b(?:CARD\s+TRANSACTION(?:\s+\d{4})?(?:\s+\d{1,2}[A-Za-z]{3}\d{2})?(?:\s+(?:CD|D|CR))?|ONLINE\s+TRANSACTION|AUTOMATED\s+CREDIT|CARD\s+SUBSCRIPTION|RECURRING\s+CARD\s+PURCHASE|PREAPPROVED\s+PAYMENT(?:\s+BILL\s+USER\s+PAYMENT)?|BILL\s+USER\s+PAYMENT|AUTOMATIC\s+PAYMENT|RECURRING\s+PAYMENT|SUBSCRIPTION\s+PAYMENT|EXPRESS\s+CHECKOUT\s+PAYMENT|OUTWARD\s+DIRECT\s+DEBIT|DIRECT\s+DEBIT\s+PAYMENT(?:\s+TO)?|DIRECT\s+DEBIT\s+TO|DIRECT\s+DEBIT|POINT\s+OF\s+SALE|CARD\s+PAYMENT\s+TO|D\/D|DDR|C\/L|OUTWARD\s+FASTER\s+PAYMENT|INWARD\s+FASTER\s+PAYMENT|FASTER\s+PAYMENT(?:\s+TO)?|CONTACTLESS|APPLE\s+PAY|GOOGLE\s+PAY|STANDING\s+ORDER|BILL\s+PAYMENT|POS|BACS|VIS|DEB|DD|CĂTRE|CATRE|CARD(?:\s*:\s*|\s+\*)|REFERINȚĂ|REFERINTA|CURSUL)\b|PAYPAL\s*\*/gi;
 
 const COUNTRY_PATTERN = /\b(?:GBR|LUX|IRL|USA|ESP|FRA|DEU|NLD|ITA|GBP|GB)\b/gi;
 const CITY_PATTERN = /\bLONDON\b/gi;
@@ -603,10 +603,17 @@ export function extractGbpAmount(line: string): number | null {
   // Monzo and some PDF exports omit the GBP symbol and encode debits as
   // `GBR-15.08` or `-15.08`. Running balances normally follow the debit;
   // prefer the explicit signed debit and leave credits to the credit filter.
+  // CRITICAL: If an unsigned decimal precedes the signed value (e.g. "O2 DD 16.05 -468.30"),
+  // the unsigned decimal is the debit amount and the trailing negative value is an overdrawn running balance.
   const signedDebit = sanitizedLine.match(/(?:^|\s|(?:GBR|GBP))[-−]\s*(\d{1,4}(?:,\d{3})*[,.]\d{2})\b/i);
   if (signedDebit) {
-    const amount = parseLocalizedAmount(signedDebit[1]);
-    if (Number.isFinite(amount) && amount > 0) return amount;
+    const precedingAmountMatch = sanitizedLine
+      .slice(0, signedDebit.index ?? 0)
+      .match(/(?:^|\s)(\d{1,4}(?:,\d{3})*\.\d{2})\b/);
+    if (!precedingAmountMatch) {
+      const amount = parseLocalizedAmount(signedDebit[1]);
+      if (Number.isFinite(amount) && amount > 0) return amount;
+    }
   }
 
   // 2. Strip date patterns and country codes before extracting decimal amounts
@@ -624,6 +631,15 @@ export function extractGbpAmount(line: string): number | null {
     .filter((n) => Number.isFinite(n) && n > 0);
 
   if (decimals.length === 1) {
+    // In multi-column table rows (containing pipe '|' or explicit column separators),
+    // if the single decimal is at the end preceded by an integer (e.g. "| DEB | 1099 344.93"),
+    // that decimal is in the running balance column, not the debit column.
+    if (
+      sanitizedLine.includes('|') &&
+      /(?:^|\s)(?<![.,\d])(\d{2,6})\s+[-+]?\d{1,4}(?:,\d{3})*\.\d{2}\s*(?:DR|CR)?$/i.test(stripped)
+    ) {
+      return null;
+    }
     return decimals[0];
   } else if (decimals.length > 1) {
     // In UK bank statements with multiple columns (Date | Merchant | Debit | Balance),
@@ -720,7 +736,7 @@ function isInformationalOrSectionBoundary(line: string): boolean {
 
 function extractReferenceToken(line: string): string | null {
   const refMatch = line.match(
-    /(?:\b(?:REF[:\s-]*([A-Z0-9-]{3,})|CD\s*(\d{4})|CARD[:\s]+(\d{4})|ENDING\s+(\d{4})|MANDATE\s+NO\s*(\d+))\b|(?:\*{1,4}|X{2,4})\s*(\d{4})\b)/i,
+    /(?:\b(?:REF[:\s-]*([A-Z0-9-]{3,})|CD\s*(\d{4})|CARD(?:\s+TRANSACTION)?[:\s]+(\d{4})|ENDING\s+(\d{4})|MANDATE\s+NO\s*(\d+))\b|(?:\*{1,4}|X{2,4})\s*(\d{4})\b)/i,
   );
   if (!refMatch) return null;
   return (refMatch[1] || refMatch[2] || refMatch[3] || refMatch[4] || refMatch[5] || refMatch[6] || '').toUpperCase() || null;
@@ -799,8 +815,16 @@ function groupStatementLines(lines: string[]): string[] {
   const logicalLines: string[] = [];
   let pending: string[] = [];
 
-  const isContinuation = (line: string): boolean =>
-    /^(?:Către|Catre|To|From|De la|Card|Referință|Referinta|Cursul)\s*:?/i.test(line);
+  const isContinuation = (line: string): boolean => {
+    if (
+      extractUkDate(line) !== null ||
+      extractGbpAmount(line) !== null ||
+      hasStructuralBankTransactionMarker(line)
+    ) {
+      return false;
+    }
+    return /^(?:Către|Catre|To|From|De la|Referință|Referinta|Cursul|Card\s*:|Card\s+\*)\s*:?/i.test(line);
+  };
 
   const flushPending = () => {
     const joined = pending.join(' ').replace(/\s+/g, ' ').trim();
@@ -844,6 +868,7 @@ function groupStatementLines(lines: string[]): string[] {
     if (
       pending.length > 0 &&
       ((extractUkDate(line) !== null && pending.some((item) => extractUkDate(item) !== null)) ||
+        (hasStructuralBankTransactionMarker(line) && pending.some((item) => hasStructuralBankTransactionMarker(item))) ||
         (!pending.some((item) => extractUkDate(item) !== null || hasStructuralBankTransactionMarker(item)) &&
           (extractUkDate(line) !== null || hasStructuralBankTransactionMarker(line))))
     ) {
@@ -851,7 +876,10 @@ function groupStatementLines(lines: string[]): string[] {
     }
 
     pending.push(line);
-    if (extractGbpAmount(line) !== null) {
+    if (
+      extractGbpAmount(line) !== null ||
+      (/\|/.test(line) && /\b\d+(?:\.\d{2})?\s+[-+]?\d+(?:\.\d{2})?\s*(?:DR|CR)?$/i.test(line))
+    ) {
       flushPending();
     }
   }
@@ -1488,8 +1516,30 @@ export function parseStatementInternal(
   const accepted = cancelLinkedReversals(transactions, reversals);
 
   // Extract candidate amounts and running balances to generate balance reconciliation evidence
-  const balanceInputs: BalanceRowInput[] = accepted.map((tx) => {
-    const extracted = extractRowAmountsAndBalance(tx.rawLine);
+  const balanceRowPattern = /\b(?:BROUGHT\s+FORWARD|BALANCE\s+BROUGHT\s+FORWARD|OPENING\s+BALANCE|START(?:ING)?\s+BALANCE|BALANCE\s+FROM\s+PREVIOUS\s+STATEMENT|PREVIOUS\s+BALANCE)\b/i;
+  const openLine = cleanedLines.find((l) => balanceRowPattern.test(l));
+  let initialBalanceInput: BalanceRowInput | null = null;
+  if (openLine) {
+    const amtMatch = openLine.match(/(?:^|\s)([-+]?[£$€]?\s*\d{1,4}(?:,\d{3})*\.\d{2})\s*(DR|CR)?(?=\s|$)/i);
+    let openVal: number | null = null;
+    if (amtMatch) {
+      const clean = amtMatch[1].replace(/[£$€\s]/g, '').replace(/,/g, '');
+      openVal = Number(clean);
+      if (amtMatch[2]?.toUpperCase() === 'DR' || amtMatch[1].includes('-')) openVal = -Math.abs(openVal);
+    }
+    if (openVal !== null && Number.isFinite(openVal)) {
+      initialBalanceInput = {
+        amounts: [],
+        balance: openVal,
+        date: extractUkDate(openLine, now)?.iso ?? null,
+        isBalanceForward: true,
+      };
+    }
+  }
+
+  const rowExtracted = accepted.map((tx) => extractRowAmountsAndBalance(tx.rawLine));
+  const rawBalanceInputs: BalanceRowInput[] = accepted.map((tx, idx) => {
+    const extracted = rowExtracted[idx];
     const hasExplicitDebit =
       /[-−]\s*(?:£|GBP)?\s*\d/i.test(tx.rawLine) ||
       /\b(?:DR|DEB)\b/i.test(tx.rawLine) ||
@@ -1502,10 +1552,14 @@ export function parseStatementInternal(
     };
   });
 
-  const evidences = reconcileBalances(balanceInputs);
+  const balanceInputs = initialBalanceInput ? [initialBalanceInput, ...rawBalanceInputs] : rawBalanceInputs;
+  const rawEvidences = reconcileBalances(balanceInputs);
+  const evidences = initialBalanceInput ? rawEvidences.slice(1) : rawEvidences;
 
   for (let idx = 0; idx < accepted.length; idx++) {
     const tx = accepted[idx];
+    const rowExt = rowExtracted[idx];
+    const ev = evidences[idx];
     if (!tx.normalizedMerchant || !tx.merchantFingerprint) {
       const fp = buildMerchantFingerprint(tx.rawLine || tx.cleanedMerchant, {
         amountGbp: tx.amountGbp,
@@ -1513,12 +1567,12 @@ export function parseStatementInternal(
       tx.normalizedMerchant = fp.normalized;
       tx.merchantFingerprint = fp.fingerprint;
     }
-    if (evidences[idx] && evidences[idx].classification !== 'UNVERIFIED') {
-      tx.balanceEvidence = evidences[idx];
+    if (ev && ev.classification !== 'UNVERIFIED') {
+      tx.balanceEvidence = ev;
       // Close the loop on running-balance delta sign determination:
       // If the running balance mathematically increased by this candidate amount (money in),
       // quarantine it so an incoming credit/refund is never falsely accepted as a subscription debit.
-      if (evidences[idx].reconciled && evidences[idx].classification === 'CREDIT_SUPPORTED' && !evidences[idx].supportsDebit) {
+      if (ev.reconciled && ev.classification === 'CREDIT_SUPPORTED' && !ev.supportsDebit) {
         tx.isCredit = true;
         tx.status = 'QUARANTINED';
         tx.validityScore = 0;
@@ -1528,6 +1582,31 @@ export function parseStatementInternal(
         } else if (!tx.reasonCodes.includes('BALANCE_REJECTED')) {
           tx.reasonCodes.push('BALANCE_REJECTED');
         }
+      } else if (
+        ev.reconciled &&
+        ev.supportsDebit &&
+        typeof ev.matchedAmount === 'number' &&
+        Math.abs(tx.amountGbp - ev.matchedAmount) > 0.01
+      ) {
+        tx.amountGbp = ev.matchedAmount;
+      }
+    }
+
+    // Gate 1 safety: if extracted amount matches the row's balance column and could not be verified
+    // by balance movement, quarantine it so a running balance is never mistaken for a payment debit.
+    if (
+      tx.status !== 'QUARANTINED' &&
+      rowExt?.balance !== null &&
+      Math.abs(tx.amountGbp - rowExt.balance) < 0.01 &&
+      (!ev || !ev.reconciled || ev.classification === 'NOT_RECONCILED')
+    ) {
+      tx.status = 'QUARANTINED';
+      tx.validityScore = 0;
+      tx.reason = 'Extracted amount matches running balance column, not transaction movement';
+      if (!tx.reasonCodes) {
+        tx.reasonCodes = ['BALANCE_REJECTED'];
+      } else if (!tx.reasonCodes.includes('BALANCE_REJECTED')) {
+        tx.reasonCodes.push('BALANCE_REJECTED');
       }
     }
   }
@@ -1556,25 +1635,25 @@ function extractRowAmountsAndBalance(line: string): { amounts: number[]; balance
   const matches = Array.from(
     stripped.matchAll(/(?:^|\s)([-+]?[£$€]?\s*\d{1,4}(?:,\d{3})*\.\d{2})\s*(DR|CR)?(?=\s|$)/gi),
   );
-  if (matches.length < 2) {
-    const val = extractGbpAmount(line);
-    return { amounts: val !== null ? [val] : [], balance: null };
-  }
-  const parsedValues = matches
-    .map((m) => {
-      const clean = m[1].replace(/[£$€\s]/g, '').replace(/,/g, '');
-      let val = Number(clean);
-      if (m[2]?.toUpperCase() === 'DR' || m[1].includes('-')) val = -Math.abs(val);
-      return val;
-    })
-    .filter((n) => Number.isFinite(n));
+  if (matches.length >= 2) {
+    const parsedValues = matches
+      .map((m) => {
+        const clean = m[1].replace(/[£$€\s]/g, '').replace(/,/g, '');
+        let val = Number(clean);
+        if (m[2]?.toUpperCase() === 'DR' || m[1].includes('-')) val = -Math.abs(val);
+        return val;
+      })
+      .filter((n) => Number.isFinite(n));
 
-  if (parsedValues.length >= 2) {
-    const balance = parsedValues[parsedValues.length - 1];
-    const candidateAmounts = parsedValues.slice(0, -1).map((v) => Math.abs(v));
-    return { amounts: candidateAmounts, balance };
+    if (parsedValues.length >= 2) {
+      const balance = parsedValues[parsedValues.length - 1];
+      const candidateAmounts = parsedValues.slice(0, -1).map((v) => Math.abs(v));
+      return { amounts: candidateAmounts, balance };
+    }
   }
-  return { amounts: parsedValues.map((v) => Math.abs(v)), balance: null };
+
+  const val = extractGbpAmount(line);
+  return { amounts: val !== null ? [val] : [], balance: null };
 }
 
 export function parseStatementLines(lines: string[], now = new Date()): ScannedTransaction[] {
