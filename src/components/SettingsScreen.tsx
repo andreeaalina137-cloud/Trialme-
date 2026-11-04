@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Moon,
   Sun,
@@ -34,6 +34,7 @@ import {
 } from '../utils/retentionAndTrust';
 import { useTranslation } from '../i18n/LanguageContext';
 import type { AuthUser } from '../services/authService';
+import { notificationService } from '../notifications';
 
 interface SettingsScreenProps {
   userPlan: UserPlan;
@@ -89,7 +90,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [restoreKeyInput, setRestoreKeyInput] = useState('');
   const [userStars, setUserStars] = useState(5);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [permissionStatus, setPermissionStatus] = useState<string>('prompt');
   const backupInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    notificationService.getPermissionState().then((res) => {
+      setPermissionStatus(res.status);
+    }).catch(() => {});
+  }, [notificationsEnabled]);
 
   const activeLicenseKey = userPlan !== 'free'
     ? getSavedLicenseKey() || generateLicenseKey(userPlan)
@@ -427,7 +435,17 @@ ${subscriptions
                 <Bell className="w-4 h-4 text-[#D4AF7C]" />
                 <div>
                   <span className="font-semibold text-[#F5F5F5]">{t('settings.remindersLabel')}</span>
-                  <div className="text-[10px] text-[#A0A0A0]">{t('settings.remindersSub')}</div>
+                  <div className="text-[10px] text-[#A0A0A0] flex items-center gap-1.5 mt-0.5">
+                    <span>3d & 1d alerts at 09:30 AM</span>
+                    <span className="text-white/20">·</span>
+                    {notificationsEnabled && permissionStatus === 'granted' ? (
+                      <span className="text-emerald-400 font-medium">Armed</span>
+                    ) : permissionStatus === 'denied' ? (
+                      <span className="text-rose-400 font-medium">Blocked</span>
+                    ) : (
+                      <span className="text-[#A0A0A0]">{notificationsEnabled ? 'Ready' : 'Off'}</span>
+                    )}
+                  </div>
                 </div>
               </div>
               <button
@@ -446,7 +464,10 @@ ${subscriptions
             </div>
 
             <div className="p-3 flex items-center justify-between bg-[#1F1F1F]/50">
-              <span className="text-[11px] text-[#A0A0A0]">Preview notification popup:</span>
+              <div>
+                <span className="text-[11px] text-[#A0A0A0] block">Preview 3-sec alert:</span>
+                <span className="text-[10px] text-[#A0A0A0]/70">Simulates scheduled renewal alarm</span>
+              </div>
               <button
                 onClick={onTriggerTestNotification}
                 className="text-[11px] font-bold text-[#D4AF7C] hover:text-[#F5F5F5] bg-[#D4AF7C]/15 px-3.5 py-1.5 rounded-full border border-[#D4AF7C]/30 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"

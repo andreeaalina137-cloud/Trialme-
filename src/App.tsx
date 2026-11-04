@@ -69,6 +69,7 @@ import {
   buildTrialUrl,
 } from './utils/trialRouting';
 import type { PopularPreset } from './data/popularPresets';
+import { notificationService } from './notifications';
 
 function AppContent() {
   const { t } = useTranslation();
@@ -408,6 +409,17 @@ function AppContent() {
   }, [soundEffectsEnabled]);
 
   useEffect(() => {
+    notificationService.setActionCallbacks({
+      getSubscriptions: () => subscriptionsRef.current,
+      onOpenSubscriptionDetail: (sub: Subscription) => {
+        setSelectedDetailSub(sub);
+        setCurrentTab('home');
+      },
+    });
+    void notificationService.reconcileAll(subscriptionsRef.current);
+  }, []);
+
+  useEffect(() => {
     if (!onboardingDone || !notificationsEnabled) return;
 
     const now = new Date();
@@ -541,6 +553,7 @@ function AppContent() {
     const nextList = [newSub, ...subscriptionsRef.current];
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
+    void notificationService.syncOnAdd(newSub);
     playSubtlePop();
     return newSub.id;
   };
@@ -632,6 +645,7 @@ function AppContent() {
     const nextList = subscriptionsRef.current.map((s) => (s.id === updated.id ? updated : s));
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
+    void notificationService.syncOnUpdate(updated);
     if (selectedDetailSub?.id === updated.id) {
       setSelectedDetailSub(updated);
     }
@@ -641,6 +655,7 @@ function AppContent() {
     const nextList = subscriptionsRef.current.filter((s) => s.id !== id);
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
+    void notificationService.syncOnDelete(id);
   };
 
   const handleConfirmCancellation = (subscriptionId: string) => {
@@ -668,6 +683,7 @@ function AppContent() {
     });
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
+    void notificationService.syncOnCancel(subscriptionId);
 
     playCashRegister();
 
@@ -745,7 +761,10 @@ function AppContent() {
       existingAndImported.push(imported);
     });
 
-    setSubscriptions([...formatted, ...deduplicatedSubscriptions]);
+    const finalList = [...formatted, ...deduplicatedSubscriptions];
+    subscriptionsRef.current = finalList;
+    setSubscriptions(finalList);
+    void notificationService.reconcileAll(finalList);
     if (formatted.length > 0) playSubtlePop();
     if (hitLimit) {
       setIsPaywallOpen(true);
@@ -838,19 +857,36 @@ function AppContent() {
   };
 
   const handleClearCancelledSubscriptions = () => {
-    setSubscriptions((previous) => previous.filter((subscription) => subscription.status !== 'cancelled'));
+    const cancelled = subscriptionsRef.current.filter((s) => s.status === 'cancelled');
+    for (const s of cancelled) {
+      void notificationService.syncOnDelete(s.id);
+    }
+    const nextList = subscriptionsRef.current.filter((subscription) => subscription.status !== 'cancelled');
+    subscriptionsRef.current = nextList;
+    setSubscriptions(nextList);
   };
 
   const handleResetData = () => {
     setSubscriptions(INITIAL_DEMO_SUBSCRIPTIONS);
   };
 
+  const handleToggleNotifications = async () => {
+    const next = !notificationsEnabled;
+    setNotificationsEnabled(next);
+    await notificationService.setNotificationsEnabled(next);
+    if (next) {
+      await notificationService.requestPermission();
+      await notificationService.reconcileAll(subscriptionsRef.current);
+    }
+  };
+
   const handleTriggerTestNotification = async () => {
     const targetSubscription = subscriptions.find(
       (subscription) => subscription.status === 'active' || subscription.status === 'trial'
     );
-    const title = t('notifications.testTitle');
-    const message = t('notifications.testMessage');
+    const result = await notificationService.triggerTestNotification(3000);
+    const title = result.scheduled ? 'Upcoming renewal [PREVIEW]' : t('notifications.testTitle');
+    const message = result.message || t('notifications.testMessage');
     setActiveNotification({
       id: `test-${Date.now()}`,
       title,
@@ -861,23 +897,6 @@ function AppContent() {
       subscriptionId: targetSubscription?.id,
     });
     playNotificationSound(soundEffectsEnabled);
-
-    if (typeof Notification === 'undefined') return;
-
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return;
-
-      const nativeNotification = new Notification(title, { body: message });
-      nativeNotification.onclick = () => {
-        window.focus();
-        if (targetSubscription) setSelectedDetailSub(targetSubscription);
-        setActiveNotification(null);
-        nativeNotification.close();
-      };
-    } catch {
-      // Browser permission or native notification APIs may be unavailable.
-    }
   };
 
   const handleSelectSidebarSection = (section: SidebarSection) => {
@@ -1092,7 +1111,7 @@ function AppContent() {
                 isDarkMode={isDarkMode}
                 onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
                 notificationsEnabled={notificationsEnabled}
-                onToggleNotifications={() => setNotificationsEnabled(!notificationsEnabled)}
+                onToggleNotifications={handleToggleNotifications}
                 soundEffectsEnabled={soundEffectsEnabled}
                 onToggleSoundEffects={() => setSoundEffectsEnabled((enabled) => !enabled)}
                 onOpenPaywall={() => setIsPaywallOpen(true)}
