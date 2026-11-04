@@ -17,34 +17,128 @@ import {
   findPresetByTrialIdentifier,
   createPendingTrialFromPreset,
 } from '../src/utils/trialRouting';
-import { clearMemoryStorage } from '../src/utils/storage';
+import { hasActiveUkFreeTrial } from '../src/data/popularPresets';
+import { clearMemoryStorage, safeStorageSet, safeStorageGet } from '../src/utils/storage';
+import { notificationService } from '../src/notifications/services/notificationService';
 
-describe('Free Trial Navigation & Auth Flow', () => {
+describe('Free Trial Navigation & Zero Login Gate Flow', () => {
   beforeEach(() => {
     clearMemoryStorage();
     logout();
     clearSavedReturnToUrl();
   });
 
-  // TEST CASE A: Logged out -> click Free Trial -> saves intended trial route & triggers auth
-  it('Case A: Logged out -> click Free Trial saves exact trial route and prompts auth', () => {
+  // TEST CASE 1: hasActiveUkFreeTrial strictly hides Free Trial button for non-trial services
+  it('strictly identifies non-trial services and hides Free Trial button (Netflix, Disney+, PureGym)', () => {
+    const netflix = findPresetByTrialIdentifier('netflix_standard_uk');
+    assert.ok(netflix);
+    assert.equal(netflix.name, 'Netflix UK Standard');
+    assert.equal(netflix.hasFreeTrial, false);
+    assert.equal(netflix.trialType, 'none');
+    assert.equal(hasActiveUkFreeTrial(netflix), false, 'Netflix UK must NOT show Free Trial button');
+
+    const disney = findPresetByTrialIdentifier('disney_plus_uk');
+    assert.ok(disney);
+    assert.equal(disney.hasFreeTrial, false);
+    assert.equal(disney.trialType, 'none');
+    assert.equal(hasActiveUkFreeTrial(disney), false, 'Disney+ UK must NOT show Free Trial button');
+
+    const puregym = findPresetByTrialIdentifier('puregym_core_uk');
+    assert.ok(puregym);
+    assert.equal(puregym.hasFreeTrial, false);
+    assert.equal(puregym.trialType, 'cooling_off');
+    assert.equal(hasActiveUkFreeTrial(puregym), false, 'PureGym Cooling-Off must NOT show Free Trial button');
+
+    const tvLicence = findPresetByTrialIdentifier('bbc_tv_licence');
+    assert.ok(tvLicence);
+    assert.equal(tvLicence.hasFreeTrial, false);
+    assert.equal(hasActiveUkFreeTrial(tvLicence), false, 'BBC TV Licence must NOT show Free Trial button');
+  });
+
+  // TEST CASE 2: hasActiveUkFreeTrial strictly shows Free Trial button for active UK free trials
+  it('strictly identifies eligible services with genuine UK free trials (Spotify, Amazon Prime, Audible)', () => {
+    const spotify = findPresetByTrialIdentifier('spotify_premium_uk');
+    assert.ok(spotify);
+    assert.equal(spotify.hasFreeTrial, true);
+    assert.equal(spotify.trialType, 'free_trial');
+    assert.ok(spotify.trialUrl);
+    assert.equal(hasActiveUkFreeTrial(spotify), true, 'Spotify Premium UK must show Free Trial button');
+
+    const prime = findPresetByTrialIdentifier('amazon_prime_uk');
+    assert.ok(prime);
+    assert.equal(prime.hasFreeTrial, true);
+    assert.equal(prime.trialType, 'free_trial');
+    assert.equal(hasActiveUkFreeTrial(prime), true, 'Amazon Prime UK must show Free Trial button');
+
+    const audible = findPresetByTrialIdentifier('audible_uk');
+    assert.ok(audible);
+    assert.equal(audible.hasFreeTrial, true);
+    assert.equal(audible.trialType, 'free_trial');
+    assert.equal(hasActiveUkFreeTrial(audible), true, 'Audible UK must show Free Trial button');
+
+    const appleTv = findPresetByTrialIdentifier('apple_tv_plus_uk');
+    assert.ok(appleTv);
+    assert.equal(appleTv.hasFreeTrial, true);
+    assert.equal(appleTv.trialType, 'free_trial');
+    assert.equal(hasActiveUkFreeTrial(appleTv), true, 'Apple TV+ UK must show Free Trial button');
+  });
+
+  // TEST CASE 3: Zero Login Gate on Free Trial click + Direct External Browser Redirect + Return Prompt
+  it('Case 3: Logged out -> click Free Trial does NOT require login, sets pending trial, and confirms on return', async () => {
     assert.equal(isAuthenticated(), false);
     assert.equal(getCurrentUser(), null);
 
-    const providerId = 'netflix_standard_uk';
-    const trialRoute = buildTrialUrl(providerId);
-    assert.equal(trialRoute, '?trial=netflix_standard_uk');
+    const spotifyPreset = findPresetByTrialIdentifier('spotify_premium_uk');
+    assert.ok(spotifyPreset);
+    assert.equal(hasActiveUkFreeTrial(spotifyPreset), true);
 
-    // Simulate clicking Free Trial when logged out: saves intended return route
-    saveReturnToUrl(trialRoute);
-    assert.equal(getSavedReturnToUrl(), '?trial=netflix_standard_uk');
+    // 1. User clicks Free Trial on Spotify while completely logged out
+    const pendingData = createPendingTrialFromPreset(spotifyPreset, '£');
+    assert.equal(pendingData.name, 'Spotify Premium UK');
+    assert.equal(pendingData.price, 11.99);
+    assert.ok(pendingData.trialUrl);
 
-    // Preset can be identified immediately from the intended route
-    const trialId = parseTrialIdentifier(getSavedReturnToUrl()!);
-    assert.equal(trialId, 'netflix_standard_uk');
-    const preset = findPresetByTrialIdentifier(trialId!);
-    assert.ok(preset);
-    assert.equal(preset?.name, 'Netflix UK Standard');
+    // Store in local storage as pending trial before browser opens
+    safeStorageSet('monetry_pending_trial', JSON.stringify({ ...pendingData, timestamp: Date.now() }));
+
+    // User is still logged out, NO login gate or auth credentials required
+    assert.equal(isAuthenticated(), false);
+    assert.equal(getCurrentUser(), null);
+
+    // 2. User returns to Monetry (simulated visibilitychange / focus)
+    const storedPending = safeStorageGet('monetry_pending_trial');
+    assert.ok(storedPending);
+    const parsedPending = JSON.parse(storedPending);
+    assert.equal(parsedPending.name, 'Spotify Premium UK');
+
+    // 3. User confirms "Yes, I started it" -> Creates local subscription and syncs notifications
+    const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const mockSubscription = {
+      id: `sub-trial-${Date.now()}`,
+      name: parsedPending.name,
+      price: parsedPending.price,
+      currency: '£',
+      frequency: 'monthly' as const,
+      category: parsedPending.category,
+      nextPaymentDate: expiryDate.toISOString().split('T')[0],
+      status: 'trial' as const,
+      trialEndDate: expiryDate.toISOString().split('T')[0],
+      trialStartAt: new Date().toISOString(),
+      trialExpiresAt: expiryDate.toISOString(),
+      trialDurationDays: 30,
+      reminderDaysBefore: 3,
+      color: parsedPending.color,
+      createdAt: new Date().toISOString().split('T')[0],
+      paymentHistory: [],
+    };
+
+    // Sync via local notification engine
+    const syncResult = await notificationService.syncOnAdd(mockSubscription);
+    assert.ok(syncResult.scheduledCount >= 1, 'Local notification engine schedules alarms for trial');
+
+    // Clean pending storage after confirmation
+    safeStorageSet('monetry_pending_trial', '');
+    assert.equal(safeStorageGet('monetry_pending_trial'), '');
   });
 
   // TEST CASE B: Logged out -> Free Trial -> Login -> lands on exact trial page

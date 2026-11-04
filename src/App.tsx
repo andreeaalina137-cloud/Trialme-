@@ -239,14 +239,7 @@ function AppContent() {
     if (trialId) {
       const preset = findPresetByTrialIdentifier(trialId);
       if (preset) {
-        if (!isLoggedIn) {
-          const currentUrl = window.location.search || window.location.pathname;
-          saveReturnToUrl(currentUrl);
-          setAuthReturnTo(currentUrl);
-          setIsAuthModalOpen(true);
-        } else {
-          navigateToTrialPreset(preset, false);
-        }
+        navigateToTrialPreset(preset, false);
       }
     }
   }, []);
@@ -258,14 +251,7 @@ function AppContent() {
       if (trialId) {
         const preset = findPresetByTrialIdentifier(trialId);
         if (preset) {
-          if (!isLoggedIn) {
-            const currentUrl = window.location.search || window.location.pathname;
-            saveReturnToUrl(currentUrl);
-            setAuthReturnTo(currentUrl);
-            setIsAuthModalOpen(true);
-          } else {
-            navigateToTrialPreset(preset, false);
-          }
+          navigateToTrialPreset(preset, false);
           return;
         }
       } else {
@@ -277,17 +263,13 @@ function AppContent() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [isLoggedIn, currencySymbol, isConfirmTrialModalOpen]);
+  }, [currencySymbol, isConfirmTrialModalOpen]);
 
   // Detect when user returns to the app after clicking a Free Trial link
   useEffect(() => {
     const handleReturnToApp = () => {
       if (trialLinkOpenedRef.current || pendingTrialActivation) {
-        if (isLoggedIn) {
-          setIsConfirmTrialModalOpen(true);
-        } else {
-          setIsAuthModalOpen(true);
-        }
+        setIsConfirmTrialModalOpen(true);
         trialLinkOpenedRef.current = false;
       }
     };
@@ -309,7 +291,7 @@ function AppContent() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [pendingTrialActivation, isLoggedIn]);
+  }, [pendingTrialActivation]);
 
   useEffect(() => {
     // Process referral/invite URL parameters (?invite=TM-XXXX or ?ref=TM-XXXX)
@@ -973,7 +955,7 @@ function AppContent() {
                 currentTab === 'calendar' ||
                 currentTab === 'reports') && (
               <HomeScreen
-                subscriptions={isLoggedIn ? subscriptions : []}
+                subscriptions={subscriptions}
                 userPlan={userPlan}
                 currencySymbol={currencySymbol}
                 onOpenAddModal={handleOpenAddModal}
@@ -997,49 +979,35 @@ function AppContent() {
                     : activeSection
                 }
                 onStartRadarTrial={(deal) => {
-                  const trialRoute = `?trial=${encodeURIComponent(deal.id)}`;
-                  if (!isLoggedIn) {
-                    handleRequestAuth(trialRoute);
-                    return;
-                  }
                   if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
                     setIsPaywallOpen(true);
                     return;
                   }
                   const preset = findPresetByTrialIdentifier(deal.id);
-                  if (preset) {
-                    navigateToTrialPreset(preset, true);
-                    return;
-                  }
-                  handleTriggerTrialLink(
-                    {
-                      name: deal.name,
-                      price: deal.postTrialPrice,
-                      currency: deal.currency || currencySymbol,
-                      frequency: 'monthly',
-                      category: deal.category,
-                      defaultTrialDays: deal.trialDays,
-                      trialUrl: deal.trialUrl,
-                      cancelUrl: deal.cancelUrl,
-                      color: deal.color,
-                      notes: deal.notes || deal.highlight,
-                    },
-                    false
-                  );
-                  setIsConfirmTrialModalOpen(true);
+                  const trialData = preset
+                    ? createPendingTrialFromPreset(preset, currencySymbol)
+                    : {
+                        name: deal.name,
+                        price: deal.postTrialPrice,
+                        currency: deal.currency || currencySymbol,
+                        frequency: 'monthly' as const,
+                        category: deal.category,
+                        defaultTrialDays: deal.trialDays,
+                        trialUrl: deal.trialUrl,
+                        cancelUrl: deal.cancelUrl,
+                        color: deal.color,
+                        notes: deal.notes || deal.highlight,
+                      };
+                  handleTriggerTrialLink(trialData, false);
                 }}
                 onQuickAddPreset={(preset, asTrial) => {
                   if (asTrial) {
-                    const trialRoute = `?trial=${encodeURIComponent(preset.id)}`;
-                    if (!isLoggedIn) {
-                      handleRequestAuth(trialRoute);
-                      return;
-                    }
                     if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
                       setIsPaywallOpen(true);
                       return;
                     }
-                    navigateToTrialPreset(preset, true);
+                    const trialData = createPendingTrialFromPreset(preset, currencySymbol);
+                    handleTriggerTrialLink(trialData, Boolean(trialData.trialUrl));
                   } else {
                     handleAddSubscription({
                       name: preset.name,
@@ -1094,9 +1062,12 @@ function AppContent() {
                   onNavigateToTrial={(preset) => navigateToTrialPreset(preset, true)}
                   onStartTrialFlow={(trialData) => {
                     handleTriggerTrialLink(trialData, Boolean(trialData.trialUrl));
-                    setIsConfirmTrialModalOpen(true);
+                    setCurrentTab('home');
+                    if (!trialData.trialUrl) {
+                      setIsConfirmTrialModalOpen(true);
+                    }
                   }}
-                  subscriptions={isLoggedIn ? subscriptions : []}
+                  subscriptions={subscriptions}
                   bonusSlots={bonusSlots}
                   onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
                 />
@@ -1115,7 +1086,7 @@ function AppContent() {
                 soundEffectsEnabled={soundEffectsEnabled}
                 onToggleSoundEffects={() => setSoundEffectsEnabled((enabled) => !enabled)}
                 onOpenPaywall={() => setIsPaywallOpen(true)}
-                subscriptions={isLoggedIn ? subscriptions : []}
+                subscriptions={subscriptions}
                 onResetData={handleResetData}
                 onTriggerTestNotification={handleTriggerTestNotification}
                 onRestoreBackup={(restoredSubs, restoredPlan) => {
@@ -1149,7 +1120,7 @@ function AppContent() {
                   if (tab === 'settings') setActiveSection('settings');
                 }
               }}
-              activeCount={isLoggedIn ? activeSubscriptionsCount : 0}
+              activeCount={activeSubscriptionsCount}
             />
           )}
 
@@ -1173,9 +1144,11 @@ function AppContent() {
             onStartTrialFlow={(trialData) => {
               handleTriggerTrialLink(trialData, Boolean(trialData.trialUrl));
               setIsAddModalOpen(false);
-              setIsConfirmTrialModalOpen(true);
+              if (!trialData.trialUrl) {
+                setIsConfirmTrialModalOpen(true);
+              }
             }}
-            subscriptions={isLoggedIn ? subscriptions : []}
+            subscriptions={subscriptions}
             bonusSlots={bonusSlots}
             onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
           />
@@ -1249,7 +1222,7 @@ function AppContent() {
             pendingTrial={pendingTrialActivation}
             onConfirm={handleConfirmTrialActivation}
             currencySymbol={currencySymbol}
-            existingSubscriptions={isLoggedIn ? subscriptions : []}
+            existingSubscriptions={subscriptions}
           />
         </div>
       )}

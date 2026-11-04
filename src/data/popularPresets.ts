@@ -600,6 +600,34 @@ function resolveDefaultTrialDays(trialDurationDays: number): 7 | 14 | 30 {
   return 7;
 }
 
+/**
+ * Validates whether a preset service genuinely provides an active, verified UK Free Trial.
+ * Returns false for non-trial services (e.g. Netflix UK, Disney+ UK) and cooling-off / refund periods.
+ */
+export function hasActiveUkFreeTrial(preset?: {
+  hasFreeTrial?: boolean;
+  trialType?: string;
+  trialDurationDays?: number;
+  defaultTrialDays?: number;
+  trialUrl?: string;
+} | null): boolean {
+  if (!preset) return false;
+  if (preset.hasFreeTrial !== true || preset.trialType === 'none') {
+    return false;
+  }
+  if (preset.trialType === 'cooling_off' || preset.trialType === 'money_back') {
+    return false;
+  }
+  const days =
+    typeof preset.trialDurationDays === 'number' && preset.trialDurationDays > 0
+      ? preset.trialDurationDays
+      : preset.defaultTrialDays || 0;
+  if (days <= 0) return false;
+  const url = preset.trialUrl?.trim();
+  if (!url) return false;
+  return true;
+}
+
 export function mapPresetToPopularPreset(preset: PresetService): PopularPreset {
   const meta = PRESET_METADATA[preset.id] || {
     color: '#D4AF7C',

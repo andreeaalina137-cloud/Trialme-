@@ -38,7 +38,7 @@ import {
 } from '../utils/subscriptionCalculations';
 import { isDuplicateSubscription } from '../utils/subscriptionIdentity';
 import { CURATED_UK_TRIALS, type CuratedUkTrial } from '../utils/retentionAndTrust';
-import { POPULAR_PRESETS, type PopularPreset } from '../data/popularPresets';
+import { POPULAR_PRESETS, hasActiveUkFreeTrial, type PopularPreset } from '../data/popularPresets';
 import { BrandIcon } from './BrandIcon';
 import { GoldBellIcon } from './GoldBellIcon';
 import { useTranslation } from '../i18n/LanguageContext';
@@ -590,7 +590,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        {preset.defaultTrialDays && (
+                        {hasActiveUkFreeTrial(preset) && (
                           <button
                             type="button"
                             disabled={isTracked}

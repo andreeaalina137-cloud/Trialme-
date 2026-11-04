@@ -16,7 +16,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import type { Subscription, SubscriptionCategory, SubscriptionFrequency, UserPlan } from '../types/subscription';
-import { POPULAR_PRESETS, type PopularPreset, type PresetFilterGroup } from '../data/popularPresets';
+import { POPULAR_PRESETS, hasActiveUkFreeTrial, type PopularPreset, type PresetFilterGroup } from '../data/popularPresets';
 import { BrandIcon } from './BrandIcon';
 import { canAddSubscription, formatPrice } from '../utils/subscriptionCalculations';
 import { isDuplicateSubscription } from '../utils/subscriptionIdentity';
@@ -105,8 +105,8 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   subscriptions = [],
   bonusSlots = 0,
   onOpenGiftSlot,
-  isLoggedIn = true,
-  onRequestAuth,
+  isLoggedIn: _isLoggedIn = true,
+  onRequestAuth: _onRequestAuth,
   onNavigateToTrial,
 }) => {
   const { t } = useTranslation();
@@ -221,10 +221,6 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     defaultDays: number
   ) => {
     if (!offer) return;
-    if (!isLoggedIn && onRequestAuth) {
-      onRequestAuth(`?trial=${encodeURIComponent(trial.name)}`);
-      return;
-    }
     checkPlanAndProceed(() => {
       if (onStartTrialFlow) {
         onStartTrialFlow({
@@ -319,8 +315,13 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   };
 
   const handlePresetAffiliateTrial = (preset: PopularPreset) => {
-    if (!isLoggedIn && onRequestAuth) {
-      onRequestAuth(`?trial=${encodeURIComponent(preset.id)}`);
+    if (!hasActiveUkFreeTrial(preset)) {
+      setName(preset.name);
+      setPrice(preset.price.toString());
+      setCategory(preset.category);
+      setColor(preset.color);
+      setCancelUrl(preset.cancelUrl);
+      setNotes(preset.description || preset.notes || '');
       return;
     }
     if (onNavigateToTrial) {
@@ -328,7 +329,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       return;
     }
     const offer = getAffiliateOffer(preset.name);
-    const trialDays = preset.defaultTrialDays ?? offer?.trialDays ?? 30;
+    const trialDays =
+      typeof preset.trialDurationDays === 'number' && preset.trialDurationDays > 0
+        ? preset.trialDurationDays
+        : preset.defaultTrialDays ?? offer?.trialDays ?? 30;
     if (expandedPresetId === preset.id) {
       setExpandedPresetId(null);
       return;
@@ -754,7 +758,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                   {filteredPresets.map((preset) => {
                     const affiliateOffer = getAffiliateOffer(preset.name);
                     const defaultDays = preset.defaultTrialDays ?? affiliateOffer?.trialDays ?? 30;
-                    const isDrawerOpen = expandedPresetId === preset.id;
+                    const isDrawerOpen = expandedPresetId === preset.id && hasActiveUkFreeTrial(preset);
                     const drawerTiming = isDrawerOpen ? calculateSmartTrialTiming(pendingTrialDays) : null;
 
                     return (
@@ -830,71 +834,73 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                             </div>
                           </div>
 
-                          {/* Right: Secondary Free Trial button + Gold Add Button */}
+                          {/* Right: Secondary Free Trial button (if eligible UK free trial) + Gold Add Button */}
                           {(() => {
                             const isTracked = subscriptions.some((s) => isDuplicateSubscription({ name: preset.name }, s));
+                            const canTrial = hasActiveUkFreeTrial(preset);
                             return (
                               <div className="shrink-0 flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  disabled={isTracked}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (isTracked) return;
-                                    const trialRoute = `?trial=${encodeURIComponent(preset.id)}`;
-                                    if (!isLoggedIn && onRequestAuth) {
-                                      onRequestAuth(trialRoute);
-                                      return;
-                                    }
-                                    if (onNavigateToTrial) {
-                                      onNavigateToTrial(preset);
-                                      return;
-                                    }
-                                    if (onStartTrialFlow) {
-                                      checkPlanAndProceed(() => {
-                                        const offer = getAffiliateOffer(preset.name);
-                                        const trialDays = preset.defaultTrialDays ?? offer?.trialDays ?? 30;
-                                        const trialUrl = preset.trialUrl || offer?.trialUrl;
-                                        onStartTrialFlow({
-                                          name: preset.name,
-                                          price: preset.price,
-                                          currency: preset.currency || currencySymbol,
-                                          frequency: preset.frequency,
-                                          category: preset.category,
-                                          defaultTrialDays: trialDays,
-                                          trialUrl,
-                                          cancelUrl: preset.cancelUrl,
-                                          cancelEmail: preset.cancelEmail,
-                                          cancelGuideSteps: preset.cancelSteps,
-                                          color: preset.color,
-                                          notes: preset.description,
+                                {canTrial && (
+                                  <button
+                                    type="button"
+                                    disabled={isTracked}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (isTracked) return;
+                                      const offer = getAffiliateOffer(preset.name);
+                                      const trialDays =
+                                        typeof preset.trialDurationDays === 'number' && preset.trialDurationDays > 0
+                                          ? preset.trialDurationDays
+                                          : preset.defaultTrialDays ?? offer?.trialDays ?? 30;
+                                      const trialUrl = preset.trialUrl || offer?.trialUrl;
+                                      const trialData = {
+                                        name: preset.name,
+                                        price: preset.price,
+                                        currency: preset.currency || currencySymbol,
+                                        frequency: preset.frequency,
+                                        category: preset.category,
+                                        defaultTrialDays: trialDays,
+                                        trialUrl,
+                                        cancelUrl: preset.cancelUrl,
+                                        cancelEmail: preset.cancelEmail,
+                                        cancelGuideSteps: preset.cancelSteps,
+                                        color: preset.color,
+                                        notes: preset.description || preset.notes,
+                                      };
+                                      if (onStartTrialFlow) {
+                                        checkPlanAndProceed(() => {
+                                          onStartTrialFlow(trialData);
+                                          onClose();
                                         });
-                                      });
-                                      return;
-                                    }
-                                    handlePresetAffiliateTrial(preset);
-                                  }}
-                                  aria-label={isTracked ? `${preset.name} already tracked` : `Start ${preset.name} free trial`}
-                                  className={`min-h-[38px] px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all duration-150 ease-out ${
-                                    isTracked
-                                      ? 'border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 cursor-default opacity-90'
-                                      : isDrawerOpen
-                                      ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/20 border-transparent cursor-pointer active:scale-[0.97]'
-                                      : 'border border-[#D4AF7C]/40 text-[#D4AF7C] hover:border-[#D4AF7C] bg-[#1F1F1F] shadow-sm cursor-pointer active:scale-[0.97]'
-                                  }`}
-                                >
-                                  {isTracked ? (
-                                    <>
-                                      <Check className="w-3.5 h-3.5 shrink-0" />
-                                      <span>Added ✓</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Gift className="w-3.5 h-3.5 shrink-0" />
-                                      <span>Free Trial</span>
-                                    </>
-                                  )}
-                                </button>
+                                        return;
+                                      }
+                                      if (trialUrl) {
+                                        window.open(trialUrl, '_blank', 'noopener,noreferrer');
+                                      }
+                                      onClose();
+                                    }}
+                                    aria-label={isTracked ? `${preset.name} already tracked` : `Start ${preset.name} free trial`}
+                                    className={`min-h-[38px] px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all duration-150 ease-out ${
+                                      isTracked
+                                        ? 'border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 cursor-default opacity-90'
+                                        : isDrawerOpen
+                                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/20 border-transparent cursor-pointer active:scale-[0.97]'
+                                        : 'border border-[#D4AF7C]/40 text-[#D4AF7C] hover:border-[#D4AF7C] bg-[#1F1F1F] shadow-sm cursor-pointer active:scale-[0.97]'
+                                    }`}
+                                  >
+                                    {isTracked ? (
+                                      <>
+                                        <Check className="w-3.5 h-3.5 shrink-0" />
+                                        <span>Added ✓</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Gift className="w-3.5 h-3.5 shrink-0" />
+                                        <span>Free Trial</span>
+                                      </>
+                                    )}
+                                  </button>
+                                )}
 
                                 <button
                                   type="button"
