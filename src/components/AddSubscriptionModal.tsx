@@ -49,6 +49,9 @@ interface AddSubscriptionModalProps {
   subscriptions?: Subscription[];
   bonusSlots?: number;
   onOpenGiftSlot?: () => void;
+  isLoggedIn?: boolean;
+  onRequestAuth?: (returnToUrl: string) => void;
+  onNavigateToTrial?: (preset: PopularPreset) => void;
 }
 
 const CATEGORIES: SubscriptionCategory[] = [
@@ -102,6 +105,9 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   subscriptions = [],
   bonusSlots = 0,
   onOpenGiftSlot,
+  isLoggedIn = true,
+  onRequestAuth,
+  onNavigateToTrial,
 }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'quick' | 'manual'>('quick');
@@ -215,6 +221,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
     defaultDays: number
   ) => {
     if (!offer) return;
+    if (!isLoggedIn && onRequestAuth) {
+      onRequestAuth(`?trial=${encodeURIComponent(trial.name)}`);
+      return;
+    }
     checkPlanAndProceed(() => {
       if (onStartTrialFlow) {
         onStartTrialFlow({
@@ -309,6 +319,14 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
   };
 
   const handlePresetAffiliateTrial = (preset: PopularPreset) => {
+    if (!isLoggedIn && onRequestAuth) {
+      onRequestAuth(`?trial=${encodeURIComponent(preset.id)}`);
+      return;
+    }
+    if (onNavigateToTrial) {
+      onNavigateToTrial(preset);
+      return;
+    }
     const offer = getAffiliateOffer(preset.name);
     const trialDays = preset.defaultTrialDays ?? offer?.trialDays ?? 30;
     if (expandedPresetId === preset.id) {
@@ -759,8 +777,8 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                         >
                           {/* Left: 44x44px Icon + Full Service Name & Price/Category/Trial Badge */}
                           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                            <div className="w-11 h-11 rounded-2xl shrink-0 overflow-hidden flex items-center justify-center">
-                              <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" />
+                            <div className="w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center">
+                              <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" linkContext="discovery" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="font-bold text-sm text-[#F5F5F5] leading-snug break-normal">
@@ -823,6 +841,15 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (isTracked) return;
+                                    const trialRoute = `?trial=${encodeURIComponent(preset.id)}`;
+                                    if (!isLoggedIn && onRequestAuth) {
+                                      onRequestAuth(trialRoute);
+                                      return;
+                                    }
+                                    if (onNavigateToTrial) {
+                                      onNavigateToTrial(preset);
+                                      return;
+                                    }
                                     if (onStartTrialFlow) {
                                       checkPlanAndProceed(() => {
                                         const offer = getAffiliateOffer(preset.name);
@@ -842,7 +869,6 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                           color: preset.color,
                                           notes: preset.description,
                                         });
-                                        onClose();
                                       });
                                       return;
                                     }

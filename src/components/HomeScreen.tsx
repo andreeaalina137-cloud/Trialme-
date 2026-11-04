@@ -578,7 +578,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       className="min-h-[68px] py-3 px-4 rounded-2xl bg-[#161616] border border-white/[0.07] flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" />
+                        <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" linkContext="discovery" />
                         <div className="min-w-0 flex-1">
                           <div className="font-semibold text-sm text-[#F5F5F5] leading-snug">
                             {preset.name}

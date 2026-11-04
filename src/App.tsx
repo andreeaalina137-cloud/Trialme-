@@ -51,6 +51,24 @@ import { ConfettiExplosion } from './components/ConfettiExplosion';
 import type { ConfettiBurst, ConfettiOrigin } from './components/ConfettiExplosion';
 import { playCashRegister, playNotificationSound, playSubtlePop, playTaDing } from './utils/soundEffects';
 import { getBonusSlots, claimInviteCode } from './utils/inviteSystem';
+import { AuthModal } from './components/AuthModal';
+import {
+  type AuthUser,
+  getCurrentUser,
+  saveReturnToUrl,
+  getSavedReturnToUrl,
+  clearSavedReturnToUrl,
+  sanitizeReturnToUrl,
+  subscribeToAuthChanges,
+  logout as authLogout,
+} from './services/authService';
+import {
+  parseTrialIdentifier,
+  findPresetByTrialIdentifier,
+  createPendingTrialFromPreset,
+  buildTrialUrl,
+} from './utils/trialRouting';
+import type { PopularPreset } from './data/popularPresets';
 
 function AppContent() {
   const { t } = useTranslation();
@@ -76,6 +94,7 @@ function AppContent() {
   const [currency, setCurrency] = useState<AppCurrency>(() => {
     return sanitizeCurrency(safeStorageGet('subcleaner_currency'));
   });
+  const currencySymbol = CURRENCIES[currency].symbol;
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     const saved = safeStorageGet('subcleaner_dark_mode');
@@ -116,6 +135,12 @@ function AppContent() {
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
   const alertedDueSubscriptions = useRef(new Set<string>());
 
+  // User Authentication State & Session
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => getCurrentUser());
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authReturnTo, setAuthReturnTo] = useState<string | null>(() => getSavedReturnToUrl());
+  const isLoggedIn = currentUser !== null;
+
   // Free Trial Confirmation Flow
   const [pendingTrialActivation, setPendingTrialActivation] = useState<PendingTrialActivation | null>(() => {
     const saved = safeStorageGet('monetry_pending_trial') ?? safeStorageGet('subcleaner_pending_trial');
@@ -137,11 +162,131 @@ function AppContent() {
   const [isConfirmTrialModalOpen, setIsConfirmTrialModalOpen] = useState(false);
   const trialLinkOpenedRef = useRef(false);
 
+  useEffect(() => {
+    return subscribeToAuthChanges((u) => {
+      setCurrentUser(u);
+    });
+  }, []);
+
+  const cleanTrialUrl = () => {
+    try {
+      const currentParams = new URLSearchParams(window.location.search);
+      if (currentParams.has('trial')) {
+        currentParams.delete('trial');
+        const newSearch = currentParams.toString() ? `?${currentParams.toString()}` : window.location.pathname;
+        window.history.replaceState({}, '', newSearch);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const navigateToTrialPreset = (preset: PopularPreset, pushHistory = true) => {
+    const trialData = createPendingTrialFromPreset(preset, currencySymbol);
+    setPendingTrialActivation(trialData);
+    setIsConfirmTrialModalOpen(true);
+    if (pushHistory) {
+      try {
+        const targetUrl = buildTrialUrl(preset.id);
+        if (window.location.search !== targetUrl) {
+          window.history.pushState({ page: 'trial', trialId: preset.id }, '', targetUrl);
+        }
+      } catch {
+        // history API guard
+      }
+    }
+  };
+
+  const handleRequestAuth = (intendedRoute: string) => {
+    const cleanRoute = sanitizeReturnToUrl(intendedRoute);
+    saveReturnToUrl(cleanRoute);
+    setAuthReturnTo(cleanRoute);
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (user: AuthUser, explicitReturnTo?: string | null) => {
+    setCurrentUser(user);
+    setIsAuthModalOpen(false);
+    const targetRoute = explicitReturnTo || authReturnTo || getSavedReturnToUrl();
+    clearSavedReturnToUrl();
+    setAuthReturnTo(null);
+
+    if (targetRoute) {
+      const cleanUrl = sanitizeReturnToUrl(targetRoute);
+      const trialId = parseTrialIdentifier(cleanUrl);
+      if (trialId) {
+        const preset = findPresetByTrialIdentifier(trialId);
+        if (preset) {
+          navigateToTrialPreset(preset, true);
+          return;
+        }
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    authLogout();
+    setCurrentUser(null);
+    setIsConfirmTrialModalOpen(false);
+    setPendingTrialActivation(null);
+    cleanTrialUrl();
+  };
+
+  // Check URL parameters on mount (Refresh / Direct Link support)
+  useEffect(() => {
+    const trialId = parseTrialIdentifier(window.location.search, window.location.pathname);
+    if (trialId) {
+      const preset = findPresetByTrialIdentifier(trialId);
+      if (preset) {
+        if (!isLoggedIn) {
+          const currentUrl = window.location.search || window.location.pathname;
+          saveReturnToUrl(currentUrl);
+          setAuthReturnTo(currentUrl);
+          setIsAuthModalOpen(true);
+        } else {
+          navigateToTrialPreset(preset, false);
+        }
+      }
+    }
+  }, []);
+
+  // Handle browser Back / Forward (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const trialId = parseTrialIdentifier(window.location.search, window.location.pathname);
+      if (trialId) {
+        const preset = findPresetByTrialIdentifier(trialId);
+        if (preset) {
+          if (!isLoggedIn) {
+            const currentUrl = window.location.search || window.location.pathname;
+            saveReturnToUrl(currentUrl);
+            setAuthReturnTo(currentUrl);
+            setIsAuthModalOpen(true);
+          } else {
+            navigateToTrialPreset(preset, false);
+          }
+          return;
+        }
+      } else {
+        if (isConfirmTrialModalOpen) {
+          setIsConfirmTrialModalOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isLoggedIn, currencySymbol, isConfirmTrialModalOpen]);
+
   // Detect when user returns to the app after clicking a Free Trial link
   useEffect(() => {
     const handleReturnToApp = () => {
       if (trialLinkOpenedRef.current || pendingTrialActivation) {
-        setIsConfirmTrialModalOpen(true);
+        if (isLoggedIn) {
+          setIsConfirmTrialModalOpen(true);
+        } else {
+          setIsAuthModalOpen(true);
+        }
         trialLinkOpenedRef.current = false;
       }
     };
@@ -163,7 +308,7 @@ function AppContent() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [pendingTrialActivation]);
+  }, [pendingTrialActivation, isLoggedIn]);
 
   useEffect(() => {
     // Process referral/invite URL parameters (?invite=TM-XXXX or ?ref=TM-XXXX)
@@ -215,6 +360,10 @@ function AppContent() {
       if (e.key !== 'Escape') return;
       if (isPaywallOpen) {
         setIsPaywallOpen(false);
+      } else if (isAuthModalOpen) {
+        setIsAuthModalOpen(false);
+      } else if (isConfirmTrialModalOpen) {
+        handleDismissTrialActivation();
       } else if (isGiftSlotOpen) {
         setIsGiftSlotOpen(false);
       } else if (isAiScannerOpen) {
@@ -231,7 +380,7 @@ function AppContent() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPaywallOpen, isGiftSlotOpen, isAiScannerOpen, selectedCancelSub, selectedDetailSub, isAddModalOpen, currentTab]);
+  }, [isPaywallOpen, isAuthModalOpen, isConfirmTrialModalOpen, isGiftSlotOpen, isAiScannerOpen, selectedCancelSub, selectedDetailSub, isAddModalOpen, currentTab]);
 
   useEffect(() => {
     safeStorageSet('subcleaner_user_plan', userPlan);
@@ -305,8 +454,6 @@ function AppContent() {
     });
     playNotificationSound(soundEffectsEnabled);
   }, [onboardingDone, notificationsEnabled, subscriptions, soundEffectsEnabled, t]);
-
-  const currencySymbol = CURRENCIES[currency].symbol;
 
   const activeSubscriptionsCount = subscriptions.filter(
     (s) => s.status === 'active' || s.status === 'trial'
@@ -470,6 +617,7 @@ function AppContent() {
     safeStorageSet('monetry_pending_trial', '');
     setIsConfirmTrialModalOpen(false);
     trialLinkOpenedRef.current = false;
+    cleanTrialUrl();
   };
 
   const handleDismissTrialActivation = () => {
@@ -477,6 +625,7 @@ function AppContent() {
     safeStorageSet('monetry_pending_trial', '');
     setIsConfirmTrialModalOpen(false);
     trialLinkOpenedRef.current = false;
+    cleanTrialUrl();
   };
 
   const handleUpdateSubscription = (updated: Subscription) => {
@@ -805,7 +954,7 @@ function AppContent() {
                 currentTab === 'calendar' ||
                 currentTab === 'reports') && (
               <HomeScreen
-                subscriptions={subscriptions}
+                subscriptions={isLoggedIn ? subscriptions : []}
                 userPlan={userPlan}
                 currencySymbol={currencySymbol}
                 onOpenAddModal={handleOpenAddModal}
@@ -829,8 +978,18 @@ function AppContent() {
                     : activeSection
                 }
                 onStartRadarTrial={(deal) => {
+                  const trialRoute = `?trial=${encodeURIComponent(deal.id)}`;
+                  if (!isLoggedIn) {
+                    handleRequestAuth(trialRoute);
+                    return;
+                  }
                   if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
                     setIsPaywallOpen(true);
+                    return;
+                  }
+                  const preset = findPresetByTrialIdentifier(deal.id);
+                  if (preset) {
+                    navigateToTrialPreset(preset, true);
                     return;
                   }
                   handleTriggerTrialLink(
@@ -846,36 +1005,22 @@ function AppContent() {
                       color: deal.color,
                       notes: deal.notes || deal.highlight,
                     },
-                    false // false because HomeScreen already called window.open
+                    false
                   );
+                  setIsConfirmTrialModalOpen(true);
                 }}
                 onQuickAddPreset={(preset, asTrial) => {
-                  if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
-                    setIsPaywallOpen(true);
-                    return;
-                  }
                   if (asTrial) {
-                    const trialDays = preset.defaultTrialDays || 30;
-                    handleTriggerTrialLink(
-                      {
-                        name: preset.name,
-                        price: preset.price,
-                        currency: preset.currency || currencySymbol,
-                        frequency: preset.frequency,
-                        category: preset.category,
-                        defaultTrialDays: trialDays,
-                        trialUrl: preset.trialUrl,
-                        cancelUrl: preset.cancelUrl,
-                        cancelEmail: preset.cancelEmail,
-                        cancelGuideSteps: preset.cancelSteps,
-                        color: preset.color,
-                        notes: preset.notes || preset.description,
-                      },
-                      Boolean(preset.trialUrl)
-                    );
-                    if (!preset.trialUrl) {
-                      setIsConfirmTrialModalOpen(true);
+                    const trialRoute = `?trial=${encodeURIComponent(preset.id)}`;
+                    if (!isLoggedIn) {
+                      handleRequestAuth(trialRoute);
+                      return;
                     }
+                    if (!canAddSubscription(activeSubscriptionsCount, userPlan, bonusSlots).allowed) {
+                      setIsPaywallOpen(true);
+                      return;
+                    }
+                    navigateToTrialPreset(preset, true);
                   } else {
                     handleAddSubscription({
                       name: preset.name,
@@ -925,14 +1070,14 @@ function AppContent() {
                   onOpenPaywall={() => setIsPaywallOpen(true)}
                   onOpenAiScanner={() => setCurrentTab('scan')}
                   onTrialTracked={handleTrialTracked}
+                  isLoggedIn={isLoggedIn}
+                  onRequestAuth={handleRequestAuth}
+                  onNavigateToTrial={(preset) => navigateToTrialPreset(preset, true)}
                   onStartTrialFlow={(trialData) => {
                     handleTriggerTrialLink(trialData, Boolean(trialData.trialUrl));
-                    setCurrentTab('home');
-                    if (!trialData.trialUrl) {
-                      setIsConfirmTrialModalOpen(true);
-                    }
+                    setIsConfirmTrialModalOpen(true);
                   }}
-                  subscriptions={subscriptions}
+                  subscriptions={isLoggedIn ? subscriptions : []}
                   bonusSlots={bonusSlots}
                   onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
                 />
@@ -951,7 +1096,7 @@ function AppContent() {
                 soundEffectsEnabled={soundEffectsEnabled}
                 onToggleSoundEffects={() => setSoundEffectsEnabled((enabled) => !enabled)}
                 onOpenPaywall={() => setIsPaywallOpen(true)}
-                subscriptions={subscriptions}
+                subscriptions={isLoggedIn ? subscriptions : []}
                 onResetData={handleResetData}
                 onTriggerTestNotification={handleTriggerTestNotification}
                 onRestoreBackup={(restoredSubs, restoredPlan) => {
@@ -962,6 +1107,9 @@ function AppContent() {
                 onReplayOnboarding={() => setOnboardingDone(false)}
                 bonusSlots={bonusSlots}
                 onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
+                currentUser={currentUser}
+                onLogout={handleLogout}
+                onRequestAuth={() => setIsAuthModalOpen(true)}
               />
             )}
             </div>
@@ -982,7 +1130,7 @@ function AppContent() {
                   if (tab === 'settings') setActiveSection('settings');
                 }
               }}
-              activeCount={activeSubscriptionsCount}
+              activeCount={isLoggedIn ? activeSubscriptionsCount : 0}
             />
           )}
 
@@ -997,14 +1145,18 @@ function AppContent() {
             onOpenPaywall={() => setIsPaywallOpen(true)}
             onOpenAiScanner={() => setIsAiScannerOpen(true)}
             onTrialTracked={handleTrialTracked}
+            isLoggedIn={isLoggedIn}
+            onRequestAuth={handleRequestAuth}
+            onNavigateToTrial={(preset) => {
+              setIsAddModalOpen(false);
+              navigateToTrialPreset(preset, true);
+            }}
             onStartTrialFlow={(trialData) => {
               handleTriggerTrialLink(trialData, Boolean(trialData.trialUrl));
               setIsAddModalOpen(false);
-              if (!trialData.trialUrl) {
-                setIsConfirmTrialModalOpen(true);
-              }
+              setIsConfirmTrialModalOpen(true);
             }}
-            subscriptions={subscriptions}
+            subscriptions={isLoggedIn ? subscriptions : []}
             bonusSlots={bonusSlots}
             onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
           />
@@ -1065,13 +1217,20 @@ function AppContent() {
             existingSubscriptions={subscriptions}
           />
 
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            onClose={() => setIsAuthModalOpen(false)}
+            onSuccess={handleAuthSuccess}
+            returnToUrl={authReturnTo}
+          />
+
           <ConfirmTrialActivationModal
             isOpen={isConfirmTrialModalOpen}
             onClose={handleDismissTrialActivation}
             pendingTrial={pendingTrialActivation}
             onConfirm={handleConfirmTrialActivation}
             currencySymbol={currencySymbol}
-            existingSubscriptions={subscriptions}
+            existingSubscriptions={isLoggedIn ? subscriptions : []}
           />
         </div>
       )}

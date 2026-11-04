@@ -33,6 +33,7 @@ import {
   parseRestoredLicensePlan,
 } from '../utils/retentionAndTrust';
 import { useTranslation } from '../i18n/LanguageContext';
+import type { AuthUser } from '../services/authService';
 
 interface SettingsScreenProps {
   userPlan: UserPlan;
@@ -53,6 +54,9 @@ interface SettingsScreenProps {
   onReplayOnboarding?: () => void;
   bonusSlots?: number;
   onOpenGiftSlot?: () => void;
+  currentUser?: AuthUser | null;
+  onLogout?: () => void;
+  onRequestAuth?: () => void;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -74,6 +78,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onReplayOnboarding,
   bonusSlots = 0,
   onOpenGiftSlot,
+  currentUser,
+  onLogout,
+  onRequestAuth,
 }) => {
   const { t, language, setLanguage, languages } = useTranslation();
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'terms' | null>(null);
@@ -284,6 +291,42 @@ ${subscriptions
               </button>
             </div>
           )}
+        </div>
+
+        {/* Account & Session Card */}
+        <div className="p-4 rounded-3xl bg-[#161616] border border-white/10 space-y-3 shadow-lg">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center font-bold text-[#D4AF7C]">
+                <ShieldCheck className="w-5 h-5 text-[#D4AF7C]" />
+              </div>
+              <div>
+                <div className="font-extrabold text-sm text-[#F5F5F5]">
+                  {currentUser ? currentUser.email : 'Guest / Logged Out'}
+                </div>
+                <div className="text-[11px] text-[#A0A0A0]">
+                  {currentUser ? 'Signed in · Cloud Sync & Shield Active' : 'Sign in to access your saved trials'}
+                </div>
+              </div>
+            </div>
+            {currentUser ? (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="px-3.5 py-1.5 rounded-full border border-white/15 hover:border-white/30 text-[#A0A0A0] hover:text-[#F5F5F5] text-xs font-semibold active:scale-[0.97] transition-all cursor-pointer"
+              >
+                Log Out
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onRequestAuth}
+                className="bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/20 px-4 py-2 rounded-full text-xs cursor-pointer active:scale-[0.97] transition-all"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Section: General Preferences & Language Selector (iOS Inset Grouped List) */}

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useState, useRef, useMemo, type FC } from 'react';
 import {
   BookOpen,
   Bot,
@@ -39,12 +39,16 @@ import {
   siYoutube,
 } from 'simple-icons';
 import type { SubscriptionCategory } from '../types/subscription';
+import { InlineLinkPill } from './InlineLinkPill';
+import { resolveServiceLink, type ServiceLinkContext } from '../utils/serviceLinkResolver';
 
-interface BrandIconProps {
+export interface BrandIconProps {
   name: string;
   category: SubscriptionCategory;
   color?: string;
   size?: 'card' | 'preset';
+  enableLinkPill?: boolean;
+  linkContext?: ServiceLinkContext;
 }
 
 function getCategoryIcon(category: SubscriptionCategory): LucideIcon {
@@ -72,7 +76,7 @@ function getCategoryIcon(category: SubscriptionCategory): LucideIcon {
   }
 }
 
-export const BrandIcon: FC<BrandIconProps> = ({
+const BrandIconInner: FC<BrandIconProps> = ({
   name,
   category,
   color = '#D4AF7C',
@@ -698,6 +702,106 @@ export const BrandIcon: FC<BrandIconProps> = ({
       aria-hidden="true"
     >
       <FallbackIcon className="h-5 w-5 text-white" strokeWidth={2.3} />
+    </span>
+  );
+};
+
+export const BrandIcon: FC<BrandIconProps> = (props) => {
+  const { name, enableLinkPill = true, linkContext = 'active' } = props;
+  const [showPill, setShowPill] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const containerRef = useRef<HTMLSpanElement>(null);
+
+  const resolvedLink = useMemo(() => {
+    if (!enableLinkPill) return null;
+    return resolveServiceLink(name, linkContext);
+  }, [name, enableLinkPill, linkContext]);
+
+  const timerRef = useRef<number | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const longPressFiredRef = useRef(false);
+
+  const clearTimer = () => {
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLSpanElement>) => {
+    if (!resolvedLink || e.button !== 0) return;
+    longPressFiredRef.current = false;
+    startPosRef.current = { x: e.clientX, y: e.clientY };
+    clearTimer();
+    timerRef.current = window.setTimeout(() => {
+      longPressFiredRef.current = true;
+      if (containerRef.current) {
+        setAnchorRect(containerRef.current.getBoundingClientRect());
+      }
+      setShowPill(true);
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try {
+          navigator.vibrate(12);
+        } catch {
+          // ignore
+        }
+      }
+    }, 550);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLSpanElement>) => {
+    if (!startPosRef.current || timerRef.current === null) return;
+    const dist = Math.hypot(e.clientX - startPosRef.current.x, e.clientY - startPosRef.current.y);
+    if (dist > 10) {
+      clearTimer();
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLSpanElement>) => {
+    clearTimer();
+    startPosRef.current = null;
+    if (longPressFiredRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  };
+
+  const handlePointerCancel = () => {
+    clearTimer();
+    startPosRef.current = null;
+  };
+
+  const innerIcon = <BrandIconInner {...props} />;
+
+  if (!resolvedLink) {
+    return innerIcon;
+  }
+
+  return (
+    <span
+      ref={containerRef}
+      className="relative inline-flex shrink-0 select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onClick={(e) => {
+        if (longPressFiredRef.current) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }}
+    >
+      {innerIcon}
+      <InlineLinkPill
+        link={resolvedLink}
+        isVisible={showPill}
+        anchorRect={anchorRect}
+        onDismiss={() => {
+          setShowPill(false);
+          setAnchorRect(null);
+        }}
+      />
     </span>
   );
 };
