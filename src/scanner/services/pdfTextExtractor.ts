@@ -1,11 +1,37 @@
-import * as pdfjsLib from 'pdfjs-dist';
 import type { PdfExtractionResult, SpatialTransactionRow } from '../types/scanner.types';
 import { reconstructPageTransactionRows } from './spatialPdfExtractor';
 
+type PdfJsLibType = typeof import('pdfjs-dist');
+let cachedPdfJs: PdfJsLibType | null = null;
 let pdfWorkerUrl: string | null = null;
 
-export async function initPdfWorker(): Promise<string | null> {
-  if (pdfWorkerUrl) return pdfWorkerUrl;
+async function getPdfJs(): Promise<PdfJsLibType | null> {
+  if (cachedPdfJs) return cachedPdfJs;
+  try {
+    if (typeof window === 'undefined') {
+      const legacyMod = await importOptional('pdfjs-dist/legacy/build/pdf.mjs');
+      if (legacyMod && typeof (legacyMod as any).getDocument === 'function') {
+        cachedPdfJs = legacyMod as unknown as PdfJsLibType;
+        return cachedPdfJs;
+      }
+    }
+    const mod = await import('pdfjs-dist');
+    cachedPdfJs = mod as unknown as PdfJsLibType;
+    return cachedPdfJs;
+  } catch (err) {
+    console.warn('[pdfTextExtractor] Failed to load pdfjs-dist:', err);
+    return null;
+  }
+}
+
+export async function initPdfWorker(pdfLib?: PdfJsLibType): Promise<string | null> {
+  const targetLib = pdfLib || cachedPdfJs;
+  if (pdfWorkerUrl) {
+    if (targetLib?.GlobalWorkerOptions && !targetLib.GlobalWorkerOptions.workerSrc) {
+      targetLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+    }
+    return pdfWorkerUrl;
+  }
   if (typeof window === 'undefined') return null;
 
   try {
@@ -13,8 +39,8 @@ export async function initPdfWorker(): Promise<string | null> {
     const mod = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
     if (mod && typeof mod.default === 'string') {
       pdfWorkerUrl = mod.default;
-      if (pdfjsLib?.GlobalWorkerOptions) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+      if (targetLib?.GlobalWorkerOptions) {
+        targetLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
       }
       return pdfWorkerUrl;
     }
@@ -23,10 +49,6 @@ export async function initPdfWorker(): Promise<string | null> {
   }
 
   return pdfWorkerUrl;
-}
-
-if (typeof window !== 'undefined') {
-  void initPdfWorker();
 }
 
 async function importOptional(specifier: string): Promise<Record<string, unknown> | null> {
@@ -589,17 +611,14 @@ interface PdfJsExtractInternalResult {
 }
 
 async function extractWithPdfJs(buffer: ArrayBuffer): Promise<PdfJsExtractInternalResult | null> {
-  if (typeof window !== 'undefined') {
-    await initPdfWorker();
-  }
-
   try {
-    let activePdfJs: typeof pdfjsLib = pdfjsLib;
-    if (typeof window === 'undefined') {
-      const legacyMod = await importOptional('pdfjs-dist/legacy/build/pdf.mjs');
-      if (legacyMod && typeof legacyMod.getDocument === 'function') {
-        activePdfJs = legacyMod as unknown as typeof pdfjsLib;
-      }
+    const activePdfJs = await getPdfJs();
+    if (!activePdfJs || typeof activePdfJs.getDocument !== 'function') {
+      return null;
+    }
+
+    if (typeof window !== 'undefined') {
+      await initPdfWorker(activePdfJs);
     }
 
     const loadingTask = activePdfJs.getDocument({
@@ -716,10 +735,12 @@ export async function renderPdfPagesForOcr(
   onPageRendered?: (pageBlob: Blob, pageNumber: number, totalPages: number) => Promise<void>,
 ): Promise<Blob[]> {
   if (typeof window === 'undefined') return [];
-  await initPdfWorker();
+  const activePdfJs = await getPdfJs();
+  if (!activePdfJs) return [];
+  await initPdfWorker(activePdfJs);
 
   try {
-    const loadingTask = pdfjsLib.getDocument({
+    const loadingTask = activePdfJs.getDocument({
       data: new Uint8Array(await file.arrayBuffer()),
       useWorkerFetch: false,
       useSystemFonts: true,

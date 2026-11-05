@@ -37,7 +37,7 @@ import {
   siUber,
   siVirgin,
   siYoutube,
-} from 'simple-icons';
+} from '../data/brandIconSvgPaths';
 import type { SubscriptionCategory } from '../types/subscription';
 import { InlineLinkPill } from './InlineLinkPill';
 import { resolveServiceLink, type ServiceLinkContext } from '../utils/serviceLinkResolver';

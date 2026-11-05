@@ -4,6 +4,25 @@ import { buildOcrDocumentFromTesseract } from './ocrScannerBridge';
 export type OcrProgressHandler = (percent: number, status: string) => void;
 
 let cachedWorkerUrl: string | null = null;
+let activeWorker: TesseractWorkerLike | null = null;
+let workerIdleTimer: ReturnType<typeof setTimeout> | null = null;
+let isWorkerBusy = false;
+
+export async function terminateOcrWorker(): Promise<void> {
+  if (workerIdleTimer) {
+    clearTimeout(workerIdleTimer);
+    workerIdleTimer = null;
+  }
+  if (activeWorker) {
+    try {
+      await activeWorker.terminate();
+    } catch {
+      // Worker already torn down
+    }
+    activeWorker = null;
+  }
+  isWorkerBusy = false;
+}
 
 async function getTesseractWorkerUrl(): Promise<string | undefined> {
   if (cachedWorkerUrl) return cachedWorkerUrl;
@@ -68,16 +87,29 @@ export async function runOfflineOcr(
     return { text: '', lines: [], engine: 'unavailable' };
   }
 
+  if (workerIdleTimer) {
+    clearTimeout(workerIdleTimer);
+    workerIdleTimer = null;
+  }
+
   let worker: TesseractWorkerLike | null = null;
   try {
-    const workerPath = await getTesseractWorkerUrl();
-    worker = await createWorker('eng', 1, {
-      ...(workerPath ? { workerPath } : {}),
-      logger: (message) => {
-        const ratio = typeof message.progress === 'number' ? message.progress : 0;
-        onProgress?.(Math.round(ratio * 100), message.status ?? 'recognizing text');
-      },
-    });
+    if (activeWorker && !isWorkerBusy) {
+      worker = activeWorker;
+      onProgress?.(25, 'Reusing active on-device OCR worker...');
+    } else {
+      const workerPath = await getTesseractWorkerUrl();
+      worker = await createWorker('eng', 1, {
+        ...(workerPath ? { workerPath } : {}),
+        logger: (message) => {
+          const ratio = typeof message.progress === 'number' ? message.progress : 0;
+          onProgress?.(Math.round(ratio * 100), message.status ?? 'recognizing text');
+        },
+      });
+      activeWorker = worker;
+    }
+
+    isWorkerBusy = true;
     let input: any = image;
     if (typeof window === 'undefined' && typeof Blob !== 'undefined' && image instanceof Blob) {
       input = Buffer.from(await image.arrayBuffer());
@@ -99,12 +131,15 @@ export async function runOfflineOcr(
     onProgress?.(100, 'OCR engine fallback to realistic UK statement matcher.');
     return { text: '', lines: [], engine: 'unavailable' };
   } finally {
-    if (worker) {
-      try {
-        await worker.terminate();
-      } catch {
-        // Worker already torn down.
-      }
+    isWorkerBusy = false;
+    // Set 30s idle timer to free memory when scanning is finished
+    if (typeof window !== 'undefined') {
+      workerIdleTimer = setTimeout(() => {
+        void terminateOcrWorker();
+      }, 30000);
+    } else if (worker && typeof window === 'undefined') {
+      // In Node tests, terminate immediately to avoid hanging handles
+      void terminateOcrWorker();
     }
   }
 }

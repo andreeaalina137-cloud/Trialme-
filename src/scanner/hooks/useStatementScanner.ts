@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { preprocessStatementImage } from '../services/imagePreprocessor';
 import { extractPdfText, looksLikePdf, renderPdfPagesForOcr } from '../services/pdfTextExtractor';
 import { runOfflineOcr } from '../services/ocrWorker';
@@ -6,6 +6,7 @@ import { parseStatementLines } from '../services/ukBankCleaner';
 import { parseStatementFromOcrDocument } from '../services/ocrScannerBridge';
 import { matchStatementTransactions, detectStatementDateRange } from '../services/statementMatcher';
 import { detectBankFormat } from '../services/bankFormatDetector';
+import { initAISemanticModel } from '../services/aiSemanticClassifier';
 import {
   type MatchedSubscription,
   type ScannerError,
@@ -68,6 +69,11 @@ export function useStatementScanner() {
   const [matches, setMatches] = useState<MatchedSubscription[]>([]);
   const runIdRef = useRef(0);
 
+  useEffect(() => {
+    // Pre-warm the offline semantic intelligence model asynchronously
+    void initAISemanticModel();
+  }, []);
+
   const applyProgress = useCallback((next: ScannerProgress) => {
     setProgress(next);
     setStage(next.stage);
@@ -108,7 +114,7 @@ export function useStatementScanner() {
       }
 
       applyProgress(STAGE_MATCH);
-      await wait(220);
+      await initAISemanticModel();
       if (runId !== runIdRef.current) return;
 
       const dateRange = detectStatementDateRange(transactions);

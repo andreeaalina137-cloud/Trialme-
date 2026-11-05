@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import type { AppCurrency, AppNotification, Subscription, UserPlan } from './types/subscription';
 import {
   CURRENCIES,
@@ -33,25 +33,48 @@ import { DatabaseProvider } from './context/DatabaseContext';
 import { Onboarding } from './components/Onboarding';
 import { BottomNav, TabType } from './components/BottomNav';
 import { HomeScreen } from './components/HomeScreen';
-import { AddSubscriptionModal } from './components/AddSubscriptionModal';
-import { SubscriptionDetailModal } from './components/SubscriptionDetailModal';
-import { CancelAssistantModal } from './components/CancelAssistantModal';
-import { PaywallModal } from './components/PaywallModal';
-import { AiStatementScannerModal } from './components/AiStatementScannerModal';
-import { SettingsScreen } from './components/SettingsScreen';
-import { GiftSlotModal } from './components/GiftSlotModal';
 import { NotificationBanner } from './components/NotificationBanner';
-import {
-  ConfirmTrialActivationModal,
-  type PendingTrialActivation,
-  type ConfirmedTrialPayload,
-} from './components/ConfirmTrialActivationModal';
 import { MobileFrameWrapper, type SidebarSection } from './components/MobileFrameWrapper';
-import { ConfettiExplosion } from './components/ConfettiExplosion';
+import type {
+  PendingTrialActivation,
+  ConfirmedTrialPayload,
+} from './components/ConfirmTrialActivationModal';
 import type { ConfettiBurst, ConfettiOrigin } from './components/ConfettiExplosion';
+
 import { playCashRegister, playNotificationSound, playSubtlePop, playTaDing } from './utils/soundEffects';
 import { getBonusSlots, claimInviteCode } from './utils/inviteSystem';
-import { AuthModal } from './components/AuthModal';
+
+// Code-split heavy modals and non-critical tabs to ensure ultra-fast initial page startup
+const AddSubscriptionModal = lazy(() =>
+  import('./components/AddSubscriptionModal').then((m) => ({ default: m.AddSubscriptionModal }))
+);
+const SubscriptionDetailModal = lazy(() =>
+  import('./components/SubscriptionDetailModal').then((m) => ({ default: m.SubscriptionDetailModal }))
+);
+const CancelAssistantModal = lazy(() =>
+  import('./components/CancelAssistantModal').then((m) => ({ default: m.CancelAssistantModal }))
+);
+const PaywallModal = lazy(() =>
+  import('./components/PaywallModal').then((m) => ({ default: m.PaywallModal }))
+);
+const AiStatementScannerModal = lazy(() =>
+  import('./components/AiStatementScannerModal').then((m) => ({ default: m.AiStatementScannerModal }))
+);
+const SettingsScreen = lazy(() =>
+  import('./components/SettingsScreen').then((m) => ({ default: m.SettingsScreen }))
+);
+const GiftSlotModal = lazy(() =>
+  import('./components/GiftSlotModal').then((m) => ({ default: m.GiftSlotModal }))
+);
+const AuthModal = lazy(() =>
+  import('./components/AuthModal').then((m) => ({ default: m.AuthModal }))
+);
+const ConfirmTrialActivationModal = lazy(() =>
+  import('./components/ConfirmTrialActivationModal').then((m) => ({ default: m.ConfirmTrialActivationModal }))
+);
+const ConfettiExplosion = lazy(() =>
+  import('./components/ConfettiExplosion').then((m) => ({ default: m.ConfettiExplosion }))
+);
 import {
   type AuthUser,
   getCurrentUser,
@@ -944,8 +967,9 @@ function AppContent() {
         />
       ) : (
         <div className="min-h-full flex flex-col justify-between">
-          {/* Main Tab Screen Content with Native Smooth View Transitions */}
-          <main className="flex-1">
+          <Suspense fallback={null}>
+            {/* Main Tab Screen Content with Native Smooth View Transitions */}
+            <main className="flex-1">
             <div
               key={`${currentTab}-${activeSection}`}
               className="min-h-full animate-native-view"
@@ -1224,7 +1248,8 @@ function AppContent() {
             currencySymbol={currencySymbol}
             existingSubscriptions={subscriptions}
           />
-        </div>
+        </Suspense>
+      </div>
       )}
     </MobileFrameWrapper>
   );
