@@ -66,7 +66,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onStartTrial
   };
 
   return (
-    <main className="relative mx-auto flex min-h-full w-full max-w-lg flex-col justify-between overflow-hidden bg-[#0A0A0A] marble-luxury-overlay px-7 py-8 text-[#F5F5F5] select-none">
+    <main className="relative mx-auto flex min-h-full w-full max-w-3xl flex-col justify-between overflow-hidden bg-[#0A0A0A] marble-luxury-overlay px-7 py-8 text-[#F5F5F5] select-none">
       {/* Test & Accessibility Compatibility Strings */}
       <span className="sr-only">{t('onboarding.headline')}</span>
       <span className="sr-only">{t('onboarding.trialTitle')} — {t('onboarding.trialSubtitle')}</span>

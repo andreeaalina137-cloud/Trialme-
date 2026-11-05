@@ -168,9 +168,9 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter sm:items-center sm:p-4">
       <div
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter"
+        className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-2xl mx-auto h-[88dvh] sm:h-auto sm:max-h-[88dvh] w-full bg-[#161616] border-t sm:border border-white/15 rounded-t-[32px] sm:rounded-3xl flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="detail-modal-title"
@@ -178,7 +178,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
         {/* Native iOS Bottom Sheet Drag Handle */}
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150"
+          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150 sm:hidden"
         />
 
         {/* Header with real brand icon */}

@@ -37,9 +37,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   return (
     <nav
       aria-label="Bottom Navigation"
-      className="fixed bottom-0 inset-x-0 max-w-lg mx-auto h-20 pb-safe backdrop-blur-2xl bg-[#0A0A0A]/95 border-t border-white/[0.06] z-40 select-none flex items-center justify-around"
+      className="fixed bottom-0 inset-x-0 z-40 backdrop-blur-2xl bg-[#0A0A0A]/95 border-t border-white/[0.06] select-none flex justify-center"
     >
-      <div className="w-full px-2 h-full grid grid-cols-5 items-center">
+      <div className="w-full max-w-3xl h-20 pb-safe px-2 grid grid-cols-5 items-center">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = isTabActive(tab.id);

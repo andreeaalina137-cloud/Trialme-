@@ -32,7 +32,7 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
   }, [notification?.id]);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-3 z-[100] flex justify-center px-4 max-w-lg mx-auto">
+    <div className="pointer-events-none fixed inset-x-0 top-3 z-[100] flex justify-center px-4 max-w-3xl mx-auto">
       <AnimatePresence initial={false}>
         {notification && (
           <motion.div

@@ -911,16 +911,16 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter sm:items-center sm:p-4">
       <section
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto h-[88dvh] w-full flex flex-col overflow-y-auto rounded-t-[32px] border-t border-white/15 bg-[#161616] p-5 pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.8)] modal-sheet-enter"
+        className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-2xl mx-auto h-[88dvh] sm:h-auto sm:max-h-[88dvh] w-full flex flex-col overflow-y-auto rounded-t-[32px] sm:rounded-3xl border-t sm:border border-white/15 bg-[#161616] p-5 pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.8)] modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="scanner-modal-title"
       >
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-2 shrink-0 cursor-pointer active:scale-95 transition-all duration-150"
+          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-2 shrink-0 cursor-pointer active:scale-95 transition-all duration-150 sm:hidden"
         />
         {scannerBody}
       </section>

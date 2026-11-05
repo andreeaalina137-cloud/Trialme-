@@ -35,8 +35,8 @@ export const MobileFrameWrapper: React.FC<MobileFrameWrapperProps> = ({
   children,
 }) => {
   return (
-    <div className="h-[100dvh] w-screen overflow-hidden bg-[#0A0A0A] text-[#F5F5F5] select-none flex justify-center">
-      <div className="w-full max-w-lg h-[100dvh] bg-[#0A0A0A] relative flex flex-col overflow-hidden">
+    <div className="min-h-[100dvh] h-[100dvh] w-full overflow-hidden bg-[#0A0A0A] text-[#F5F5F5] select-none flex justify-center">
+      <div className="w-full max-w-3xl h-full bg-[#0A0A0A] relative flex flex-col overflow-hidden">
         <div className="flex-1 h-full overflow-y-auto overscroll-y-contain bg-[#0A0A0A] relative">
           {children}
         </div>

@@ -178,7 +178,7 @@ export const ConfirmTrialActivationModal: React.FC<ConfirmTrialActivationModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md modal-backdrop-enter sm:items-center sm:p-4">
       <div
-        className="fixed inset-x-0 bottom-0 max-w-md mx-auto w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] sm:rounded-3xl sm:border sm:border-white/10 flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter max-h-[92dvh]"
+        className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-md mx-auto w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] sm:rounded-3xl sm:border sm:border-white/10 flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter max-h-[92dvh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-trial-title"

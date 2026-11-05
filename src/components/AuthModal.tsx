@@ -66,7 +66,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       aria-modal="true"
       aria-labelledby="auth-modal-title"
     >
-      <div className="fixed inset-x-0 bottom-0 max-w-md mx-auto w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] sm:rounded-3xl sm:border sm:border-white/10 flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter max-h-[92dvh]">
+      <div className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-md mx-auto w-full bg-[#161616] border-t border-white/15 rounded-t-[32px] sm:rounded-3xl sm:border sm:border-white/10 flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter max-h-[92dvh]">
         {/* iOS Drag Handle */}
         <div
           onClick={onClose}
