@@ -13,6 +13,7 @@ import {
   formatPrice,
   filterAndSortSubscriptions,
 } from './subscriptionCalculations.ts';
+import { deduplicateCancelledSubscriptions, sanitizeSubscriptionsList } from './storage.ts';
 import type { Subscription } from '../types/subscription.ts';
 
 const mockSubscriptions: Subscription[] = [
@@ -194,4 +195,61 @@ test('filterAndSortSubscriptions filters by status and sorts by renewal', () => 
   // Spotify is due Oct 18 (3 days), Netflix Oct 20 (5 days)
   assert.equal(filtered[0].name, 'Spotify Premium UK');
   assert.equal(filtered[1].name, 'Netflix UK Standard');
+});
+
+test('filterAndSortSubscriptions shows ONLY active/trial subscriptions by default (statusFilter: all) and isolates cancelled items', () => {
+  const defaultMainList = filterAndSortSubscriptions(
+    mockSubscriptions,
+    {
+      statusFilter: 'all',
+      sortBy: 'renewal',
+    },
+    '2026-10-15'
+  );
+  assert.equal(defaultMainList.length, 2);
+  assert.ok(defaultMainList.every((s) => s.status !== 'cancelled'));
+
+  const cancelledList = filterAndSortSubscriptions(
+    mockSubscriptions,
+    {
+      statusFilter: 'cancelled',
+    },
+    '2026-10-15'
+  );
+  assert.equal(cancelledList.length, 1);
+  assert.equal(cancelledList[0].id, 'sub-3');
+  assert.equal(cancelledList[0].status, 'cancelled');
+});
+
+test('deduplicateCancelledSubscriptions and sanitizeSubscriptionsList deduplicate cancelled entries by normalized merchant name', () => {
+  const listWithDuplicates: Subscription[] = [
+    ...mockSubscriptions,
+    {
+      ...mockSubscriptions[1],
+      id: 'sub-spotify-cancelled-1',
+      name: 'Spotify',
+      status: 'cancelled',
+      monthlySavingsAmount: 11.99,
+    },
+    {
+      ...mockSubscriptions[1],
+      id: 'sub-spotify-cancelled-2',
+      name: '  spotify  ',
+      status: 'cancelled',
+      monthlySavingsAmount: 11.99,
+    },
+  ];
+
+  const deduped = deduplicateCancelledSubscriptions(listWithDuplicates);
+  const cancelledSpotify = deduped.filter(
+    (s) => s.status === 'cancelled' && s.name.toLowerCase().trim() === 'spotify'
+  );
+  assert.equal(cancelledSpotify.length, 1);
+  assert.equal(cancelledSpotify[0].id, 'sub-spotify-cancelled-1');
+
+  const sanitized = sanitizeSubscriptionsList(listWithDuplicates);
+  const sanitizedCancelledSpotify = sanitized.filter(
+    (s) => s.status === 'cancelled' && s.name.toLowerCase().trim() === 'spotify'
+  );
+  assert.equal(sanitizedCancelledSpotify.length, 1);
 });

@@ -21,6 +21,7 @@ import {
   normalizeScannedSubscriptionName,
 } from './utils/subscriptionIdentity';
 import {
+  deduplicateCancelledSubscriptions,
   loadPersistedSubscriptions,
   safeStorageGet,
   safeStorageSet,
@@ -350,7 +351,7 @@ function AppContent() {
   useEffect(() => {
     // Auto-roll any past-due active renewal dates forward to the next valid billing cycle
     // (covers restored backups, manual edits to past dates, reactivations and day changes).
-    const normalized = normalizeRenewalDates(subscriptions);
+    const normalized = deduplicateCancelledSubscriptions(normalizeRenewalDates(subscriptions));
     if (normalized !== subscriptions) {
       subscriptionsRef.current = normalized;
       setSubscriptions(normalized);
@@ -647,7 +648,8 @@ function AppContent() {
   };
 
   const handleUpdateSubscription = (updated: Subscription) => {
-    const nextList = subscriptionsRef.current.map((s) => (s.id === updated.id ? updated : s));
+    const mappedList = subscriptionsRef.current.map((s) => (s.id === updated.id ? updated : s));
+    const nextList = deduplicateCancelledSubscriptions(mappedList);
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
     if (updated.status === 'cancelled') {
@@ -700,18 +702,30 @@ function AppContent() {
     const todayKey = formatLocalDateKey(new Date());
 
     let updatedSub: Subscription | null = null;
-    const nextList = subscriptionsRef.current.map((s) => {
-      if (s.id === subscriptionId) {
-        updatedSub = {
-          ...s,
-          status: 'cancelled' as const,
-          cancelledAt: todayKey,
-          monthlySavingsAmount: savedAmount,
-        };
-        return updatedSub;
-      }
-      return s;
-    });
+    const cancelledNorm = subscriptionToCancel.name.toLowerCase().trim();
+    const cancelledCanon = normalizeScannedSubscriptionName(cancelledNorm) || cancelledNorm;
+
+    const nextList = deduplicateCancelledSubscriptions(
+      subscriptionsRef.current
+        .map((s) => {
+          if (s.id === subscriptionId) {
+            updatedSub = {
+              ...s,
+              status: 'cancelled' as const,
+              cancelledAt: todayKey,
+              monthlySavingsAmount: savedAmount,
+            };
+            return updatedSub;
+          }
+          return s;
+        })
+        .filter((s) => {
+          if (s.id === subscriptionId || s.status !== 'cancelled') return true;
+          const existingNorm = s.name.toLowerCase().trim();
+          const existingCanon = normalizeScannedSubscriptionName(existingNorm) || existingNorm;
+          return existingNorm !== cancelledNorm && existingCanon !== cancelledCanon;
+        })
+    );
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
     for (const key of Array.from(alertedDueSubscriptions.current)) {
@@ -803,7 +817,7 @@ function AppContent() {
       existingAndImported.push(imported);
     });
 
-    const finalList = [...formatted, ...deduplicatedSubscriptions];
+    const finalList = deduplicateCancelledSubscriptions([...formatted, ...deduplicatedSubscriptions]);
     subscriptionsRef.current = finalList;
     setSubscriptions(finalList);
     void notificationService.reconcileAll(finalList);
@@ -1165,7 +1179,9 @@ function AppContent() {
                 onResetData={handleResetData}
                 onTriggerTestNotification={handleTriggerTestNotification}
                 onRestoreBackup={(restoredSubs, restoredPlan) => {
-                  setSubscriptions(restoredSubs);
+                  const deduped = deduplicateCancelledSubscriptions(restoredSubs);
+                  subscriptionsRef.current = deduped;
+                  setSubscriptions(deduped);
                   if (restoredPlan) setUserPlan(restoredPlan);
                 }}
                 onSelectPlan={(plan) => setUserPlan(plan)}

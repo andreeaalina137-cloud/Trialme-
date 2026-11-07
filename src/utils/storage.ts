@@ -6,6 +6,39 @@ import type {
   SubscriptionStatus,
   UserPlan,
 } from '../types/subscription';
+import { normalizeScannedSubscriptionName } from './subscriptionIdentity';
+
+function canonicalCancelledMerchantKey(name: string): string {
+  const trimmed = (name || '').toLowerCase().trim();
+  const scanned = normalizeScannedSubscriptionName(trimmed);
+  return scanned || trimmed;
+}
+
+/**
+ * Deduplicates cancelled subscriptions by normalized merchant name (`name.toLowerCase().trim()`
+ * and canonical brand name), keeping the first (most recent) cancelled entry for each merchant
+ * while leaving all active/trial subscriptions untouched.
+ */
+export function deduplicateCancelledSubscriptions(subscriptions: Subscription[]): Subscription[] {
+  const seenCancelledNames = new Set<string>();
+  const seenCancelledCanonical = new Set<string>();
+  let changed = false;
+
+  const result = subscriptions.filter((sub) => {
+    if (sub.status !== 'cancelled') return true;
+    const norm = (sub.name || '').toLowerCase().trim();
+    const canon = canonicalCancelledMerchantKey(sub.name);
+    if ((norm && seenCancelledNames.has(norm)) || (canon && seenCancelledCanonical.has(canon))) {
+      changed = true;
+      return false;
+    }
+    if (norm) seenCancelledNames.add(norm);
+    if (canon) seenCancelledCanonical.add(canon);
+    return true;
+  });
+
+  return changed ? result : subscriptions;
+}
 
 const memoryStorage = new Map<string, string>();
 
@@ -222,19 +255,30 @@ export function sanitizeSubscriptionsList(raw: unknown): Subscription[] {
   if (!Array.isArray(raw)) return [];
   const seenIds = new Set<string>();
   const seenActiveNames = new Set<string>();
+  const seenCancelledNames = new Set<string>();
+  const seenCancelledCanonical = new Set<string>();
   const result: Subscription[] = [];
 
   raw.forEach((entry, index) => {
     const clean = sanitizeSubscriptionItem(entry, index);
     if (!clean) return;
 
+    const norm = clean.name.toLowerCase().trim();
+    const canon = canonicalCancelledMerchantKey(clean.name);
+
     // Deduplicate active and trial entries with identical names
     if (clean.status === 'active' || clean.status === 'trial') {
-      const norm = clean.name.toLowerCase().trim();
       if (seenActiveNames.has(norm)) {
         return;
       }
       seenActiveNames.add(norm);
+    } else if (clean.status === 'cancelled') {
+      // Deduplicate cancelled entries by normalized merchant name so duplicate cancelled rows never appear
+      if ((norm && seenCancelledNames.has(norm)) || (canon && seenCancelledCanonical.has(canon))) {
+        return;
+      }
+      if (norm) seenCancelledNames.add(norm);
+      if (canon) seenCancelledCanonical.add(canon);
     }
 
     let uniqueId = clean.id;

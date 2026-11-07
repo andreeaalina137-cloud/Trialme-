@@ -109,6 +109,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     .filter((s) => s.status === 'active' || s.status === 'trial')
     .sort((a, b) => a.nextPaymentDate.localeCompare(b.nextPaymentDate));
 
+  const activeOnlyCount = subscriptions.filter((s) => s.status === 'active').length;
   const activeCount = activeSubs.length;
   const trialCount = subscriptions.filter((s) => s.status === 'trial').length;
   const cancelledCount = subscriptions.filter((s) => s.status === 'cancelled').length;
@@ -295,8 +296,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               {(['all', 'active', 'trial', 'renewingSoon', 'cancelled'] as const).map((filterKey) => {
                 const isSelected = statusFilter === filterKey;
                 const labels: Record<typeof filterKey, string> = {
-                  all: `${t('home.filterAll')} (${subscriptions.length})`,
-                  active: `${t('home.filterActive')} (${activeCount})`,
+                  all: `${t('home.filterAll')} (${activeCount})`,
+                  active: `${t('home.filterActive')} (${activeOnlyCount})`,
                   trial: `Free Trials (${trialCount})`,
                   renewingSoon: t('home.filterDueSoon'),
                   cancelled: `${t('home.filterCancelled')} (${cancelledCount})`,
@@ -429,13 +430,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         )}
 
-        {/* MY TRIALS SECTION */}
+        {/* MY TRIALS / ALL SUBSCRIPTIONS SECTION */}
         <div className="space-y-2.5">
-          <div className="flex items-center justify-between px-1">
+          <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
             <h2 className="text-base font-extrabold text-[#F5F5F5]">
               {activeSection === 'subscriptions' ? 'All Subscriptions' : 'My Trials'}
             </h2>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {cancelledCount > 0 && activeSection !== 'trials' && (
+                <div className="inline-flex items-center rounded-full bg-[#161616] border border-white/10 p-0.5 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('all')}
+                    className={`px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                      statusFilter !== 'cancelled'
+                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm'
+                        : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
+                    }`}
+                  >
+                    Active ({activeCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('cancelled')}
+                    className={`px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                      statusFilter === 'cancelled'
+                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm'
+                        : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
+                    }`}
+                  >
+                    Cancelled / Saved ({cancelledCount})
+                  </button>
+                </div>
+              )}
               {onLoadShowcaseTrials && subscriptions.length <= 2 && (
                 <button
                   type="button"

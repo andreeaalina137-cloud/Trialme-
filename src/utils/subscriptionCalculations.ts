@@ -401,6 +401,9 @@ export function filterAndSortSubscriptions(
     } else {
       result = result.filter((s) => s.status === options.statusFilter);
     }
+  } else {
+    // Default ('all' or omitted): only show active and trial subscriptions, never mix cancelled items
+    result = result.filter((s) => s.status !== 'cancelled');
   }
 
   // Sorting
