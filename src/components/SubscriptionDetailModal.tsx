@@ -394,9 +394,9 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
               )}
 
               {/* Status and Next Payment */}
-              <div className="p-4 rounded-[22px] bg-[#1F1F1F]/90 border border-white/[0.06] space-y-3">
-                <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
-                  <span className="text-[#A0A0A0]">{t('detail.statusLabel')}</span>
+              <div className="p-4 rounded-[22px] bg-[#141416] border border-white/[0.07] space-y-2.5">
+                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+                  <span className="text-[#9A9AA2] font-medium">{t('detail.statusLabel')}</span>
                   {isCancelled ? (
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
                       {t('home.cancelledBadge')}
@@ -414,13 +414,13 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
 
                 {!isCancelled && (
                   <>
-                    <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
-                      <span className="text-[#A0A0A0]">{t('detail.nextBilling')}</span>
+                    <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+                      <span className="text-[#9A9AA2] font-medium">{t('detail.nextBilling')}</span>
                       <span className="font-semibold text-[#F5F5F5] font-mono">{subscription.nextPaymentDate}</span>
                     </div>
 
-                    <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
-                      <span className="text-[#A0A0A0]">{t('detail.timeRemaining')}</span>
+                    <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+                      <span className="text-[#9A9AA2] font-medium">{t('detail.timeRemaining')}</span>
                       <span className={`font-semibold ${daysRemaining <= 3 ? 'text-[#D4AF7C]' : 'text-[#F5F5F5]'}`}>
                         {daysRemaining < 0
                           ? `Billed ${Math.abs(daysRemaining)} days ago`
@@ -435,7 +435,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 )}
 
                 <div className="flex items-center justify-between">
-                  <span className="text-[#A0A0A0]">{t('detail.remindersLabel')}</span>
+                  <span className="text-[#9A9AA2] font-medium">{t('detail.remindersLabel')}</span>
                   <span className="font-semibold text-[#F5F5F5]">
                     {isCancelled
                       ? t('home.cancelledBadge')
@@ -444,37 +444,37 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 </div>
 
                 {!isCancelled && (
-                  <div className="border-t border-white/[0.08] pt-3 space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#A0A0A0] flex items-center justify-between">
+                  <div className="border-t border-white/[0.06] pt-2.5 space-y-2">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#9A9AA2] flex items-center justify-between">
                       <span>Phone Calendar Auto-Alarm ({reminderDaysBefore}d before)</span>
                       <span className="text-[#D4AF7C] font-semibold">Works offline</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={handleGoogleCalendarSync}
                         disabled={!calendarReminderDate}
-                        className="btn-champagne flex items-center justify-between gap-2 rounded-full px-3.5 py-2.5 text-left font-extrabold text-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                        className="btn-champagne flex items-center justify-between gap-1.5 rounded-full px-3 py-2 text-left font-extrabold text-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                       >
-                        <span className="flex min-w-0 items-center gap-2">
-                          <CalendarDays className="h-4 w-4 shrink-0" />
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <CalendarDays className="h-3.5 w-3.5 shrink-0" />
                           <span className="text-[11px] truncate">1-Tap Google Calendar</span>
                         </span>
-                        <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                        <ExternalLink className="h-3 w-3 shrink-0" />
                       </button>
 
                       <button
                         type="button"
                         onClick={handleCalendarSync}
                         disabled={!calendarReminderDate}
-                        className="btn-secondary-luxury flex items-center justify-between gap-2 rounded-full px-3.5 py-2.5 text-left font-semibold text-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                        className="btn-secondary-luxury flex items-center justify-between gap-1.5 rounded-full px-3 py-2 text-left font-semibold text-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                       >
-                        <span className="flex min-w-0 items-center gap-2">
-                          <CalendarDays className="h-4 w-4 shrink-0 text-[#D4AF7C]" />
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#D4AF7C]" />
                           <span className="text-[11px] truncate">{t('detail.syncCalendar')} (.ics)</span>
                         </span>
-                        <Download className="h-3.5 w-3.5 shrink-0 text-[#D4AF7C]" />
+                        <Download className="h-3 w-3 shrink-0 text-[#D4AF7C]" />
                       </button>
                     </div>
 
@@ -490,7 +490,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                     )}
 
                     {!calendarReminderDate && (
-                      <p className="mt-1.5 text-[10px] text-[#A0A0A0]">{t('detail.calendarUnavailable')}</p>
+                      <p className="mt-1.5 text-[10px] text-[#9A9AA2]">{t('detail.calendarUnavailable')}</p>
                     )}
                   </div>
                 )}

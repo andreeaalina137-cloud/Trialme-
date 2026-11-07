@@ -67,13 +67,13 @@
   padding-bottom: max(0.65rem, env(safe-area-inset-bottom));
 }
 
-/* Luxury Card & Elevated Surfaces (#161616 with subtle border & softer layered shadow) */
+/* Luxury Card & Elevated Surfaces (#141416 with subtle border & layered depth shadow) */
 .luxury-panel {
-  background: #161616;
+  background: #141416;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Primary Champagne Gold CTA Button Gradient (Mandatory Spec: from #E5C391 to #B79B6B) */
@@ -82,7 +82,7 @@
   color: #0A0A0A;
   font-weight: 700;
   border-radius: 9999px;
-  box-shadow: 0 4px 14px rgba(212, 175, 124, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(212, 175, 124, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.38);
   transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -95,17 +95,17 @@
 }
 
 .btn-secondary-luxury {
-  background-color: #1F1F1F;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: #1C1C20;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 9999px !important;
   color: #F5F5F5;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-secondary-luxury:hover {
-  background-color: #262626;
-  border-color: rgba(212, 175, 124, 0.28);
+  background-color: #25252B;
+  border-color: rgba(212, 175, 124, 0.32);
 }
 
 .btn-secondary-luxury:active {
@@ -116,7 +116,7 @@
 .btn-cancel-soft {
   background-image: linear-gradient(135deg, rgba(153, 27, 27, 0.55) 0%, rgba(190, 18, 60, 0.45) 100%);
   color: #FFE4E6;
-  border: 1px solid rgba(244, 63, 94, 0.26);
+  border: 1px solid rgba(244, 63, 94, 0.28);
   border-radius: 9999px !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -133,8 +133,8 @@
 }
 
 .input-luxury {
-  background-color: #1F1F1F;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background-color: #1C1C20;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #F5F5F5;
   border-radius: 9999px;
   transition: border-color 180ms ease, box-shadow 180ms ease;

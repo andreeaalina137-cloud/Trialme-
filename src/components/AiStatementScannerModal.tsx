@@ -437,134 +437,141 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         </div>
       )}
 
-      {/* Main Upload & Results Layout: Clean, spacious vertical stack under the magnifying glass */}
-      <div className="max-w-xl mx-auto space-y-6">
+      {/* Main Upload & Results Layout: Structured Dropzone Well & Cohesive Protection Card */}
+      <div className="max-w-xl mx-auto space-y-4">
         {/* Upload & Scanner Controls Card */}
-        <div className="w-full rounded-3xl bg-[#161616] border border-white/[0.08] p-6 text-center shadow-xl space-y-4">
-          {/* Central Glowing Document + Gold Magnifying Glass Hero */}
-          <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-full bg-[#D4AF7C]/20 blur-2xl"
-            />
-            <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] relative z-10">
-              <defs>
-                <linearGradient id="docGlass" x1="20" y1="15" x2="90" y2="105" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#2B3B5E" />
-                  <stop offset="100%" stopColor="#162038" />
-                </linearGradient>
-                <linearGradient id="goldLens" x1="50" y1="45" x2="105" y2="105" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#FFF3D1" />
-                  <stop offset="45%" stopColor="#D4AF7C" />
-                  <stop offset="100%" stopColor="#9A7B4C" />
-                </linearGradient>
-              </defs>
-              <rect
-                x="24"
-                y="14"
-                width="58"
-                height="76"
-                rx="10"
-                fill="url(#docGlass)"
-                stroke="#475569"
-                strokeWidth="1.5"
+        <div className="w-full rounded-[24px] bg-[#141416] border border-white/[0.07] p-5 text-center shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)] space-y-4">
+          {/* Inset Dashed Dropzone Well */}
+          <div className="rounded-2xl bg-[#0D0D10] border border-dashed border-[#D4AF7C]/30 p-5 space-y-4">
+            {/* Central Glowing Document + Gold Magnifying Glass Hero */}
+            <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded-full bg-[#D4AF7C]/20 blur-2xl"
               />
-              <rect x="34" y="28" width="24" height="4" rx="2" fill="#A0A0A0" fillOpacity="0.6" />
-              <rect x="34" y="38" width="38" height="3.5" rx="1.75" fill="#A0A0A0" fillOpacity="0.4" />
-              <rect x="34" y="47" width="34" height="3.5" rx="1.75" fill="#D4AF7C" fillOpacity="0.7" />
-              <rect x="34" y="56" width="30" height="3.5" rx="1.75" fill="#A0A0A0" fillOpacity="0.4" />
-              <rect x="34" y="65" width="22" height="3.5" rx="1.75" fill="#D4AF7C" fillOpacity="0.55" />
-              <circle
-                cx="68"
-                cy="62"
-                r="20"
-                fill="#0A0A0A"
-                fillOpacity="0.55"
-                stroke="url(#goldLens)"
-                strokeWidth="5"
-              />
-              <line
-                x1="83"
-                y1="77"
-                x2="99"
-                y2="93"
-                stroke="url(#goldLens)"
-                strokeWidth="6.5"
-                strokeLinecap="round"
-              />
-              <circle cx="20" cy="40" r="1.5" fill="#D4AF7C" />
-              <circle cx="96" cy="30" r="2" fill="#D4AF7C" />
-              <circle cx="90" cy="52" r="1.2" fill="#FFF3D1" />
-            </svg>
-          </div>
+              <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)] relative z-10">
+                <defs>
+                  <linearGradient id="docGlass" x1="20" y1="15" x2="90" y2="105" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#2B3B5E" />
+                    <stop offset="100%" stopColor="#162038" />
+                  </linearGradient>
+                  <linearGradient id="goldLens" x1="50" y1="45" x2="105" y2="105" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFF3D1" />
+                    <stop offset="45%" stopColor="#D4AF7C" />
+                    <stop offset="100%" stopColor="#9A7B4C" />
+                  </linearGradient>
+                </defs>
+                <rect
+                  x="24"
+                  y="14"
+                  width="58"
+                  height="76"
+                  rx="10"
+                  fill="url(#docGlass)"
+                  stroke="#475569"
+                  strokeWidth="1.5"
+                />
+                <rect x="34" y="28" width="24" height="4" rx="2" fill="#A0A0A0" fillOpacity="0.6" />
+                <rect x="34" y="38" width="38" height="3.5" rx="1.75" fill="#A0A0A0" fillOpacity="0.4" />
+                <rect x="34" y="47" width="34" height="3.5" rx="1.75" fill="#D4AF7C" fillOpacity="0.7" />
+                <rect x="34" y="56" width="30" height="3.5" rx="1.75" fill="#A0A0A0" fillOpacity="0.4" />
+                <rect x="34" y="65" width="22" height="3.5" rx="1.75" fill="#D4AF7C" fillOpacity="0.55" />
+                <circle
+                  cx="68"
+                  cy="62"
+                  r="20"
+                  fill="#0A0A0A"
+                  fillOpacity="0.55"
+                  stroke="url(#goldLens)"
+                  strokeWidth="5"
+                />
+                <line
+                  x1="83"
+                  y1="77"
+                  x2="99"
+                  y2="93"
+                  stroke="url(#goldLens)"
+                  strokeWidth="6.5"
+                  strokeLinecap="round"
+                />
+                <circle cx="20" cy="40" r="1.5" fill="#D4AF7C" />
+                <circle cx="96" cy="30" r="2" fill="#D4AF7C" />
+                <circle cx="90" cy="52" r="1.2" fill="#FFF3D1" />
+              </svg>
+            </div>
 
-          <div>
-            <h3 className="text-xl font-extrabold text-[#F5F5F5] leading-tight">
-              Find your subscriptions automatically
-            </h3>
-            <p className="mt-2 text-xs text-[#A0A0A0] leading-relaxed max-w-xs mx-auto">
-              Connect your bank statement or upload a PDF. Our AI will find recurring payments and free trials.
-            </p>
-          </div>
+            <div>
+              <h3 className="text-[18px] font-extrabold text-[#F5F5F5] tracking-tight leading-snug">
+                Find your subscriptions automatically
+              </h3>
+              <p className="mt-1.5 text-[12.5px] text-[#9A9AA2] leading-relaxed max-w-xs mx-auto">
+                Connect your bank statement or upload a PDF. Our AI will find recurring payments and free trials.
+              </p>
+            </div>
 
-          {/* Primary Champagne Gold Upload Button */}
-          <div>
-            <label className="btn-champagne min-h-[50px] w-full rounded-full py-3.5 px-6 text-sm font-extrabold text-[#0A0A0A] flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.97] transition-all duration-150">
-              {isScanning ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-[#0A0A0A]" />
-                  <span>Scanning statement...</span>
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4 stroke-[2.5]" />
-                  <span>Upload Statement</span>
-                </>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,application/pdf,.csv"
-                onClick={resetScannerState}
-                onChange={handleFileUpload}
-                className="sr-only"
-              />
-            </label>
-          </div>
+            {/* Primary Champagne Gold Upload Button */}
+            <div>
+              <label className="btn-champagne min-h-[48px] w-full rounded-full py-3 px-6 text-sm font-extrabold text-[#0A0A0A] flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.97] transition-all duration-150 shadow-md">
+                {isScanning ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-[#0A0A0A]" />
+                    <span>Scanning statement...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 stroke-[2.5]" />
+                    <span>Upload Statement</span>
+                  </>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,application/pdf,.csv"
+                  onClick={resetScannerState}
+                  onChange={handleFileUpload}
+                  className="sr-only"
+                />
+              </label>
+            </div>
 
-          {/* Supported Formats */}
-          <div className="flex items-center justify-center gap-4 text-[11px] font-semibold text-[#A0A0A0]">
-            <span className="inline-flex items-center gap-1">
-              <FileText className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              PDF
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <FileSpreadsheet className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              CSV
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <ImageIcon className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              Images
-            </span>
+            {/* Supported Formats Pills */}
+            <div className="flex items-center justify-center gap-2 pt-0.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1C1C20] border border-white/[0.07] px-3 py-1 text-[11px] font-semibold text-[#F5F5F5]">
+                <FileText className="w-3.5 h-3.5 text-[#D4AF7C]" />
+                PDF
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1C1C20] border border-white/[0.07] px-3 py-1 text-[11px] font-semibold text-[#F5F5F5]">
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[#D4AF7C]" />
+                CSV
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1C1C20] border border-white/[0.07] px-3 py-1 text-[11px] font-semibold text-[#F5F5F5]">
+                <ImageIcon className="w-3.5 h-3.5 text-[#D4AF7C]" />
+                Images
+              </span>
+            </div>
           </div>
 
           {/* Trust Badge */}
-          <div className="rounded-2xl bg-[#1F1F1F] border border-white/[0.06] p-2.5 text-[11px] text-[#A0A0A0] flex items-center justify-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 text-[#D4AF7C] shrink-0" />
-            <span>100% Private – Processed locally, no Open Banking login required (Unlimited Offline Scans)</span>
+          <div className="rounded-2xl bg-[#1C1C20]/80 border border-white/[0.06] px-3.5 py-2.5 text-[11.5px] text-[#9A9AA2] flex items-center gap-2.5 text-left">
+            <div className="h-7 w-7 rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/25 flex items-center justify-center shrink-0">
+              <Lock className="w-3.5 h-3.5 text-[#D4AF7C]" />
+            </div>
+            <span className="leading-snug">
+              100% Private – Processed locally, no Open Banking login required (Unlimited Offline Scans)
+            </span>
           </div>
 
           {/* Quick Demo Statement Triggers */}
-          <div className="space-y-1.5 pt-1">
-            <span className="text-[10px] uppercase tracking-wider text-[#A0A0A0] font-bold block">
+          <div className="space-y-2 pt-0.5">
+            <span className="text-[10.5px] uppercase tracking-wider text-[#9A9AA2] font-bold block">
               Quick Test Samples
             </span>
-            <div className="flex items-center justify-center gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 disabled={isScanning}
                 onClick={() => void handleScanSample('barclays')}
-                className="rounded-full border border-white/10 bg-[#1F1F1F] px-3.5 py-1.5 text-[11px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C] transition-colors cursor-pointer disabled:opacity-50"
+                className="min-h-[38px] rounded-full border border-white/[0.08] bg-[#1C1C20] px-3 py-2 text-[11.5px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C]/50 transition-colors cursor-pointer disabled:opacity-50"
               >
                 Try Barclays UK Sample
               </button>
@@ -572,7 +579,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                 type="button"
                 disabled={isScanning}
                 onClick={() => void handleScanSample('revolut')}
-                className="rounded-full border border-white/10 bg-[#1F1F1F] px-3.5 py-1.5 text-[11px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C] transition-colors cursor-pointer disabled:opacity-50"
+                className="min-h-[38px] rounded-full border border-white/[0.08] bg-[#1C1C20] px-3 py-2 text-[11.5px] font-bold text-[#D4AF7C] hover:border-[#D4AF7C]/50 transition-colors cursor-pointer disabled:opacity-50"
               >
                 Try Revolut Sample
               </button>
@@ -580,29 +587,29 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
           </div>
         </div>
 
-        {/* Dynamic Empty State (Show Bell / Protection Banner) */}
+        {/* Dynamic Empty State — Sleek Horizontal Feature Card (Emma-style proportion) */}
         {detectedItems.length === 0 && (
-          <div className="w-full rounded-3xl bg-[#161616] border border-white/[0.08] p-6 text-center shadow-xl flex flex-col items-center relative overflow-hidden">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-12 inset-x-0 h-32 bg-gradient-to-b from-[#D4AF7C]/15 via-transparent to-transparent"
-            />
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF7C]/35 bg-[#D4AF7C]/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#D4AF7C]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              Smart Protection
-            </span>
-
-            <div className="my-5 relative flex items-center justify-center">
+          <div className="w-full rounded-[24px] bg-[#141416] border border-white/[0.07] p-4.5 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)] flex items-center gap-4 text-left relative overflow-hidden">
+            <div className="h-14 w-14 rounded-2xl bg-[#1C1C20] border border-[#D4AF7C]/25 flex items-center justify-center shrink-0 relative">
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -inset-3 rounded-full bg-[#D4AF7C]/20 blur-2xl"
+                className="pointer-events-none absolute inset-0 rounded-2xl bg-[#D4AF7C]/15 blur-md"
               />
-              <GoldBellIcon size="lg" className="relative z-10" />
+              <GoldBellIcon size="sm" className="relative z-10" />
             </div>
 
-            <h4 className="text-base font-extrabold text-[#F5F5F5] tracking-tight">
-              Enjoy the trial. Get reminded before you pay.
-            </h4>
+            <div className="min-w-0 flex-1 space-y-1">
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#D4AF7C]/30 bg-[#D4AF7C]/12 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#D4AF7C]">
+                <ShieldCheck className="w-3 h-3 text-[#D4AF7C]" />
+                Smart Protection
+              </span>
+              <h4 className="text-[14.5px] font-extrabold text-[#F5F5F5] tracking-tight leading-snug">
+                Enjoy the trial. Get reminded before you pay.
+              </h4>
+              <p className="text-[12px] text-[#9A9AA2] leading-snug">
+                Automatic 10:00 AM renewal shields armed for every imported subscription.
+              </p>
+            </div>
           </div>
         )}
 
