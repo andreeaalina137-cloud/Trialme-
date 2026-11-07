@@ -325,24 +325,24 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
             </form>
           ) : (
             <>
-              {/* Cost card */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-3xl bg-[#1F1F1F] border border-white/[0.08]">
-                  <div className="text-[11px] uppercase tracking-wider text-[#A0A0A0] font-semibold">
+              {/* Cost card — Emma-inspired unified stat surface with subtle hairline divider */}
+              <div className="grid grid-cols-2 divide-x divide-white/[0.07] rounded-[22px] bg-[#1F1F1F]/90 border border-white/[0.06] py-3.5 px-2">
+                <div className="px-3">
+                  <div className="text-[11px] text-[#A0A0A0] font-medium">
                     {t('detail.currentCost')}
                   </div>
-                  <div className="text-xl font-black text-[#F5F5F5] mt-0.5 font-mono">
+                  <div className="text-xl font-extrabold text-[#F5F5F5] mt-0.5 font-mono tabular-nums">
                     {formatPrice(subscription.price, subscription.currency || currencySymbol)}
                     <span className="text-xs font-normal text-[#A0A0A0]">
                       /{subscription.frequency === 'yearly' ? 'yr' : subscription.frequency === 'weekly' ? 'wk' : 'mo'}
                     </span>
                   </div>
                 </div>
-                <div className="p-3.5 rounded-3xl bg-[#1F1F1F] border border-white/[0.08]">
-                  <div className="text-[11px] uppercase tracking-wider text-[#A0A0A0] font-semibold">
+                <div className="px-3">
+                  <div className="text-[11px] text-[#A0A0A0] font-medium">
                     {t('detail.annualForecast')}
                   </div>
-                  <div className="text-xl font-black text-[#D4AF7C] mt-0.5 font-mono">
+                  <div className="text-xl font-extrabold text-[#D4AF7C] mt-0.5 font-mono tabular-nums">
                     {formatPrice(annualCost, subscription.currency || currencySymbol)}
                     <span className="text-xs font-normal text-[#A0A0A0]">/yr</span>
                   </div>
@@ -351,18 +351,18 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
 
               {/* UK Price Hike Alert Banner */}
               {priceHikeAlert && (
-                <div className="rounded-3xl border border-[#D4AF7C]/40 bg-[#1F1F1F] p-3 flex items-start gap-2.5">
+                <div className="rounded-[22px] border border-[#D4AF7C]/25 bg-[#1F1F1F]/90 p-3.5 flex items-start gap-3">
                   <TrendingUp className="w-4 h-4 text-[#D4AF7C] shrink-0 mt-0.5" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-extrabold text-[#D4AF7C]">
+                      <span className="text-xs font-bold text-[#D4AF7C]">
                         {priceHikeAlert.headline}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-rose-300">
+                      <span className="text-[11px] font-mono font-bold text-rose-300">
                         +£{priceHikeAlert.annualExtra.toFixed(0)}/yr
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#A0A0A0] mt-0.5 leading-relaxed">
+                    <p className="text-xs text-[#A0A0A0] mt-0.5 leading-relaxed">
                       {priceHikeAlert.effectiveNote}
                     </p>
                   </div>
@@ -370,11 +370,11 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
               )}
 
               {canSwitchAnnual && affiliateOffer?.annualUrl && (
-                <aside className="rounded-3xl border border-[#D4AF7C]/35 bg-[#1F1F1F] p-3">
+                <aside className="rounded-[22px] border border-[#D4AF7C]/25 bg-[#1F1F1F]/90 p-3.5">
                   <button
                     type="button"
                     onClick={() => window.open(affiliateOffer.annualUrl, '_blank', 'noopener,noreferrer')}
-                    className="flex w-full items-start gap-2 text-left text-[11px] font-semibold leading-relaxed text-[#F5F5F5] hover:text-[#D4AF7C]"
+                    className="flex w-full items-start gap-2.5 text-left text-xs font-medium leading-relaxed text-[#F5F5F5] hover:text-[#D4AF7C]"
                   >
                     <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#D4AF7C]" />
                     <span>{t('affiliate.annualTip', {
@@ -384,7 +384,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                   <button
                     type="button"
                     onClick={handleAnnualSwitch}
-                    className="btn-champagne mt-2 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 text-[10px] font-extrabold text-[#0A0A0A] cursor-pointer"
+                    className="btn-champagne mt-2.5 flex w-full items-center justify-center gap-2 rounded-full px-3.5 py-2.5 text-xs font-bold text-[#0A0A0A] cursor-pointer"
                   >
                     {t('affiliate.annualSwitch', {
                       price: formatPrice(annualPlanPrice, subscription.currency || currencySymbol),
@@ -394,7 +394,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
               )}
 
               {/* Status and Next Payment */}
-              <div className="p-4 rounded-3xl bg-[#1F1F1F] border border-white/[0.08] space-y-3">
+              <div className="p-4 rounded-[22px] bg-[#1F1F1F]/90 border border-white/[0.06] space-y-3">
                 <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
                   <span className="text-[#A0A0A0]">{t('detail.statusLabel')}</span>
                   {isCancelled ? (
@@ -538,7 +538,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 </div>
               )}
 
-              <div className="p-4 rounded-3xl bg-[#1F1F1F] border border-white/[0.08] space-y-2.5">
+              <div className="p-4 rounded-[22px] bg-[#1F1F1F]/90 border border-white/[0.06] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#F5F5F5]">{t('detail.historyLabel')}</span>
                   <span className="text-[10px] text-[#D4AF7C]">Direct Debit verified</span>
@@ -548,7 +548,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                     {subscription.paymentHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between py-1.5 px-3 rounded-full bg-[#0A0A0A]/80 border border-white/[0.08]"
+                        className="flex items-center justify-between py-2 px-3.5 rounded-full bg-[#0A0A0A]/80 border border-white/[0.06]"
                       >
                         <span className="text-[#A0A0A0] font-mono text-[11px]">{item.date}</span>
                         <span className="font-mono font-bold text-[#F5F5F5]">

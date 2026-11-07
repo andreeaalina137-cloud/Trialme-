@@ -233,20 +233,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   return (
     <div className="min-h-full bg-[#0A0A0A]">
       {/* Sticky Native Mobile App Bar */}
-      <header className="h-14 backdrop-blur-xl bg-[#0A0A0A]/90 sticky top-0 z-30 flex items-center justify-between px-4 border-b border-white/[0.06]">
+      <header className="h-14 backdrop-blur-xl bg-[#0A0A0A]/92 sticky top-0 z-30 flex items-center justify-between px-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <span className="text-[22px] font-extrabold tracking-tight text-[#D4AF7C]">
+          <span className="text-[21px] font-extrabold tracking-tight text-[#D4AF7C]">
             Monetry
           </span>
-          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30 uppercase">
+          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/25 uppercase tracking-wider">
             UK
           </span>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setShowSearchBar((v) => !v)}
-            className="h-10 w-10 rounded-full bg-[#161616] border border-white/10 flex items-center justify-center text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 ease-out cursor-pointer"
+            className="h-10 w-10 rounded-full bg-[#161616] border border-white/[0.07] hover:bg-[#1F1F1F] flex items-center justify-center text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 ease-out cursor-pointer"
             aria-label="Toggle search and filters"
           >
             <SlidersHorizontal className="w-4 h-4 text-[#D4AF7C]" />
@@ -257,7 +257,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               playSubtlePop();
               onOpenAddModal();
             }}
-            className="h-10 w-10 rounded-full bg-[#161616] border border-white/10 flex items-center justify-center text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 ease-out cursor-pointer"
+            className="h-10 w-10 rounded-full bg-[#161616] border border-white/[0.07] hover:bg-[#1F1F1F] flex items-center justify-center text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 ease-out cursor-pointer"
             aria-label={t('home.ctaAdd')}
           >
             <Plus className="w-5 h-5 text-[#F5F5F5] stroke-[2.2]" />
@@ -265,11 +265,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </header>
 
-      {/* Pure Mobile Feed (Comfortable spacing, no side bars) */}
-      <div className="space-y-4 px-4 pt-3 pb-28">
+      {/* Pure Mobile Feed (Comfortable Emma-level visual rhythm & spacing) */}
+      <div className="space-y-5 px-4 pt-4 pb-28">
         {/* Search & Filter Drawer (when toggled or search active) */}
         {(showSearchBar || searchQuery || statusFilter !== 'all') && (
-          <div className="rounded-3xl bg-[#161616] border border-white/[0.08] p-3.5 space-y-2.5 shadow-xl">
+          <div className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-4 space-y-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
             <div className="relative">
               <Search className="w-4 h-4 text-[#A0A0A0] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -277,7 +277,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 placeholder={t('home.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-luxury min-h-[44px] w-full rounded-full pl-10 pr-9 py-2 text-xs"
+                className="input-luxury min-h-[44px] w-full rounded-full pl-10 pr-9 py-2 text-[13px]"
                 aria-label={t('home.searchLabel')}
               />
               {searchQuery && (
@@ -307,10 +307,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     key={filterKey}
                     type="button"
                     onClick={() => setStatusFilter(filterKey)}
-                    className={`px-3.5 py-2 rounded-full font-bold shrink-0 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-full font-semibold shrink-0 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
                       isSelected
-                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-md shadow-[#D4AF7C]/20'
-                        : 'bg-[#1F1F1F] text-[#A0A0A0] border border-white/10 hover:text-[#F5F5F5]'
+                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
+                        : 'bg-[#1F1F1F] text-[#A0A0A0] border border-white/[0.06] hover:text-[#F5F5F5]'
                     }`}
                   >
                     {labels[filterKey]}
@@ -323,12 +323,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* HERO CARD: "Upcoming Deadline" */}
         {activeSection !== 'subscriptions' && (
-          <div className="rounded-3xl bg-[#161616] border border-white/[0.08] p-5 space-y-4 shadow-2xl backdrop-blur-xl">
+          <div className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-5 space-y-4 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-[15px] font-bold text-[#F5F5F5] tracking-tight">
+              <h2 className="text-[16px] font-bold text-[#F5F5F5] tracking-tight">
                 Upcoming Deadline
               </h2>
-              <span className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] px-3.5 py-1 text-xs font-extrabold text-[#0A0A0A] shadow-sm">
+              <span className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] px-3 py-1 text-xs font-bold text-[#0A0A0A] shadow-sm">
                 {nearestDaysLeft === 0
                   ? 'Ends today'
                   : nearestDaysLeft === 1
@@ -349,7 +349,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       onOpenSubscriptionDetail(nearestSub);
                     }
                   }}
-                  className="flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.98] transition-all duration-150 ease-out pt-0.5"
+                  className="flex items-center justify-between gap-3.5 cursor-pointer group active:scale-[0.985] transition-all duration-150 ease-out pt-0.5"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <BrandIcon
@@ -358,10 +358,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       color={nearestSub.color}
                     />
                     <div className="min-w-0">
-                      <div className="text-lg font-extrabold text-[#F5F5F5] leading-snug group-hover:text-[#D4AF7C] transition-colors">
+                      <div className="text-[17px] font-bold text-[#F5F5F5] tracking-tight leading-snug group-hover:text-[#D4AF7C] transition-colors">
                         {nearestSub.name.replace(' UK Standard', '').replace(' UK', '')}
                       </div>
-                      <div className="text-xs text-[#A0A0A0]">
+                      <div className="text-[13px] text-[#A0A0A0] leading-snug mt-0.5">
                         {nearestSub.status === 'trial' ? 'Free trial' : 'Active subscription'}
                       </div>
                     </div>
@@ -372,20 +372,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 {/* Expected Charge Row + Champagne Gold Progress Bar on #1F1F1F track */}
                 <div className="space-y-2.5 pt-1">
                   <div className="flex items-end justify-between gap-2">
-                    <span className="text-xs text-[#A0A0A0]">Expected charge</span>
+                    <span className="text-[13px] text-[#A0A0A0]">Expected charge</span>
                     <div className="text-right">
-                      <div className="text-sm font-extrabold text-[#F5F5F5] tabular-nums">
+                      <div className="text-[15px] font-bold text-[#F5F5F5] tabular-nums">
                         {formatPrice(nearestSub.price, nearestSub.currency || currencySymbol)}/month
                       </div>
-                      <div className="text-[11px] text-[#A0A0A0]">
+                      <div className="text-xs text-[#A0A0A0] mt-0.5">
                         Renews {formatRenewalDate(nearestSub.nextPaymentDate)}
                       </div>
                     </div>
                   </div>
 
-                  <div className="w-full h-2 rounded-full bg-[#1F1F1F] overflow-hidden">
+                  <div className="w-full h-1.5 rounded-full bg-[#1F1F1F] overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] shadow-[0_0_12px_rgba(212,175,124,0.45)] transition-all duration-500"
+                      className="h-full rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] transition-all duration-500"
                       style={{ width: `${nearestProgressPercent}%` }}
                     />
                   </div>
@@ -396,7 +396,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenSubscriptionDetail(nearestSub)}
-                    className="btn-secondary-luxury min-h-[46px] rounded-full py-2.5 px-4 text-xs font-bold text-[#F5F5F5] text-center active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+                    className="btn-secondary-luxury min-h-[44px] rounded-full py-2.5 px-4 text-[13px] font-semibold text-[#F5F5F5] text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                   >
                     View Details
                   </button>
@@ -409,7 +409,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         onOpenSubscriptionDetail(nearestSub);
                       }
                     }}
-                    className="btn-secondary-luxury min-h-[46px] rounded-full py-2.5 px-4 text-xs font-bold text-[#F5F5F5] hover:border-rose-400/50 hover:text-rose-200 text-center active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+                    className="btn-secondary-luxury min-h-[44px] rounded-full py-2.5 px-4 text-[13px] font-semibold text-[#F5F5F5] hover:border-rose-400/40 hover:text-rose-200 text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                   >
                     Cancel Trial
                   </button>
@@ -417,11 +417,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </>
             ) : (
               <div className="py-4 text-center space-y-3">
-                <p className="text-xs text-[#A0A0A0]">No upcoming trial deadlines yet.</p>
+                <p className="text-[13px] text-[#A0A0A0]">No upcoming trial deadlines yet.</p>
                 <button
                   type="button"
                   onClick={onOpenAddModal}
-                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-lg shadow-[#D4AF7C]/20 min-h-[46px] px-5 py-2.5 text-xs active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/15 min-h-[44px] px-5 py-2.5 text-[13px] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                 >
                   + Add Your First Free Trial
                 </button>
@@ -431,20 +431,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         )}
 
         {/* MY TRIALS / ALL SUBSCRIPTIONS SECTION */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
-            <h2 className="text-base font-extrabold text-[#F5F5F5]">
+            <h2 className="text-[16px] font-bold text-[#F5F5F5] tracking-tight">
               {activeSection === 'subscriptions' ? 'All Subscriptions' : 'My Trials'}
             </h2>
             <div className="flex items-center gap-2">
               {cancelledCount > 0 && activeSection !== 'trials' && (
-                <div className="inline-flex items-center rounded-full bg-[#161616] border border-white/10 p-0.5 text-[11px]">
+                <div className="inline-flex items-center rounded-full bg-[#161616] border border-white/[0.07] p-0.5 text-[11px]">
                   <button
                     type="button"
                     onClick={() => setStatusFilter('all')}
-                    className={`px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
                       statusFilter !== 'cancelled'
-                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm'
+                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
                         : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
                     }`}
                   >
@@ -453,9 +453,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <button
                     type="button"
                     onClick={() => setStatusFilter('cancelled')}
-                    className={`px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
                       statusFilter === 'cancelled'
-                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm'
+                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
                         : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
                     }`}
                   >
@@ -467,7 +467,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={onLoadShowcaseTrials}
-                  className="text-xs font-bold text-[#D4AF7C] hover:underline cursor-pointer"
+                  className="text-xs font-semibold text-[#D4AF7C] hover:underline cursor-pointer"
                 >
                   + Load 5 Trials
                 </button>
@@ -475,7 +475,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setShowSearchBar((v) => !v)}
-                className="text-xs font-semibold text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
+                className="text-[13px] font-medium text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
               >
                 See all
               </button>
@@ -510,7 +510,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsConfirmingClearCancelled(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#161616] px-3 py-1.5 text-[10px] font-semibold text-[#A0A0A0] transition-colors hover:border-[#D4AF7C]/40 hover:text-[#F5F5F5]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-[#161616] px-3 py-1.5 text-[10px] font-semibold text-[#A0A0A0] transition-colors hover:border-[#D4AF7C]/35 hover:text-[#F5F5F5]"
                 >
                   <Trash2 className="h-3 w-3" />
                   {t('home.clearCancelled')}
@@ -520,7 +520,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
 
           {filteredSubs.length > 0 ? (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <AnimatePresence mode="popLayout" initial={false}>
                 {(activeSection === 'subscriptions'
                   ? filteredSubs
@@ -538,8 +538,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </AnimatePresence>
             </div>
           ) : (
-            <div className="rounded-3xl bg-[#161616] border border-white/[0.08] p-7 text-center space-y-3 shadow-xl">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-[#D4AF7C]/35 bg-[#D4AF7C]/10 text-[#D4AF7C]">
+            <div className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-6 text-center space-y-3.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-[#D4AF7C]/25 bg-[#D4AF7C]/10 text-[#D4AF7C]">
                 {subscriptions.length === 0 && !searchQuery ? (
                   <Gift className="h-5 w-5" />
                 ) : (
@@ -547,12 +547,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 )}
               </div>
               <div>
-                <p className="font-bold text-sm text-[#F5F5F5]">
+                <p className="font-bold text-[15px] text-[#F5F5F5]">
                   {subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialTitle')
                     : t('home.noSubsFound')}
                 </p>
-                <p className="text-xs text-[#A0A0A0] mt-1">
+                <p className="text-[13px] text-[#A0A0A0] mt-1 leading-relaxed">
                   {subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialDesc')
                     : searchQuery
@@ -568,7 +568,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       setSearchQuery('');
                       setStatusFilter('all');
                     }}
-                    className="btn-secondary-luxury min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold cursor-pointer"
+                    className="btn-secondary-luxury min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold cursor-pointer"
                   >
                     <X className="h-3.5 w-3.5" />
                     <span>Reset Filters</span>
@@ -576,7 +576,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 )}
                 <button
                   onClick={onOpenAddModal}
-                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-lg shadow-[#D4AF7C]/20 min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/15 min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[13px] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                 >
                   <Gift className="h-3.5 w-3.5" />
                   <span>
@@ -591,26 +591,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Matching UK Presets when searching */}
           {matchingPresets.length > 0 && (
-            <div className="space-y-2 pt-2">
-              <div className="flex items-center justify-between text-xs text-[#D4AF7C] font-bold px-1">
+            <div className="space-y-2.5 pt-2">
+              <div className="flex items-center justify-between text-xs text-[#D4AF7C] font-semibold px-1">
                 <span>Quick-Add from UK Preset Directory ({matchingPresets.length})</span>
                 <span className="text-[10px] text-[#A0A0A0]">1-Tap Setup</span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {matchingPresets.map((preset) => {
                   const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: preset.name }, s));
                   return (
                     <div
                       key={preset.id}
-                      className="min-h-[68px] py-3 px-4 rounded-2xl bg-[#161616] border border-white/[0.07] flex items-center justify-between gap-3"
+                      className="min-h-[70px] py-3.5 px-4 rounded-[22px] bg-[#161616] border border-white/[0.06] flex items-center justify-between gap-3"
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
                         <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" linkContext="discovery" />
                         <div className="min-w-0 flex-1">
-                          <div className="font-semibold text-sm text-[#F5F5F5] leading-snug">
+                          <div className="font-semibold text-[15px] text-[#F5F5F5] leading-snug">
                             {preset.name}
                           </div>
-                          <div className="text-[11px] text-[#A0A0A0] mt-0.5">
+                          <div className="text-xs text-[#A0A0A0] mt-0.5">
                             {formatPrice(preset.price, preset.currency)}/
                             {preset.frequency === 'yearly' ? 'yr' : 'mo'} · {preset.category}
                           </div>
@@ -630,10 +630,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                 onOpenAddModal();
                               }
                             }}
-                            className={`min-h-[38px] rounded-full px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 transition-all duration-150 ease-out ${
+                            className={`min-h-[38px] rounded-full px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5 transition-all duration-150 ease-out ${
                               isTracked
                                 ? 'border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 cursor-default opacity-90'
-                                : 'btn-secondary-luxury text-[#D4AF7C] active:scale-[0.97] cursor-pointer'
+                                : 'btn-secondary-luxury text-[#D4AF7C] active:scale-[0.975] cursor-pointer'
                             }`}
                           >
                             {isTracked ? (
@@ -661,10 +661,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                               onOpenAddModal();
                             }
                           }}
-                          className={`min-h-[38px] px-3.5 py-2 rounded-full font-bold flex items-center justify-center gap-1 shadow-md transition-all duration-150 ease-out ${
+                          className={`min-h-[38px] px-3.5 py-2 rounded-full font-bold flex items-center justify-center gap-1 shadow-sm transition-all duration-150 ease-out ${
                             isTracked
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default opacity-90'
-                              : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[#D4AF7C]/20 active:scale-[0.97] cursor-pointer'
+                              : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] active:scale-[0.975] cursor-pointer'
                           }`}
                           aria-label={isTracked ? `${preset.name} already added` : `Add ${preset.name}`}
                         >
@@ -691,20 +691,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Free Tier Limit Reached Banner */}
         {userPlan === 'free' && activeCount >= 2 + bonusSlots && onOpenGiftSlot && (
-          <div className="rounded-3xl bg-[#161616] border border-[#D4AF7C]/35 p-3.5 flex items-center justify-between gap-3 shadow-xl">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-8 w-8 rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/35 flex items-center justify-center shrink-0 text-[#D4AF7C]">
+          <div className="rounded-[22px] bg-[#161616] border border-[#D4AF7C]/25 p-4 flex items-center justify-between gap-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-9 w-9 rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/25 flex items-center justify-center shrink-0 text-[#D4AF7C]">
                 <Gift className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-[#F5F5F5] truncate">Free slot limit reached ({activeCount}/{2 + bonusSlots})</div>
-                <div className="text-[10px] text-[#A0A0A0] truncate">Invite a mate & unlock +1 slot for free</div>
+                <div className="text-[13px] font-semibold text-[#F5F5F5] truncate">Free slot limit reached ({activeCount}/{2 + bonusSlots})</div>
+                <div className="text-xs text-[#A0A0A0] truncate">Invite a mate & unlock +1 slot for free</div>
               </div>
             </div>
             <button
               type="button"
               onClick={onOpenGiftSlot}
-              className="btn-champagne shrink-0 px-3.5 py-1.5 rounded-full text-xs font-bold text-[#0A0A0A] active:scale-[0.97] transition-all cursor-pointer shadow-md shadow-[#D4AF7C]/20"
+              className="btn-champagne shrink-0 px-3.5 py-2 rounded-full text-xs font-bold text-[#0A0A0A] active:scale-[0.975] transition-all cursor-pointer"
             >
               +1 Free Slot
             </button>
@@ -712,12 +712,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         )}
 
         {/* Total Potential Charges & Cash-Flow Projection Card */}
-        <div className="rounded-3xl bg-[#161616] border border-white/[0.08] p-4 space-y-3 shadow-xl backdrop-blur-xl">
-          <div className="flex items-center justify-between">
+        <div className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-5 space-y-4 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-xs font-bold text-[#A0A0A0]">Total Potential Charges</div>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="text-2xl font-extrabold text-[#F5F5F5] tabular-nums">
+              <div className="text-[13px] font-medium text-[#A0A0A0]">Total Potential Charges</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-[26px] font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
                   <AnimatedCounter
                     value={monthlyTotal}
                     currencySymbol={currencySymbol}
@@ -732,7 +732,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <button
               type="button"
               onClick={() => setShowCalendarSheet((v) => !v)}
-              className="btn-secondary-luxury min-h-[40px] px-3.5 py-2 rounded-full text-xs font-bold text-[#D4AF7C] flex items-center gap-1.5 active:scale-[0.97] transition-all cursor-pointer"
+              className="btn-secondary-luxury min-h-[40px] px-3.5 py-2 rounded-full text-xs font-semibold text-[#D4AF7C] flex items-center gap-1.5 active:scale-[0.975] transition-all cursor-pointer"
             >
               <CalendarDays className="w-3.5 h-3.5 text-[#D4AF7C]" />
               <span>{showCalendarSheet ? 'Hide Calendar' : 'Calendar'}</span>
@@ -740,20 +740,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {/* Vertical Bar Chart Visual (6-Month Projection) */}
-          <div className="pt-1.5">
-            <div className="flex items-center justify-between text-[11px] text-[#A0A0A0] mb-1.5">
+          <div className="pt-1">
+            <div className="flex items-center justify-between text-xs text-[#A0A0A0] mb-2">
               <span>Monthly Renewal Forecast</span>
               <span className="text-[#D4AF7C] font-semibold">{trialCount} active trials</span>
             </div>
-            <div className="h-20 rounded-2xl bg-[#0A0A0A]/70 border border-white/[0.06] p-2.5 flex items-end justify-between gap-2.5">
+            <div className="h-20 rounded-2xl bg-[#0A0A0A]/80 border border-white/[0.05] p-3 flex items-end justify-between gap-2.5">
               {monthlyChartBars.map((bar, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                  <div className="w-full bg-[#1F1F1F]/70 rounded-t-lg h-full max-h-[48px] flex items-end overflow-hidden">
+                  <div className="w-full bg-[#1F1F1F]/70 rounded-t-md h-full max-h-[46px] flex items-end overflow-hidden">
                     <div
-                      className={`w-full rounded-t-lg transition-all duration-500 ${
+                      className={`w-full rounded-t-md transition-all duration-500 ${
                         bar.active
-                          ? 'bg-gradient-to-t from-[#B79B6B] to-[#D4AF7C] shadow-[0_0_10px_rgba(212,175,124,0.4)]'
-                          : 'bg-gradient-to-t from-[#1F1F1F] to-[#B79B6B]/70'
+                          ? 'bg-gradient-to-t from-[#B79B6B] to-[#D4AF7C]'
+                          : 'bg-gradient-to-t from-[#1F1F1F] to-[#B79B6B]/65'
                       }`}
                       style={{ height: bar.height }}
                     />
@@ -767,13 +767,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {userPlan === 'free' && (
-            <div className="pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-[#A0A0A0] flex-wrap gap-2">
+            <div className="pt-3 border-t border-white/[0.05] flex items-center justify-between text-xs text-[#A0A0A0] flex-wrap gap-2">
               <span className="flex items-center gap-1.5">
                 <span>
                   Free slots: <strong className="text-[#F5F5F5] font-mono">{activeCount}/{2 + bonusSlots}</strong>
                 </span>
                 {bonusSlots > 0 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#D4AF7C]/20 text-[#D4AF7C] border border-[#D4AF7C]/30">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
                     +{bonusSlots} bonus
                   </span>
                 )}
@@ -783,7 +783,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <button
                     type="button"
                     onClick={onOpenGiftSlot}
-                    className="font-bold text-[#D4AF7C] hover:underline cursor-pointer flex items-center gap-1"
+                    className="font-semibold text-[#D4AF7C] hover:underline cursor-pointer flex items-center gap-1"
                   >
                     <Gift className="w-3 h-3" />
                     <span>Invite for +1 slot</span>
@@ -793,7 +793,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={onOpenPaywall}
-                  className="font-bold text-[#D4AF7C] hover:underline cursor-pointer"
+                  className="font-semibold text-[#D4AF7C] hover:underline cursor-pointer"
                 >
                   {t('home.unlockLifetime')}
                 </button>
@@ -814,22 +814,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         {/* UK Free Trial Radar */}
-        <section className="rounded-3xl bg-[#161616] border border-white/[0.08] p-4 shadow-xl">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#D4AF7C]/35 bg-[#D4AF7C]/15 text-[#D4AF7C]">
+        <section className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D4AF7C]/25 bg-[#D4AF7C]/12 text-[#D4AF7C]">
                 <Gift className="h-4 w-4" />
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-extrabold text-[#F5F5F5] truncate">
+                  <h3 className="text-[15px] font-bold text-[#F5F5F5] tracking-tight truncate">
                     UK Free Trial Radar
                   </h3>
-                  <span className="rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/35 px-2 py-0.5 text-[9px] font-bold text-[#D4AF7C]">
+                  <span className="rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/25 px-2 py-0.5 text-[10px] font-semibold text-[#D4AF7C]">
                     Auto-Alarm
                   </span>
                 </div>
-                <p className="text-[11px] text-[#A0A0A0] truncate">
+                <p className="text-[13px] text-[#A0A0A0] truncate mt-0.5">
                   Curated UK trials with 10:00 AM cancellation alarm
                 </p>
               </div>
@@ -837,29 +837,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <button
               type="button"
               onClick={() => setShowTrialRadar((v) => !v)}
-              className="btn-secondary-luxury min-h-[40px] shrink-0 rounded-full px-3.5 py-2 text-xs font-bold text-[#D4AF7C] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+              className="btn-secondary-luxury min-h-[40px] shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold text-[#D4AF7C] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
             >
               {showTrialRadar ? 'Hide' : `Explore (${CURATED_UK_TRIALS.length})`}
             </button>
           </div>
 
           {showTrialRadar && (
-            <div className="mt-3.5 space-y-2.5 pt-3.5 border-t border-white/[0.07]">
+            <div className="mt-4 space-y-3 pt-4 border-t border-white/[0.06]">
               {CURATED_UK_TRIALS.map((deal) => {
                 const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: deal.name }, s));
                 return (
                   <div
                     key={deal.id}
-                    className="rounded-2xl border border-white/[0.07] bg-[#1F1F1F] p-3.5 flex flex-col justify-between gap-3"
+                    className="rounded-2xl border border-white/[0.06] bg-[#1F1F1F]/90 p-4 flex flex-col justify-between gap-3"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-1.5">
-                        <span className="font-bold text-xs text-[#F5F5F5]">{deal.name}</span>
-                        <span className="shrink-0 rounded-full bg-[#D4AF7C]/20 border border-[#D4AF7C]/35 px-2 py-0.5 text-[9px] font-extrabold text-[#D4AF7C]">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-[15px] text-[#F5F5F5]">{deal.name}</span>
+                        <span className="shrink-0 rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/25 px-2.5 py-0.5 text-[10px] font-bold text-[#D4AF7C]">
                           {deal.badge}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#A0A0A0] mt-1 leading-snug">{deal.highlight}</p>
+                      <p className="text-[13px] text-[#A0A0A0] mt-1 leading-relaxed">{deal.highlight}</p>
                     </div>
                     <button
                       type="button"
@@ -873,10 +873,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           onOpenAddModal();
                         }
                       }}
-                      className={`rounded-full font-bold shadow-lg min-h-[44px] w-full px-3 py-2 text-xs flex items-center justify-center gap-1.5 transition-all duration-150 ease-out ${
+                      className={`rounded-full font-bold min-h-[44px] w-full px-4 py-2.5 text-[13px] flex items-center justify-center gap-1.5 transition-all duration-150 ease-out ${
                         isTracked
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default opacity-90'
-                          : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-[#D4AF7C]/20 active:scale-[0.97] cursor-pointer'
+                          : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm active:scale-[0.975] cursor-pointer'
                       }`}
                     >
                       {isTracked ? (
@@ -903,32 +903,32 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
-          className="relative overflow-hidden rounded-3xl bg-[#161616] border border-white/[0.08] p-5 shadow-xl space-y-4"
+          className="relative overflow-hidden rounded-[22px] bg-[#161616] border border-white/[0.06] p-5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)] space-y-4"
         >
           <div className="relative z-10 flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#D4AF7C]/20 text-[#D4AF7C] border border-[#D4AF7C]/40">
+            <div className="space-y-1.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
                 <Trophy className="w-3 h-3 text-[#D4AF7C]" />
                 {t('home.savedSoFarTitle')}
               </span>
 
-              <div className="flex items-baseline gap-2 pt-1">
-                <span className="text-3xl font-extrabold text-[#F5F5F5] tracking-tight tabular-nums">
+              <div className="flex items-baseline gap-2 pt-0.5">
+                <span className="text-[28px] font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
                   <AnimatedCounter
                     value={totalSavings}
                     currencySymbol={currencySymbol}
                     className={`text-[#D4AF7C] ${isSavingsBoosted ? 'animate-savings-counter' : ''}`}
                   />
                 </span>
-                <span className="text-xs text-[#A0A0A0] font-semibold">{t('home.savedPerMonth')}</span>
+                <span className="text-xs text-[#A0A0A0] font-medium">{t('home.savedPerMonth')}</span>
               </div>
 
-              <div className="mt-1.5 inline-flex items-center gap-2 rounded-full border border-white/[0.07] bg-[#1F1F1F] px-3 py-1 text-[11px]">
+              <div className="mt-1.5 inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-[#1F1F1F] px-3 py-1 text-xs">
                 <span className="text-[#A0A0A0]">{t('home.thisMonthSavings')}</span>
                 <span className="font-bold text-[#D4AF7C]">{formatPrice(thisMonthSavings, currencySymbol)}</span>
               </div>
 
-              <p className="text-xs text-[#A0A0A0] leading-snug pt-0.5">
+              <p className="text-[13px] text-[#A0A0A0] leading-relaxed pt-0.5">
                 {cancelledCount > 0
                   ? cancelledCount === 1
                     ? t('home.savedSubsCountSingle')
@@ -945,15 +945,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 playSuccessFanfare();
               }}
               aria-label={t('home.celebrateSavings')}
-              className="w-14 h-14 rounded-full bg-[#1F1F1F] border border-[#D4AF7C]/40 flex items-center justify-center shrink-0 shadow-lg cursor-pointer"
+              className="w-12 h-12 rounded-full bg-[#1F1F1F] border border-[#D4AF7C]/30 flex items-center justify-center shrink-0 cursor-pointer"
             >
-              <Trophy className="w-7 h-7 text-[#D4AF7C] fill-[#D4AF7C]/30 animate-trophy" />
+              <Trophy className="w-6 h-6 text-[#D4AF7C] fill-[#D4AF7C]/25 animate-trophy" />
             </motion.button>
           </div>
 
           {cancelledCount > 0 && (
-            <div className="relative z-10 pt-3 border-t border-white/[0.07] flex items-center justify-between text-xs text-[#F5F5F5] font-medium">
-              <span className="flex items-center gap-1 text-[#A0A0A0]">
+            <div className="relative z-10 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-[#F5F5F5] font-medium">
+              <span className="flex items-center gap-1.5 text-[#A0A0A0]">
                 <TrendingUp className="w-3.5 h-3.5 text-[#D4AF7C]" />
                 {t('home.annualizedSavings')}:
               </span>
@@ -964,19 +964,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
 
           {/* Achievements Row */}
-          <div className="pt-2 border-t border-white/[0.07] space-y-2">
+          <div className="pt-3 border-t border-white/[0.06] space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#A0A0A0]">
+              <span className="text-xs font-semibold text-[#A0A0A0]">
                 {t('home.achievements')}
               </span>
-              <span className="text-[10px] font-semibold text-[#D4AF7C]">
+              <span className="text-xs font-semibold text-[#D4AF7C]">
                 {t('home.achievementsUnlocked', {
                   unlocked: unlockedAchievementIds.length,
                   total: ACHIEVEMENTS.length,
                 })}
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {ACHIEVEMENTS.map((achievement, index) => {
                 const isUnlocked = unlockedAchievementIds.includes(achievement.id);
                 const isCelebrating = celebratingAchievementIds.includes(achievement.id);
@@ -985,10 +985,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 return (
                   <div
                     key={achievement.id}
-                    className={`flex items-center gap-2 rounded-2xl border p-2.5 ${
+                    className={`flex items-center gap-2.5 rounded-2xl border p-3 ${
                       isUnlocked
-                        ? 'border-[#D4AF7C]/40 bg-[#D4AF7C]/15 text-[#D4AF7C]'
-                        : 'border-white/[0.05] bg-[#1F1F1F] text-[#A0A0A0]/60'
+                        ? 'border-[#D4AF7C]/30 bg-[#D4AF7C]/12 text-[#D4AF7C]'
+                        : 'border-white/[0.05] bg-[#1F1F1F]/80 text-[#A0A0A0]/65'
                     } ${isCelebrating ? 'animate-achievement-unlock' : ''}`}
                     aria-label={`${t(achievement.titleKey)}${
                       isUnlocked ? `, ${t('home.achievementUnlocked')}` : `, ${t('home.achievementLocked')}`
@@ -996,7 +996,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   >
                     <AchievementIcon className="h-4 w-4 shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-[10px] font-bold leading-tight truncate">
+                      <div className="text-xs font-semibold leading-tight truncate">
                         {t(achievement.titleKey)}
                       </div>
                     </div>
@@ -1009,18 +1009,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Smart Trial Reminder Notifications Mobile Card */}
         {activeSubs.length > 0 && (
-          <div className="rounded-3xl bg-[#161616] border border-white/[0.08] p-4 space-y-3 shadow-xl">
-            <div className="flex items-center justify-between px-0.5">
-              <h3 className="text-xs font-extrabold text-[#F5F5F5] uppercase tracking-wider">
+          <div className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-5 space-y-3.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[15px] font-bold text-[#F5F5F5] tracking-tight">
                 Smart Trial Alerts
               </h3>
-              <span className="text-[10px] font-bold text-[#D4AF7C] flex items-center gap-1">
+              <span className="text-xs font-semibold text-[#D4AF7C] flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 10:00 AM Guard
               </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {activeSubs.slice(0, 2).map((sub, idx) => {
                 const days = Math.max(1, getDaysUntilNextPayment(sub.nextPaymentDate));
                 const displayName = sub.name.replace(' UK Standard', '').replace(' Premium UK', '').replace(' UK', '');
@@ -1029,31 +1029,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <div
                     key={sub.id}
                     onClick={() => onOpenSubscriptionDetail(sub)}
-                    className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F]/80 p-3.5 space-y-2 cursor-pointer hover:border-[#D4AF7C]/30 active:scale-[0.99] transition-all duration-150 select-none shadow-sm"
+                    className="rounded-2xl border border-white/[0.06] bg-[#1F1F1F]/75 p-4 space-y-2.5 cursor-pointer hover:border-[#D4AF7C]/25 active:scale-[0.99] transition-all duration-150 select-none"
                   >
-                    <div className="flex items-start gap-2.5">
-                      <div className="h-6 w-6 rounded-md bg-[#D4AF7C]/15 border border-[#D4AF7C]/25 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 mt-0.5">
                         <GoldBellIcon size="xs" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold text-[#A0A0A0] uppercase tracking-wider">Monetry</span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
+                          <span className="text-[11px] font-semibold text-[#A0A0A0] uppercase tracking-wider">Monetry</span>
+                          <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/20">
                             {days}d left
                           </span>
                         </div>
-                        <p className="text-xs text-[#F5F5F5] mt-1 font-semibold leading-snug">
+                        <p className="text-[14px] text-[#F5F5F5] mt-1 font-semibold leading-snug">
                           {idx === 0
                             ? `${displayName} trial ends in ${days} days`
                             : `Upcoming: ${displayName} renewal`}
                         </p>
-                        <p className="text-[11px] text-[#A0A0A0] mt-0.5 leading-snug">
+                        <p className="text-xs text-[#A0A0A0] mt-0.5 leading-snug">
                           {formatPrice(sub.price, sub.currency || currencySymbol)}/{sub.frequency === 'yearly' ? 'yr' : 'mo'} · 10:00 AM auto-alert active
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-white/[0.05]">
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.05]">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1061,7 +1061,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           if (onOpenCancelSub) onOpenCancelSub(sub);
                           else onOpenSubscriptionDetail(sub);
                         }}
-                        className="btn-cancel-soft py-1 px-3 text-[11px] font-semibold rounded-full active:scale-[0.97] transition-all cursor-pointer"
+                        className="btn-cancel-soft py-1.5 px-3.5 text-xs font-semibold rounded-full active:scale-[0.975] transition-all cursor-pointer"
                       >
                         Cancel Trial
                       </button>
@@ -1071,7 +1071,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           e.stopPropagation();
                           onOpenSubscriptionDetail(sub);
                         }}
-                        className="btn-secondary-luxury py-1 px-3 text-[11px] font-bold text-[#D4AF7C] rounded-full active:scale-[0.97] transition-all cursor-pointer"
+                        className="btn-secondary-luxury py-1.5 px-3.5 text-xs font-semibold text-[#D4AF7C] rounded-full active:scale-[0.975] transition-all cursor-pointer"
                       >
                         View
                       </button>
