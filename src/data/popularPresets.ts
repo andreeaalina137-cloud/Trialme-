@@ -628,6 +628,142 @@ export function hasActiveUkFreeTrial(preset?: {
   return true;
 }
 
+export const CONCISE_CANCELLATION_TIPS: Record<string, string> = {
+  netflix_standard_uk: 'Cancel online anytime in your Netflix account with access continuing until the billing period ends.',
+  spotify_premium_uk: 'Cancel in your Spotify account overview to revert to Spotify Free while keeping your playlists.',
+  disney_plus_uk: 'Cancel online in your Disney+ subscription settings before your next billing date.',
+  amazon_prime_uk: 'Manage or end membership in Amazon Prime Central before renewal to avoid automatic annual billing.',
+  apple_tv_plus_uk: 'Cancel at least 24 hours before renewal in Apple Subscriptions; trial access ends immediately upon cancellation.',
+  now_tv_uk: 'Cancel each active Cinema, Entertainment, or Boost pass individually in your NOW account settings.',
+  sky_stream_uk: 'Rolling Sky plans require 31 days advance notice via your MySky account or support chat.',
+  youtube_premium_uk: 'Cancel anytime via YouTube Paid Memberships in your web browser or mobile settings.',
+  audible_uk: 'Spend any remaining audiobook credits before cancelling in Audible account details, as unused credits expire.',
+  bbc_tv_licence: 'Cancel online via TV Licensing if you no longer watch live TV or use BBC iPlayer.',
+  dazn_uk: 'Monthly Flex plans require 30 days advance notice in your DAZN account settings.',
+  paramount_plus_uk: 'Cancel in your Paramount+ account settings at least 24 hours prior to your renewal date.',
+  discovery_plus_tnt_uk: 'Cancel online anytime in your Discovery+ account settings before the next monthly billing cycle.',
+  the_guardian_digital: 'Manage or cancel your digital subscription online via your Guardian account portal.',
+  puregym_core_uk: 'Cancel online via the PureGym member dashboard at least 4 working days before your Direct Debit date.',
+  the_gym_group_uk: 'Cancel in the member portal at least 4 working days before your next Direct Debit payment.',
+  david_lloyd_uk: 'Requires 3 full calendar months written notice after your initial commitment period.',
+  jd_gyms_uk: 'Submit the online cancellation form at least 14 days before your billing date before stopping your Direct Debit.',
+  virgin_active_uk: 'Requires 30 days formal notice via your home club or the Virgin Active member portal.',
+  strava_uk: 'Cancel in Strava account settings at least 24 hours before trial or annual renewal.',
+  myfitnesspal_premium_uk: 'Cancel via your web account or app store subscriptions at least 24 hours before renewal.',
+  whoop_uk: 'Cancel online and return any trial hardware within the return window to avoid commitment fees.',
+  headspace_uk: 'Turn off auto-renewal in your Headspace subscription settings at least 24 hours before renewal.',
+  calm_premium_uk: 'Cancel at least 24 hours before trial or annual renewal in your Calm account settings.',
+  playstation_plus_uk: 'Turn off auto-renewal in PlayStation account Subscription Management before your next billing date.',
+  xbox_game_pass_ultimate_uk: 'Turn off recurring billing online in your Microsoft Services & Subscriptions dashboard.',
+  nintendo_switch_online_uk: 'Turn off automatic renewal in Nintendo eShop or account membership settings.',
+  chatgpt_plus_uk: 'Cancel anytime under My Plan in ChatGPT settings at least 24 hours before renewal.',
+  claude_pro_uk: 'Cancel anytime via Billing settings in your Claude account before your monthly renewal.',
+  apple_icloud_200gb_uk: 'Downgrade or cancel anytime in iPhone Settings under your Apple Account and iCloud storage.',
+  google_one_ai_uk: 'Cancel or downgrade your storage plan anytime in Google One membership settings.',
+  microsoft_365_personal_uk: 'Turn off recurring billing in your Microsoft account Services & Subscriptions portal.',
+  nordvpn_uk: 'Cancel auto-renewal in your Nord Account billing tab; 30-day refunds require live support chat.',
+  expressvpn_uk: 'Turn off automatic renewal in your ExpressVPN dashboard under My Subscription.',
+  adobe_creative_cloud_uk: 'Manage plan in your Adobe account; cancelling an annual contract after 14 days may incur an early exit fee.',
+  canva_pro_uk: 'Cancel anytime under Billing & Teams in Canva settings while keeping access to free designs.',
+  deliveroo_plus_uk: 'Cancel anytime in the Deliveroo app under Account and Deliveroo Plus membership.',
+  uber_one_uk: 'Cancel in the Uber app at least 48 hours before your next billing date to avoid renewal.',
+  just_eat_plus_uk: 'Cancel anytime in your Just Eat account settings prior to your monthly renewal date.',
+  hellofresh_uk: 'Pause or cancel in Plan Settings by 11:59 PM on the Wednesday before your next scheduled delivery.',
+  gousto_uk: 'Skip or cancel in Subscription Settings before 12:00 PM noon, 3 days prior to delivery.',
+  club_pret_uk: 'Cancel anytime via your Pret account settings in the app or online.',
+  tesco_clubcard_plus_uk: 'Cancel anytime in your Tesco Clubcard account settings before your next monthly billing date.',
+  asos_premier_uk: 'Turn off auto-renew in your ASOS Premier account settings before your annual renewal date.',
+  experian_creditexpert_uk: 'Downgrade to the free Experian account in Subscription Details before your billing cycle renews.',
+  clearscore_protect_uk: 'Cancel the Protect add-on in your ClearScore account settings; your core credit report stays free.',
+  equifax_uk: 'Cancel your subscription online in MyEquifax account settings before the next billing date.',
+  monzo_perks_uk: 'Cancel directly in the Monzo app under Perks settings.',
+  revolut_premium_uk: 'Cancel in the Revolut app under Your Plan; early termination within 12 months may incur a break fee.',
+};
+
+const BOILERPLATE_NOTE_PATTERNS = [
+  /^local preset$/i,
+  /^cancellation trap detected\.?$/i,
+  /^no (uk )?free trial\.?$/i,
+  /^auto[- ]?detected( recurring)? subscription\.?$/i,
+  /^recurring subscription\.?$/i,
+  /^subscription\.?$/i,
+  /^monthly subscription\.?$/i,
+  /^annual subscription\.?$/i,
+];
+
+export function isRedundantSubscriptionNote(
+  note: string | undefined | null,
+  serviceName?: string | null,
+  presetName?: string | null
+): boolean {
+  if (!note || typeof note !== 'string') return true;
+  const trimmed = note.trim();
+  if (!trimmed) return true;
+
+  if (BOILERPLATE_NOTE_PATTERNS.some((re) => re.test(trimmed))) {
+    return true;
+  }
+
+  const normNote = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  if (!normNote) return true;
+
+  const names = [serviceName, presetName]
+    .filter((n): n is string => typeof n === 'string' && n.trim().length > 0)
+    .map((n) => n.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim())
+    .filter(Boolean);
+
+  for (const normName of names) {
+    if (normNote === normName) return true;
+    if (normName.includes(normNote) && normNote.split(/\s+/).length <= 4) return true;
+    if (normNote.includes(normName)) {
+      const remainder = normNote.replace(normName, '').trim();
+      const extraWords = remainder ? remainder.split(/\s+/).filter(Boolean) : [];
+      if (extraWords.length <= 2) return true;
+    }
+  }
+
+  return false;
+}
+
+export function resolveConciseCancellationTip(
+  serviceName: string,
+  rawNote?: string | null,
+  presetId?: string | null,
+  presetName?: string | null
+): string | null {
+  if (rawNote !== undefined && rawNote !== null && rawNote.trim() !== '') {
+    if (isRedundantSubscriptionNote(rawNote, serviceName, presetName)) {
+      return null;
+    }
+  }
+
+  if (presetId && CONCISE_CANCELLATION_TIPS[presetId]) {
+    if (!rawNote || !rawNote.trim()) {
+      return CONCISE_CANCELLATION_TIPS[presetId];
+    }
+  }
+
+  if (rawNote && rawNote.trim()) {
+    const clean = rawNote.trim();
+    if (isRedundantSubscriptionNote(clean, serviceName, presetName)) {
+      return null;
+    }
+    if (presetId && CONCISE_CANCELLATION_TIPS[presetId]) {
+      const dbPreset = getDatabase().presets.find((p) => p.id === presetId);
+      if (dbPreset && dbPreset.notes && clean === dbPreset.notes.trim()) {
+        return CONCISE_CANCELLATION_TIPS[presetId];
+      }
+    }
+    return clean;
+  }
+
+  if (presetId && CONCISE_CANCELLATION_TIPS[presetId]) {
+    return CONCISE_CANCELLATION_TIPS[presetId];
+  }
+
+  return null;
+}
+
 export function mapPresetToPopularPreset(preset: PresetService): PopularPreset {
   const meta = PRESET_METADATA[preset.id] || {
     color: '#D4AF7C',
@@ -640,6 +776,7 @@ export function mapPresetToPopularPreset(preset: PresetService): PopularPreset {
   };
 
   const defaultTrialDays = resolveDefaultTrialDays(preset.trial_duration_days);
+  const conciseTip = CONCISE_CANCELLATION_TIPS[preset.id] || (meta as any).description || '';
 
   return {
     id: preset.id,
@@ -653,13 +790,13 @@ export function mapPresetToPopularPreset(preset: PresetService): PopularPreset {
     cancelUrl: preset.cancel_url,
     cancelEmail: meta.cancelEmail || '',
     cancelSteps: meta.cancelSteps,
-    description: (meta as any).description || preset.name,
+    description: conciseTip,
     defaultTrialDays,
     trialUrl: meta.trialUrl || preset.cancel_url,
     keywords: meta.keywords,
     hasFreeTrial: preset.has_free_trial,
     trialType: preset.trial_type,
-    notes: preset.notes,
+    notes: CONCISE_CANCELLATION_TIPS[preset.id] || preset.notes,
     monthlyPriceGbp: preset.monthly_price_gbp,
     trialDurationDays: preset.trial_duration_days,
   };

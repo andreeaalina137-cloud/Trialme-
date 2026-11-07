@@ -999,26 +999,26 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                               <span>10am Alarm: <strong className="text-[#D4AF7C]">{formatArmedAlarmDateTime(drawerTiming.alarmArmedAt)}</strong></span>
                             </div>
 
-                            {preset.notes && (
-                              <div className="rounded-2xl p-3.5 bg-[#0A0A0A] border border-[#D4AF37]/50 shadow-md shadow-[#D4AF37]/10 space-y-1.5">
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] uppercase tracking-wider">
-                                  <AlertTriangle className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-                                  <span>Smart Trap Warning / Cancellation Tip</span>
-                                </div>
-                                <p className="text-xs text-[#F5F5F5]/90 leading-relaxed">{preset.notes}</p>
+                            {(preset.cancelUrl || preset.notes) && (
+                              <div className="rounded-xl px-3.5 py-2.5 bg-white/[0.02] border border-white/[0.06] space-y-2">
                                 {preset.cancelUrl && (
-                                  <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-xs">
-                                    <span className="text-[#A0A0A0]">Cancellation URL:</span>
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-[#A0A0A0] font-medium">Cancellation Portal</span>
                                     <a
                                       href={preset.cancelUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-[#D4AF37] hover:underline flex items-center gap-1 font-mono font-bold"
+                                      className="text-[#D4AF37] hover:text-[#E5C391] hover:underline flex items-center gap-1 font-semibold transition-colors"
                                       onClick={(e) => e.stopPropagation()}
                                     >
-                                      <span>Open Portal</span>
-                                      <ExternalLink className="w-3 h-3" />
+                                      <span>Open Link ↗</span>
                                     </a>
+                                  </div>
+                                )}
+                                {preset.notes && preset.notes.toLowerCase().trim() !== preset.name.toLowerCase().trim() && (
+                                  <div className={`flex items-start gap-2 ${preset.cancelUrl ? 'pt-1.5 border-t border-white/[0.05]' : ''}`}>
+                                    <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#D4AF37] shrink-0" />
+                                    <p className="text-xs text-white/50 leading-relaxed">{preset.notes}</p>
                                   </div>
                                 )}
                               </div>

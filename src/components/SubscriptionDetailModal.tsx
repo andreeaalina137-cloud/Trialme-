@@ -19,6 +19,7 @@ import {
 import { getUkPriceHikeAlert } from '../utils/retentionAndTrust';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getAffiliateOffer } from '../data/cheaperAlternatives';
+import { isRedundantSubscriptionNote, resolveConciseCancellationTip } from '../data/popularPresets';
 import { useMonetryData } from '../context/DatabaseContext';
 
 interface SubscriptionDetailModalProps {
@@ -66,7 +67,11 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
       setPrice(subscription.price.toString());
       setNextPaymentDate(subscription.nextPaymentDate);
       setReminderDays(subscription.reminderDaysBefore || 3);
-      setNotes(subscription.notes || '');
+      setNotes(
+        isRedundantSubscriptionNote(subscription.notes, subscription.name)
+          ? ''
+          : subscription.notes || ''
+      );
       setIsEditing(false);
       setIsConfirmingDelete(false);
       setCalendarSyncedNotice(null);
@@ -89,6 +94,17 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
     && !!affiliateOffer?.annualUrl && annualDiscountRate > 0;
   const calendarReminderDate = getSubscriptionReminderDate(subscription);
   const reminderDaysBefore = subscription.reminderDaysBefore || 3;
+  const portalUrl = subscription.cancelUrl || matchedPreset?.cancel_url;
+  const meaningfulTip = resolveConciseCancellationTip(
+    subscription.name,
+    subscription.notes,
+    matchedPreset?.id,
+    matchedPreset?.name
+  );
+  const showCoolingOffBadge =
+    isTrial &&
+    matchedPreset &&
+    (matchedPreset.trial_type === 'cooling_off' || matchedPreset.trial_type === 'free_trial');
 
   const handleCalendarSync = () => {
     if (!calendarReminderDate || isCancelled) return;
@@ -480,54 +496,43 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 )}
               </div>
 
-              {(subscription.notes || matchedPreset?.notes) && (
-                <div className="p-4 rounded-3xl bg-[#0A0A0A] border border-[#D4AF37]/50 shadow-md shadow-[#D4AF37]/10 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] uppercase tracking-wider">
-                      <ShieldAlert className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                      <span>Smart Trap Warning / Cancellation Tip</span>
-                    </div>
-                    {matchedPreset && (
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          matchedPreset.trial_type === 'none'
-                            ? 'bg-zinc-800 text-[#A0A0A0] border border-zinc-700'
-                            : matchedPreset.trial_type === 'cooling_off'
-                            ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
-                            : matchedPreset.trial_type === 'money_back'
-                            ? 'bg-sky-500/10 text-sky-300 border border-sky-500/30'
-                            : matchedPreset.trial_type === 'promo_discount'
-                            ? 'bg-purple-500/10 text-purple-300 border border-purple-500/30'
-                            : 'bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30'
-                        }`}
-                      >
-                        {matchedPreset.trial_type === 'none'
-                          ? 'No UK Free Trial'
-                          : matchedPreset.trial_type === 'cooling_off'
-                          ? '14-Day Cooling-Off'
-                          : matchedPreset.trial_type === 'money_back'
-                          ? '30-Day Refund Shield'
-                          : matchedPreset.trial_type === 'promo_discount'
-                          ? 'Promo Intro Offer'
-                          : `${matchedPreset.trial_duration_days}d Free Trial`}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-[#F5F5F5]/90 leading-relaxed">
-                    {subscription.notes || matchedPreset?.notes}
-                  </p>
-                  {(subscription.cancelUrl || matchedPreset?.cancel_url) && (
-                    <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-xs">
-                      <span className="text-[#A0A0A0]">Cancellation Portal:</span>
+              {(portalUrl || meaningfulTip) && (
+                <div className="px-3.5 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2">
+                  {portalUrl && (
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-[#A0A0A0] font-medium">Cancellation Portal</span>
+                        {showCoolingOffBadge && matchedPreset && (
+                          <span className="text-[10px] text-[#D4AF37]/80 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-full px-2 py-0.5 shrink-0">
+                            {matchedPreset.trial_type === 'cooling_off'
+                              ? '14-Day Cooling-Off'
+                              : `${matchedPreset.trial_duration_days}d Trial`}
+                          </span>
+                        )}
+                      </div>
                       <a
-                        href={subscription.cancelUrl || matchedPreset?.cancel_url}
+                        href={portalUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#D4AF37] hover:underline flex items-center gap-1 font-mono font-bold"
+                        className="text-[#D4AF37] hover:text-[#E5C391] hover:underline flex items-center gap-1 font-semibold shrink-0 transition-colors"
                       >
-                        <span>Open Link</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Open Link ↗</span>
                       </a>
+                    </div>
+                  )}
+                  {meaningfulTip && (
+                    <div
+                      className={`flex items-start gap-2 ${
+                        portalUrl ? 'pt-1.5 border-t border-white/[0.05]' : ''
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#D4AF37] shrink-0"
+                      />
+                      <p className="text-xs text-white/50 leading-relaxed">
+                        {meaningfulTip}
+                      </p>
                     </div>
                   )}
                 </div>

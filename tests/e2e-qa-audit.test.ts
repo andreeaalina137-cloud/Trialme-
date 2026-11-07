@@ -3,7 +3,13 @@ import assert from 'node:assert/strict';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { POPULAR_PRESETS, INITIAL_DEMO_SUBSCRIPTIONS, type PresetFilterGroup } from '../src/data/popularPresets';
+import {
+  POPULAR_PRESETS,
+  INITIAL_DEMO_SUBSCRIPTIONS,
+  resolveConciseCancellationTip,
+  isRedundantSubscriptionNote,
+  type PresetFilterGroup,
+} from '../src/data/popularPresets';
 import { AFFILIATE_OFFERS, getAffiliateOffer, getCheaperAlternative } from '../src/data/cheaperAlternatives';
 import {
   calculateSmartTrialTiming,
@@ -563,6 +569,45 @@ describe('SubCleaner A-to-Z End-to-End (E2E) QA Simulation Suite', () => {
       );
       assert.ok(detailHtml.includes('1-Tap Google Calendar'));
       assert.ok(detailHtml.includes('UK Price Hike (+£2/mo)'));
+      assert.ok(detailHtml.includes('Cancellation Portal'));
+      assert.ok(detailHtml.includes('Open Link ↗'));
+      assert.ok(!detailHtml.includes('Smart Trap Warning / Cancellation Tip'));
+
+      // Verify Monzo Perks / Max with redundant name-as-note hides the tip and shows only Cancellation Portal -> Open Link ↗
+      const monzoSub: Subscription = {
+        ...sampleSub,
+        id: 'sub-monzo-test',
+        name: 'Monzo Perks / Max',
+        price: 7.0,
+        category: 'Utilities',
+        cancelUrl: 'https://monzo.com/',
+        notes: 'Monzo Perks / Max',
+      };
+      const monzoDetailHtml = renderToStaticMarkup(
+        React.createElement(
+          LanguageProvider,
+          null,
+          React.createElement(SubscriptionDetailModal, {
+            isOpen: true,
+            onClose: noop,
+            subscription: monzoSub,
+            onUpdateSubscription: noop,
+            onDeleteSubscription: noop,
+            onOpenCancelAssistant: noop,
+            currencySymbol: '£',
+          })
+        )
+      );
+      assert.ok(monzoDetailHtml.includes('Cancellation Portal'));
+      assert.ok(monzoDetailHtml.includes('Open Link ↗'));
+      assert.ok(!monzoDetailHtml.includes('Smart Trap Warning'));
+      assert.ok(!monzoDetailHtml.includes('14-Day Cooling-Off'));
+      assert.equal(isRedundantSubscriptionNote('Monzo Perks / Max', 'Monzo Perks / Max'), true);
+      assert.equal(resolveConciseCancellationTip('Monzo Perks / Max', 'Monzo Perks / Max', 'monzo_perks_uk'), null);
+      assert.equal(
+        resolveConciseCancellationTip('Monzo Perks / Max', undefined, 'monzo_perks_uk'),
+        'Cancel directly in the Monzo app under Perks settings.'
+      );
 
       const cancelHtml = renderToStaticMarkup(
         React.createElement(
