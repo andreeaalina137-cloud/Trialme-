@@ -32,7 +32,7 @@ export const CancelAssistantModal: React.FC<CancelAssistantModalProps> = ({
   const [accountName, setAccountName] = useState('');
   const [isAlternativeDismissed, setIsAlternativeDismissed] = useState(false);
 
-  if (!isOpen) return null;
+  if (!isOpen || !subscription || subscription.status === 'cancelled') return null;
 
   const defaultGuideSteps = subscription.cancelGuideSteps || [
     `Log into your official ${subscription.name} account dashboard`,
@@ -68,6 +68,10 @@ ${accountName || '[Your Full Name]'}`;
   };
 
   const handleConfirm = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (subscription.status === 'cancelled') {
+      onClose();
+      return;
+    }
     onCelebrate({ x: event.clientX, y: event.clientY });
     playSuccessFanfare();
     onConfirmCancellation(subscription.id);

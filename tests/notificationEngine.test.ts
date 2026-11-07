@@ -14,8 +14,9 @@ import {
   type NotificationPermissionState,
   type NotificationActionListener,
   type PlatformType,
+  getAllPossibleNotificationIdsForItem,
 } from '../src/notifications';
-import { clearMemoryStorage } from '../src/utils/storage';
+import { clearMemoryStorage, safeStorageGet, safeStorageSet } from '../src/utils/storage';
 
 /**
  * In-memory Mock Driver simulating platform delivery (Android / iOS / Web).
@@ -453,6 +454,50 @@ describe('MONETRY — Notification Intelligence Engine V1', () => {
     assert.equal(repo.getAll().length, 2);
 
     await service.syncOnDelete(sampleTrial.id);
+    assert.equal(repo.getAll().length, 0);
+  });
+
+  // 23. Hard-purge on cancelSubscription(id) and removeSubscription(id) clears stored alert keys and all deterministic IDs
+  it('23. cancelSubscription(id) and removeSubscription(id) hard-purge scheduled IDs and stored alert keys', async () => {
+    await service.syncOnAdd(sampleSub, BASE_NOW);
+    safeStorageSet(`subcleaner_due_alert:${sampleSub.id}:2026-11-04`, 'true');
+    safeStorageSet(`subcleaner_due_alert:${sampleSub.id}:2026-11-05`, 'true');
+    safeStorageSet(`subcleaner_due_alert:${sampleTrial.id}:2026-11-04`, 'true');
+
+    await service.cancelSubscription(sampleSub.id);
+
+    assert.equal(repo.getByItemId(sampleSub.id).length, 0);
+    assert.equal(safeStorageGet(`subcleaner_due_alert:${sampleSub.id}:2026-11-04`), null);
+    assert.equal(safeStorageGet(`subcleaner_due_alert:${sampleSub.id}:2026-11-05`), null);
+    assert.equal(safeStorageGet(`subcleaner_due_alert:${sampleTrial.id}:2026-11-04`), 'true');
+
+    const expectedPurgedIds = getAllPossibleNotificationIdsForItem(sampleSub.id);
+    const cancelledByDriver = mockDriver.cancelledCalls.flat();
+    for (const id of expectedPurgedIds) {
+      assert.equal(cancelledByDriver.includes(id), true, `Expected deterministic ID ${id} to be cancelled on driver`);
+    }
+
+    // Also test removeSubscription alias even when repository is already empty
+    mockDriver.reset();
+    await service.removeSubscription(sampleSub.id);
+    const cancelledOnRemove = mockDriver.cancelledCalls.flat();
+    for (const id of expectedPurgedIds) {
+      assert.equal(cancelledOnRemove.includes(id), true, `Expected deterministic ID ${id} to be cancelled on removeSubscription`);
+    }
+  });
+
+  // 24. Boot reconciliation strictly excludes cancelled and paused subscriptions
+  it('24. boot reconciliation strictly excludes cancelled and paused items and purges any orphaned schedules', async () => {
+    await service.syncOnAdd(sampleSub, BASE_NOW);
+    await service.syncOnAdd(sampleTrial, BASE_NOW);
+    assert.equal(repo.getAll().length, 4);
+
+    const cancelledSub: Subscription = { ...sampleSub, status: 'cancelled' };
+    const pausedTrial: Subscription = { ...sampleTrial, status: 'paused' as any };
+
+    const result = await service.reconcileAll([cancelledSub, pausedTrial], BASE_NOW);
+    assert.equal(result.scheduledCount, 0);
+    assert.equal(result.cancelledCount, 4);
     assert.equal(repo.getAll().length, 0);
   });
 });

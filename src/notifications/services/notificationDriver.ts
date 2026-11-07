@@ -67,6 +67,7 @@ interface CapacitorLocalNotificationsPlugin {
 export class NotificationDriver implements INotificationDriver {
   private actionListeners = new Set<NotificationActionListener>();
   private channelInitialized = false;
+  private webTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
   public getPlatform(): PlatformType {
     if (typeof window !== 'undefined' && (window as any).Capacitor) {
@@ -239,8 +240,33 @@ export class NotificationDriver implements INotificationDriver {
 
     // Web / Headless mode:
     // Scheduled metadata is safely stored in local repository.
-    // Web notifications cannot guarantee background delivery while the tab is closed,
-    // which is strictly documented according to Phase 5.
+    // Clear any existing pending web timer for each notification ID before scheduling.
+    for (const n of notifications) {
+      const existingTimer = this.webTimers.get(n.id);
+      if (existingTimer !== undefined) {
+        clearTimeout(existingTimer);
+        this.webTimers.delete(n.id);
+      }
+      if (
+        typeof window !== 'undefined' &&
+        typeof Notification !== 'undefined' &&
+        Notification.permission === 'granted'
+      ) {
+        const delayMs = new Date(n.scheduledFor).getTime() - Date.now();
+        // Node/browser setTimeout max safe 32-bit delay is ~24.8 days (2147483647 ms)
+        if (delayMs > 0 && delayMs <= 2147483647) {
+          const timerId = setTimeout(() => {
+            this.webTimers.delete(n.id);
+            try {
+              new Notification(n.title, { body: n.body });
+            } catch {
+              // ignore
+            }
+          }, delayMs);
+          this.webTimers.set(n.id, timerId);
+        }
+      }
+    }
     return {
       scheduledIds: notifications.map((n) => n.id),
       failedIds: [],
@@ -249,6 +275,13 @@ export class NotificationDriver implements INotificationDriver {
 
   public async cancel(notificationIds: number[]): Promise<number[]> {
     if (notificationIds.length === 0) return [];
+    for (const id of notificationIds) {
+      const timerId = this.webTimers.get(id);
+      if (timerId !== undefined) {
+        clearTimeout(timerId);
+        this.webTimers.delete(id);
+      }
+    }
     const plugin = this.getCapacitorPlugin();
     if (plugin) {
       try {
@@ -263,6 +296,10 @@ export class NotificationDriver implements INotificationDriver {
   }
 
   public async cancelAll(): Promise<void> {
+    for (const timerId of this.webTimers.values()) {
+      clearTimeout(timerId);
+    }
+    this.webTimers.clear();
     const plugin = this.getCapacitorPlugin();
     if (plugin) {
       try {

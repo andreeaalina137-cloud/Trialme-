@@ -20,6 +20,8 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
 }) => {
   const { t } = useTranslation();
   const onDismissRef = useRef(onDismiss);
+  const isWarningAlert =
+    notification?.type === 'reminder' || notification?.type === 'trial';
 
   useEffect(() => {
     onDismissRef.current = onDismiss;
@@ -27,9 +29,13 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
   useEffect(() => {
     if (!notification) return;
-    const timer = window.setTimeout(() => onDismissRef.current(), 8000);
+    const autoDismissMs =
+      notification.type === 'reminder' || notification.type === 'trial'
+        ? 8000
+        : 4000;
+    const timer = window.setTimeout(() => onDismissRef.current(), autoDismissMs);
     return () => window.clearTimeout(timer);
-  }, [notification?.id]);
+  }, [notification?.id, notification?.type]);
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-3 z-[100] flex justify-center px-4 max-w-3xl mx-auto">
@@ -51,7 +57,7 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
               }
             }}
             onClick={() => {
-              if (onAction) onAction(notification);
+              if (isWarningAlert && onAction) onAction(notification);
               else onDismiss();
             }}
             className="pointer-events-auto w-full max-w-[400px] rounded-[22px] border border-white/[0.1] bg-[#161616]/95 p-3.5 text-[#F5F5F5] shadow-2xl shadow-black/80 backdrop-blur-2xl cursor-pointer select-none active:scale-[0.98] transition-transform duration-150"
@@ -96,32 +102,34 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
                   {notification.message}
                 </p>
 
-                {/* Compact Native Action Pills */}
-                <div className="mt-2.5 flex items-center justify-end gap-2 pt-1 border-t border-white/[0.06]">
-                  {onCancelTrial && (
+                {/* Compact Native Action Pills — shown ONLY on upcoming renewal/trial warning alerts */}
+                {isWarningAlert && (
+                  <div className="mt-2.5 flex items-center justify-end gap-2 pt-1 border-t border-white/[0.06]">
+                    {onCancelTrial && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCancelTrial(notification);
+                        }}
+                        className="btn-cancel-soft py-1 px-3 text-[11px] font-semibold rounded-full active:scale-[0.97] transition-all cursor-pointer"
+                      >
+                        Cancel Trial
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onCancelTrial(notification);
+                        if (onAction) onAction(notification);
+                        else onDismiss();
                       }}
-                      className="btn-cancel-soft py-1 px-3 text-[11px] font-semibold rounded-full active:scale-[0.97] transition-all cursor-pointer"
+                      className="btn-secondary-luxury py-1 px-3.5 text-[11px] font-bold text-[#D4AF7C] rounded-full active:scale-[0.97] transition-all cursor-pointer"
                     >
-                      Cancel Trial
+                      View
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onAction) onAction(notification);
-                      else onDismiss();
-                    }}
-                    className="btn-secondary-luxury py-1 px-3.5 text-[11px] font-bold text-[#D4AF7C] rounded-full active:scale-[0.97] transition-all cursor-pointer"
-                  >
-                    View
-                  </button>
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

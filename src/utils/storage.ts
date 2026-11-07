@@ -54,6 +54,35 @@ export function safeStorageRemove(key: string): boolean {
   }
 }
 
+export function safeStorageRemoveByPrefix(prefix: string): number {
+  if (!prefix) return 0;
+  let removed = 0;
+  for (const key of Array.from(memoryStorage.keys())) {
+    if (key.startsWith(prefix)) {
+      memoryStorage.delete(key);
+      removed += 1;
+    }
+  }
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < window.localStorage.length; i += 1) {
+        const key = window.localStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          keysToRemove.push(key);
+        }
+      }
+      for (const key of keysToRemove) {
+        window.localStorage.removeItem(key);
+        removed += 1;
+      }
+    }
+  } catch {
+    // ignore storage iteration errors
+  }
+  return removed;
+}
+
 export function clearMemoryStorage(): void {
   memoryStorage.clear();
   try {

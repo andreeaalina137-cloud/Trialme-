@@ -1,11 +1,15 @@
 import type { Subscription } from '../../types/subscription';
+import { safeStorageRemoveByPrefix } from '../../utils/storage';
 import type {
   INotificationDriver,
   NotificationActionCallbacks,
+  NotificationItemType,
+  NotificationLeadDays,
   NotificationPermissionState,
   NotificationSyncResult,
 } from '../types/notification.types';
 import { notificationDriver } from './notificationDriver';
+import { generateNotificationId } from './notificationIdGenerator';
 import {
   NotificationPermissionManager,
 } from './notificationPermissionManager';
@@ -19,6 +23,24 @@ import {
   notificationActionHandler,
 } from './notificationActionHandler';
 import { calculateEligibleNotifications } from './notificationRules';
+
+/**
+ * Computes all deterministic notification IDs (3-day & 1-day across subscription & trial)
+ * for a given itemId so platform/web schedules are unconditionally purged even if
+ * repository records were missing or out of sync.
+ */
+export function getAllPossibleNotificationIdsForItem(itemId: string): number[] {
+  if (!itemId || typeof itemId !== 'string' || !itemId.trim()) return [];
+  const types: NotificationItemType[] = ['subscription', 'trial'];
+  const leads: NotificationLeadDays[] = [3, 1];
+  const ids = new Set<number>();
+  for (const itemType of types) {
+    for (const leadDays of leads) {
+      ids.add(generateNotificationId(itemId, leadDays, itemType));
+    }
+  }
+  return Array.from(ids);
+}
 
 export class NotificationService {
   private repository: NotificationRepository;
@@ -146,11 +168,22 @@ export class NotificationService {
     try {
       // Cancel existing notifications for this item
       const removedIds = this.repository.removeByItemId(subscription.id);
-      if (removedIds.length > 0) {
-        await this.driver.cancel(removedIds);
+      const isInactive =
+        subscription.status === 'cancelled' || (subscription.status as string) === 'paused';
+
+      if (isInactive) {
+        safeStorageRemoveByPrefix(`subcleaner_due_alert:${subscription.id}:`);
       }
 
-      if (!this.isNotificationsEnabled() || subscription.status === 'cancelled' || (subscription.status as string) === 'paused') {
+      const idsToCancel = isInactive
+        ? Array.from(new Set([...removedIds, ...getAllPossibleNotificationIdsForItem(subscription.id)]))
+        : removedIds;
+
+      if (idsToCancel.length > 0) {
+        await this.driver.cancel(idsToCancel);
+      }
+
+      if (!this.isNotificationsEnabled() || isInactive) {
         return {
           scheduledCount: 0,
           cancelledCount: removedIds.length,
@@ -200,13 +233,18 @@ export class NotificationService {
   }
 
   /**
-   * Cancels all notifications when an item is deleted.
+   * Hard-purges all scheduled notifications, pending timers, and stored alert keys
+   * when an item is deleted.
    */
   public async syncOnDelete(subscriptionId: string): Promise<NotificationSyncResult> {
     try {
       const removedIds = this.repository.removeByItemId(subscriptionId);
-      if (removedIds.length > 0) {
-        await this.driver.cancel(removedIds);
+      safeStorageRemoveByPrefix(`subcleaner_due_alert:${subscriptionId}:`);
+      const allIdsToCancel = Array.from(
+        new Set([...removedIds, ...getAllPossibleNotificationIdsForItem(subscriptionId)])
+      );
+      if (allIdsToCancel.length > 0) {
+        await this.driver.cancel(allIdsToCancel);
       }
       return {
         scheduledCount: 0,
@@ -230,9 +268,26 @@ export class NotificationService {
   }
 
   /**
-   * Cancels future notifications when an item is cancelled or marked complete.
+   * Hard-purges all future notifications, pending timers, and stored alert keys
+   * when an item is cancelled or marked complete.
    */
   public async syncOnCancel(subscriptionId: string): Promise<NotificationSyncResult> {
+    return this.syncOnDelete(subscriptionId);
+  }
+
+  /**
+   * Alias for syncOnCancel(id): immediately cancels/clears any pending timers,
+   * scheduled local notifications (3-day and 1-day 09:30 alerts), and stored alert keys.
+   */
+  public async cancelSubscription(subscriptionId: string): Promise<NotificationSyncResult> {
+    return this.syncOnCancel(subscriptionId);
+  }
+
+  /**
+   * Alias for syncOnDelete(id): immediately cancels/clears any pending timers,
+   * scheduled local notifications (3-day and 1-day 09:30 alerts), and stored alert keys.
+   */
+  public async removeSubscription(subscriptionId: string): Promise<NotificationSyncResult> {
     return this.syncOnDelete(subscriptionId);
   }
 

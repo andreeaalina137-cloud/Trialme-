@@ -383,7 +383,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                   <span className="text-[#A0A0A0]">{t('detail.statusLabel')}</span>
                   {isCancelled ? (
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                      {t('home.cancelledBadge')} ({t('home.savedBadge')})
+                      {t('home.cancelledBadge')}
                     </span>
                   ) : isTrial ? (
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#D4AF7C]/20 text-[#D4AF7C] border border-[#D4AF7C]/35">
@@ -396,28 +396,34 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
-                  <span className="text-[#A0A0A0]">{t('detail.nextBilling')}</span>
-                  <span className="font-semibold text-[#F5F5F5] font-mono">{subscription.nextPaymentDate}</span>
-                </div>
+                {!isCancelled && (
+                  <>
+                    <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
+                      <span className="text-[#A0A0A0]">{t('detail.nextBilling')}</span>
+                      <span className="font-semibold text-[#F5F5F5] font-mono">{subscription.nextPaymentDate}</span>
+                    </div>
 
-                <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
-                  <span className="text-[#A0A0A0]">{t('detail.timeRemaining')}</span>
-                  <span className={`font-semibold ${daysRemaining <= 3 ? 'text-[#D4AF7C]' : 'text-[#F5F5F5]'}`}>
-                    {daysRemaining < 0
-                      ? `Billed ${Math.abs(daysRemaining)} days ago`
-                      : daysRemaining === 0
-                      ? t('home.dueToday')
-                      : daysRemaining === 1
-                      ? t('home.dueTomorrow')
-                      : t('home.dueInDays', { days: daysRemaining })}
-                  </span>
-                </div>
+                    <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
+                      <span className="text-[#A0A0A0]">{t('detail.timeRemaining')}</span>
+                      <span className={`font-semibold ${daysRemaining <= 3 ? 'text-[#D4AF7C]' : 'text-[#F5F5F5]'}`}>
+                        {daysRemaining < 0
+                          ? `Billed ${Math.abs(daysRemaining)} days ago`
+                          : daysRemaining === 0
+                          ? t('home.dueToday')
+                          : daysRemaining === 1
+                          ? t('home.dueTomorrow')
+                          : t('home.dueInDays', { days: daysRemaining })}
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 <div className="flex items-center justify-between">
                   <span className="text-[#A0A0A0]">{t('detail.remindersLabel')}</span>
                   <span className="font-semibold text-[#F5F5F5]">
-                    {t('detail.remindDays', { days: subscription.reminderDaysBefore || 3 })}
+                    {isCancelled
+                      ? t('home.cancelledBadge')
+                      : t('detail.remindDays', { days: subscription.reminderDaysBefore || 3 })}
                   </span>
                 </div>
 
@@ -561,10 +567,12 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
           {!isCancelled ? (
             <button
               onClick={() => {
+                if (isCancelled) return;
                 onClose();
                 onOpenCancelAssistant(subscription);
               }}
-              className="btn-cancel-soft w-full py-4 px-6 rounded-full font-bold text-sm active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isCancelled}
+              className="btn-cancel-soft w-full py-4 px-6 rounded-full font-bold text-sm active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
             >
               <ShieldAlert className="w-4 h-4 text-rose-300" />
               <span>{t('detail.cancelThis')}</span>

@@ -33,6 +33,9 @@ export class NotificationReconciliation {
     const activeSubMap = new Map<string, Subscription>();
 
     for (const sub of subscriptions) {
+      if (sub.status === 'cancelled' || (sub.status as string) === 'paused') {
+        continue;
+      }
       if (sub.status === 'active' || sub.status === 'trial') {
         activeSubMap.set(sub.id, sub);
       }

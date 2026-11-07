@@ -650,9 +650,19 @@ function AppContent() {
     const nextList = subscriptionsRef.current.map((s) => (s.id === updated.id ? updated : s));
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
+    if (updated.status === 'cancelled') {
+      for (const key of Array.from(alertedDueSubscriptions.current)) {
+        if (key.startsWith(`subcleaner_due_alert:${updated.id}:`)) {
+          alertedDueSubscriptions.current.delete(key);
+        }
+      }
+    }
     void notificationService.syncOnUpdate(updated);
     if (selectedDetailSub?.id === updated.id) {
       setSelectedDetailSub(updated);
+    }
+    if (selectedCancelSub?.id === updated.id && updated.status === 'cancelled') {
+      setSelectedCancelSub(null);
     }
   };
 
@@ -660,6 +670,20 @@ function AppContent() {
     const nextList = subscriptionsRef.current.filter((s) => s.id !== id);
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
+    for (const key of Array.from(alertedDueSubscriptions.current)) {
+      if (key.startsWith(`subcleaner_due_alert:${id}:`)) {
+        alertedDueSubscriptions.current.delete(key);
+      }
+    }
+    if (selectedDetailSub?.id === id) {
+      setSelectedDetailSub(null);
+    }
+    if (selectedCancelSub?.id === id) {
+      setSelectedCancelSub(null);
+    }
+    if (activeNotification?.subscriptionId === id) {
+      setActiveNotification(null);
+    }
     void notificationService.syncOnDelete(id);
   };
 
@@ -675,19 +699,32 @@ function AppContent() {
     const savedName = subscriptionToCancel.name;
     const todayKey = formatLocalDateKey(new Date());
 
+    let updatedSub: Subscription | null = null;
     const nextList = subscriptionsRef.current.map((s) => {
       if (s.id === subscriptionId) {
-        return {
+        updatedSub = {
           ...s,
           status: 'cancelled' as const,
           cancelledAt: todayKey,
           monthlySavingsAmount: savedAmount,
         };
+        return updatedSub;
       }
       return s;
     });
     subscriptionsRef.current = nextList;
     setSubscriptions(nextList);
+    for (const key of Array.from(alertedDueSubscriptions.current)) {
+      if (key.startsWith(`subcleaner_due_alert:${subscriptionId}:`)) {
+        alertedDueSubscriptions.current.delete(key);
+      }
+    }
+    if (selectedDetailSub?.id === subscriptionId && updatedSub) {
+      setSelectedDetailSub(updatedSub);
+    }
+    if (selectedCancelSub?.id === subscriptionId) {
+      setSelectedCancelSub(null);
+    }
     void notificationService.syncOnCancel(subscriptionId);
 
     playCashRegister();
@@ -942,20 +979,27 @@ function AppContent() {
         notification={activeNotification}
         onDismiss={() => setActiveNotification(null)}
         onAction={(notif) => {
-          const target =
-            subscriptions.find((subscription) => subscription.id === notif.subscriptionId) ??
-            (notif.type === 'reminder'
-              ? subscriptions.find((subscription) => subscription.name.includes('Netflix'))
-              : undefined) ??
-            (notif.type === 'reminder' ? subscriptions[0] : undefined);
+          if (notif.type !== 'reminder' && notif.type !== 'trial') {
+            setActiveNotification(null);
+            return;
+          }
+          const target = notif.subscriptionId
+            ? subscriptions.find((subscription) => subscription.id === notif.subscriptionId)
+            : undefined;
           if (target) setSelectedDetailSub(target);
           setActiveNotification(null);
         }}
         onCancelTrial={(notif) => {
-          const target =
-            subscriptions.find((subscription) => subscription.id === notif.subscriptionId) ??
-            subscriptions[0];
-          if (target) setSelectedCancelSub(target);
+          if (notif.type !== 'reminder' && notif.type !== 'trial') {
+            setActiveNotification(null);
+            return;
+          }
+          const target = notif.subscriptionId
+            ? subscriptions.find((subscription) => subscription.id === notif.subscriptionId)
+            : undefined;
+          if (target && target.status !== 'cancelled') {
+            setSelectedCancelSub(target);
+          }
           setActiveNotification(null);
         }}
       />
@@ -983,8 +1027,15 @@ function AppContent() {
                 userPlan={userPlan}
                 currencySymbol={currencySymbol}
                 onOpenAddModal={handleOpenAddModal}
-                onOpenSubscriptionDetail={(sub) => setSelectedDetailSub(sub)}
-                onOpenCancelSub={(sub) => setSelectedCancelSub(sub)}
+                onOpenSubscriptionDetail={(sub) => {
+                  const latest = subscriptionsRef.current.find((s) => s.id === sub.id) ?? sub;
+                  setSelectedDetailSub(latest);
+                }}
+                onOpenCancelSub={(sub) => {
+                  const latest = subscriptionsRef.current.find((s) => s.id === sub.id) ?? sub;
+                  if (latest.status === 'cancelled') return;
+                  setSelectedCancelSub(latest);
+                }}
                 onOpenAiScanner={() => setCurrentTab('scan')}
                 onOpenCalendar={() => setCurrentTab('calendar')}
                 onLoadShowcaseTrials={handleLoadShowcaseTrials}
@@ -1180,12 +1231,18 @@ function AppContent() {
           <SubscriptionDetailModal
             isOpen={!!selectedDetailSub}
             onClose={() => setSelectedDetailSub(null)}
-            subscription={selectedDetailSub}
+            subscription={
+              selectedDetailSub
+                ? subscriptions.find((s) => s.id === selectedDetailSub.id) ?? selectedDetailSub
+                : null
+            }
             onUpdateSubscription={handleUpdateSubscription}
             onDeleteSubscription={handleDeleteSubscription}
             onOpenCancelAssistant={(sub) => {
+              const latest = subscriptionsRef.current.find((s) => s.id === sub.id) ?? sub;
               setSelectedDetailSub(null);
-              setSelectedCancelSub(sub);
+              if (latest.status === 'cancelled') return;
+              setSelectedCancelSub(latest);
             }}
             currencySymbol={currencySymbol}
             userPlan={userPlan}
@@ -1194,17 +1251,21 @@ function AppContent() {
             onOpenPaywall={() => setIsPaywallOpen(true)}
           />
 
-          {selectedCancelSub && (
-            <CancelAssistantModal
-              isOpen={!!selectedCancelSub}
-              onClose={() => setSelectedCancelSub(null)}
-              subscription={selectedCancelSub}
-              subscriptions={subscriptions}
-              onConfirmCancellation={handleConfirmCancellation}
-              currencySymbol={currencySymbol}
-              onCelebrate={triggerCelebration}
-            />
-          )}
+          {selectedCancelSub &&
+            (subscriptions.find((s) => s.id === selectedCancelSub.id) ?? selectedCancelSub).status !==
+              'cancelled' && (
+              <CancelAssistantModal
+                isOpen={!!selectedCancelSub}
+                onClose={() => setSelectedCancelSub(null)}
+                subscription={
+                  subscriptions.find((s) => s.id === selectedCancelSub.id) ?? selectedCancelSub
+                }
+                subscriptions={subscriptions}
+                onConfirmCancellation={handleConfirmCancellation}
+                currencySymbol={currencySymbol}
+                onCelebrate={triggerCelebration}
+              />
+            )}
 
           <PaywallModal
             isOpen={isPaywallOpen}
