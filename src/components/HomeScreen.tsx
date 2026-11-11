@@ -265,11 +265,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </header>
 
-      {/* Pure Mobile Feed (Comfortable Emma-level visual rhythm & spacing) */}
-      <div className="space-y-5 px-4 pt-4 pb-28">
+      {/* Pure Mobile Feed (Compact, natural information density & refined proportions) */}
+      <div className="space-y-3.5 px-4 pt-3 pb-24">
         {/* Search & Filter Drawer (when toggled or search active) */}
         {(showSearchBar || searchQuery || statusFilter !== 'all') && (
-          <div className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-4 space-y-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
+          <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-3.5 space-y-2.5">
             <div className="relative">
               <Search className="w-4 h-4 text-[#A0A0A0] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -277,7 +277,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 placeholder={t('home.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-luxury min-h-[44px] w-full rounded-full pl-10 pr-9 py-2 text-[13px]"
+                className="input-luxury min-h-[40px] w-full rounded-full pl-9 pr-8 py-1.5 text-xs"
                 aria-label={t('home.searchLabel')}
               />
               {searchQuery && (
@@ -287,12 +287,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#A0A0A0] hover:text-[#F5F5F5] cursor-pointer"
                   aria-label="Clear search"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs no-scrollbar">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11.5px] no-scrollbar">
               {(['all', 'active', 'trial', 'renewingSoon', 'cancelled'] as const).map((filterKey) => {
                 const isSelected = statusFilter === filterKey;
                 const labels: Record<typeof filterKey, string> = {
@@ -307,10 +307,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     key={filterKey}
                     type="button"
                     onClick={() => setStatusFilter(filterKey)}
-                    className={`px-3.5 py-2 rounded-full font-semibold shrink-0 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-full font-semibold shrink-0 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
                       isSelected
                         ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
-                        : 'bg-[#1F1F1F] text-[#A0A0A0] border border-white/[0.06] hover:text-[#F5F5F5]'
+                        : 'bg-[#1C1C1E] text-[#A0A0A0] border border-white/[0.06] hover:text-[#F5F5F5]'
                     }`}
                   >
                     {labels[filterKey]}
@@ -323,12 +323,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* HERO CARD: "Upcoming Deadline" */}
         {activeSection !== 'subscriptions' && (
-          <div className="rounded-[24px] bg-[#141416] border border-white/[0.07] p-5 space-y-4 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)]">
+          <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[12px] font-bold uppercase tracking-wider text-[#9A9AA2]">
+              <span className="text-[12px] font-semibold text-[#A0A0A0]">
                 Upcoming Deadline
               </span>
-              <span className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] px-3 py-1 text-[11px] font-extrabold text-[#0A0A0A] shadow-sm">
+              <span className="rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/25 px-2.5 py-0.5 text-[11px] font-bold text-[#D4AF7C]">
                 {nearestDaysLeft === 0
                   ? 'Ends today'
                   : nearestDaysLeft === 1
@@ -349,46 +349,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       onOpenSubscriptionDetail(nearestSub);
                     }
                   }}
-                  className="flex items-center justify-between gap-3.5 cursor-pointer group active:scale-[0.985] transition-all duration-150 ease-out"
+                  className="flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.985] transition-all duration-150 ease-out"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     <BrandIcon
                       name={nearestSub.name}
                       category={nearestSub.category}
                       color={nearestSub.color}
                     />
                     <div className="min-w-0">
-                      <div className="text-[18px] font-extrabold text-[#F5F5F5] tracking-tight leading-snug group-hover:text-[#D4AF7C] transition-colors">
+                      <div className="text-[15.5px] font-bold text-[#F5F5F5] tracking-tight leading-snug group-hover:text-[#D4AF7C] transition-colors">
                         {nearestSub.name.replace(' UK Standard', '').replace(' UK', '')}
                       </div>
-                      <div className="text-[12.5px] font-medium text-[#9A9AA2] leading-snug mt-0.5">
+                      <div className="text-xs text-[#A0A0A0] leading-snug mt-0.5">
                         {nearestSub.status === 'trial' ? 'Free trial' : 'Active subscription'} · {nearestSub.category}
                       </div>
                     </div>
                   </div>
-                  <div className="h-8 w-8 rounded-full bg-[#1C1C20] border border-white/[0.05] flex items-center justify-center shrink-0">
-                    <ChevronRight className="w-4 h-4 text-[#9A9AA2] group-hover:text-[#D4AF7C]" />
-                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#A0A0A0]/60 group-hover:text-[#D4AF7C] shrink-0" />
                 </div>
 
-                {/* Emma-inspired 2-Column Divided Metric Strip + Sleek Progress Track */}
-                <div className="rounded-2xl bg-[#1C1C20]/75 border border-white/[0.05] p-3.5 space-y-3">
-                  <div className="grid grid-cols-2 divide-x divide-white/[0.07]">
-                    <div className="pr-3">
-                      <span className="text-[11px] font-medium text-[#9A9AA2] block">Expected charge</span>
-                      <div className="text-[16px] font-extrabold text-[#F5F5F5] tabular-nums mt-0.5">
-                        {formatPrice(nearestSub.price, nearestSub.currency || currencySymbol)}/month
-                      </div>
-                    </div>
-                    <div className="pl-3">
-                      <span className="text-[11px] font-medium text-[#9A9AA2] block">Next billing</span>
-                      <div className="text-[13px] font-bold text-[#D4AF7C] mt-1">
-                        Renews {formatRenewalDate(nearestSub.nextPaymentDate)}
-                      </div>
-                    </div>
+                {/* Clean Inline Charge Summary + Thin Progress Track (No Heavy Inner Container) */}
+                <div className="space-y-1.5 pt-2 border-t border-white/[0.05]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#A0A0A0]">Expected charge</span>
+                    <span className="font-bold text-[#F5F5F5] tabular-nums">
+                      {formatPrice(nearestSub.price, nearestSub.currency || currencySymbol)}/month · Renews {formatRenewalDate(nearestSub.nextPaymentDate)}
+                    </span>
                   </div>
 
-                  <div className="w-full h-1.5 rounded-full bg-[#0A0A0A] overflow-hidden">
+                  <div className="w-full h-1.5 rounded-full bg-[#1F1F22] overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] transition-all duration-500"
                       style={{ width: `${nearestProgressPercent}%` }}
@@ -396,12 +386,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   </div>
                 </div>
 
-                {/* Two Equal Touch Buttons: View Details & Cancel Trial (Emma dual-CTA style) */}
-                <div className="grid grid-cols-2 gap-3 pt-0.5">
+                {/* Two Compact, Equal Touch Buttons: View Details & Cancel Trial */}
+                <div className="grid grid-cols-2 gap-2.5 pt-0.5">
                   <button
                     type="button"
                     onClick={() => onOpenSubscriptionDetail(nearestSub)}
-                    className="min-h-[44px] rounded-full bg-[#222226] border border-white/[0.08] hover:border-white/20 py-2.5 px-4 text-[13px] font-bold text-[#F5F5F5] text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                    className="h-9 rounded-full bg-[#1C1C1E] border border-white/[0.07] hover:border-white/20 px-3 text-xs font-semibold text-[#F5F5F5] text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                   >
                     View Details
                   </button>
@@ -414,19 +404,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         onOpenSubscriptionDetail(nearestSub);
                       }
                     }}
-                    className="min-h-[44px] rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] py-2.5 px-4 text-[13px] font-extrabold text-[#0A0A0A] shadow-sm text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                    className="btn-cancel-soft h-9 rounded-full px-3 text-xs font-semibold text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                   >
                     Cancel Trial
                   </button>
                 </div>
               </>
             ) : (
-              <div className="py-4 text-center space-y-3">
-                <p className="text-[13px] text-[#9A9AA2]">No upcoming trial deadlines yet.</p>
+              <div className="py-3 text-center space-y-2.5">
+                <p className="text-xs text-[#A0A0A0]">No upcoming trial deadlines yet.</p>
                 <button
                   type="button"
                   onClick={onOpenAddModal}
-                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/15 min-h-[44px] px-5 py-2.5 text-[13px] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm px-4 py-2 text-xs active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                 >
                   + Add Your First Free Trial
                 </button>
@@ -436,18 +426,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         )}
 
         {/* MY TRIALS / ALL SUBSCRIPTIONS SECTION */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
-            <h2 className="text-[16px] font-bold text-[#F5F5F5] tracking-tight">
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between gap-2 px-0.5 flex-wrap">
+            <h2 className="text-[14.5px] font-bold text-[#F5F5F5] tracking-tight">
               {activeSection === 'subscriptions' ? 'All Subscriptions' : 'My Trials'}
             </h2>
             <div className="flex items-center gap-2">
               {cancelledCount > 0 && activeSection !== 'trials' && (
-                <div className="inline-flex items-center rounded-full bg-[#161616] border border-white/[0.07] p-0.5 text-[11px]">
+                <div className="inline-flex items-center rounded-full bg-[#141414] border border-white/[0.07] p-0.5 text-[11px]">
                   <button
                     type="button"
                     onClick={() => setStatusFilter('all')}
-                    className={`px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
+                    className={`px-2.5 py-0.5 rounded-full font-semibold transition-all cursor-pointer ${
                       statusFilter !== 'cancelled'
                         ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
                         : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
@@ -458,7 +448,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <button
                     type="button"
                     onClick={() => setStatusFilter('cancelled')}
-                    className={`px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
+                    className={`px-2.5 py-0.5 rounded-full font-semibold transition-all cursor-pointer ${
                       statusFilter === 'cancelled'
                         ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
                         : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
@@ -480,7 +470,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setShowSearchBar((v) => !v)}
-                className="text-[13px] font-medium text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
+                className="text-xs font-medium text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
               >
                 See all
               </button>
@@ -490,7 +480,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {statusFilter === 'cancelled' && cancelledCount > 0 && (
             <div className="flex justify-end">
               {isConfirmingClearCancelled ? (
-                <div className="flex items-center gap-2 rounded-full border border-rose-400/20 bg-[#161616] px-3 py-1.5 text-[10px]">
+                <div className="flex items-center gap-2 rounded-full border border-rose-400/20 bg-[#141414] px-3 py-1 text-[10px]">
                   <span className="text-[#A0A0A0]">{t('home.confirmClearCancelled')}</span>
                   <button
                     type="button"
@@ -515,7 +505,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsConfirmingClearCancelled(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-[#161616] px-3 py-1.5 text-[10px] font-semibold text-[#A0A0A0] transition-colors hover:border-[#D4AF7C]/35 hover:text-[#F5F5F5]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-[#141414] px-3 py-1 text-[10px] font-semibold text-[#A0A0A0] transition-colors hover:border-[#D4AF7C]/35 hover:text-[#F5F5F5]"
                 >
                   <Trash2 className="h-3 w-3" />
                   {t('home.clearCancelled')}
@@ -525,7 +515,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
 
           {filteredSubs.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <AnimatePresence mode="popLayout" initial={false}>
                 {(activeSection === 'subscriptions'
                   ? filteredSubs
@@ -543,21 +533,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </AnimatePresence>
             </div>
           ) : (
-            <div className="rounded-[22px] bg-[#161616] border border-white/[0.06] p-6 text-center space-y-3.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-[#D4AF7C]/25 bg-[#D4AF7C]/10 text-[#D4AF7C]">
+            <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-5 text-center space-y-3">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-[#D4AF7C]/25 bg-[#D4AF7C]/10 text-[#D4AF7C]">
                 {subscriptions.length === 0 && !searchQuery ? (
-                  <Gift className="h-5 w-5" />
+                  <Gift className="h-4.5 w-4.5" />
                 ) : (
-                  <Search className="h-5 w-5" />
+                  <Search className="h-4.5 w-4.5" />
                 )}
               </div>
               <div>
-                <p className="font-bold text-[15px] text-[#F5F5F5]">
+                <p className="font-bold text-sm text-[#F5F5F5]">
                   {subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialTitle')
                     : t('home.noSubsFound')}
                 </p>
-                <p className="text-[13px] text-[#A0A0A0] mt-1 leading-relaxed">
+                <p className="text-xs text-[#A0A0A0] mt-1 leading-relaxed">
                   {subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialDesc')
                     : searchQuery
@@ -565,7 +555,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     : t('home.noSubsStart')}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-0.5">
                 {subscriptions.length > 0 && (searchQuery !== '' || statusFilter !== 'all') && (
                   <button
                     type="button"
@@ -573,7 +563,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       setSearchQuery('');
                       setStatusFilter('all');
                     }}
-                    className="btn-secondary-luxury min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold cursor-pointer"
+                    className="btn-secondary-luxury h-9 inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 text-xs font-semibold cursor-pointer"
                   >
                     <X className="h-3.5 w-3.5" />
                     <span>Reset Filters</span>
@@ -581,7 +571,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 )}
                 <button
                   onClick={onOpenAddModal}
-                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-md shadow-[#D4AF7C]/15 min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[13px] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm h-9 inline-flex items-center justify-center gap-1.5 px-4 text-xs active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                 >
                   <Gift className="h-3.5 w-3.5" />
                   <span>
@@ -596,32 +586,32 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Matching UK Presets when searching */}
           {matchingPresets.length > 0 && (
-            <div className="space-y-2.5 pt-2">
+            <div className="space-y-2 pt-1.5">
               <div className="flex items-center justify-between text-xs text-[#D4AF7C] font-semibold px-1">
                 <span>Quick-Add from UK Preset Directory ({matchingPresets.length})</span>
                 <span className="text-[10px] text-[#A0A0A0]">1-Tap Setup</span>
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {matchingPresets.map((preset) => {
                   const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: preset.name }, s));
                   return (
                     <div
                       key={preset.id}
-                      className="min-h-[70px] py-3.5 px-4 rounded-[22px] bg-[#161616] border border-white/[0.06] flex items-center justify-between gap-3"
+                      className="py-2.5 px-3.5 rounded-2xl bg-[#141414] border border-white/[0.06] flex items-center justify-between gap-2.5"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" linkContext="discovery" />
                         <div className="min-w-0 flex-1">
-                          <div className="font-semibold text-[15px] text-[#F5F5F5] leading-snug">
+                          <div className="font-semibold text-[13.5px] text-[#F5F5F5] leading-snug truncate">
                             {preset.name}
                           </div>
-                          <div className="text-xs text-[#A0A0A0] mt-0.5">
+                          <div className="text-[11px] text-[#A0A0A0] mt-0.5">
                             {formatPrice(preset.price, preset.currency)}/
                             {preset.frequency === 'yearly' ? 'yr' : 'mo'} · {preset.category}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         {hasActiveUkFreeTrial(preset) && !isTracked && (
                           <button
                             type="button"
@@ -633,9 +623,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                 onOpenAddModal();
                               }
                             }}
-                            className="btn-secondary-luxury min-h-[38px] rounded-full px-3.5 py-2 text-xs font-semibold text-[#D4AF7C] flex items-center gap-1.5 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                            className="btn-secondary-luxury h-8 rounded-full px-2.5 text-[11px] font-semibold text-[#D4AF7C] flex items-center gap-1 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
                           >
-                            <Gift className="w-3.5 h-3.5 shrink-0" />
+                            <Gift className="w-3 h-3 shrink-0" />
                             <span>Free Trial</span>
                           </button>
                         )}
@@ -651,21 +641,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                               onOpenAddModal();
                             }
                           }}
-                          className={`min-h-[38px] px-3.5 py-2 rounded-full text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-all duration-150 ease-out ${
+                          className={`h-8 px-3 rounded-full text-[11px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all duration-150 ease-out ${
                             isTracked
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default opacity-90'
+                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 cursor-default opacity-90'
                               : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] active:scale-[0.975] cursor-pointer'
                           }`}
                           aria-label={isTracked ? `${preset.name} already added` : `Add ${preset.name}`}
                         >
                           {isTracked ? (
                             <>
-                              <Check className="w-3.5 h-3.5 stroke-[2.75]" />
-                              <span>Added ✓</span>
+                              <Check className="w-3 h-3 stroke-[2.75]" />
+                              <span>Added</span>
+                              <span className="sr-only">Added ✓</span>
                             </>
                           ) : (
                             <>
-                              <Plus className="w-3.5 h-3.5 stroke-[2.75]" />
+                              <Plus className="w-3 h-3 stroke-[2.75]" />
                               <span>Add</span>
                             </>
                           )}
@@ -681,20 +672,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Free Tier Limit Reached Banner */}
         {userPlan === 'free' && activeCount >= 2 + bonusSlots && onOpenGiftSlot && (
-          <div className="rounded-[22px] bg-[#161616] border border-[#D4AF7C]/25 p-4 flex items-center justify-between gap-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="h-9 w-9 rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/25 flex items-center justify-center shrink-0 text-[#D4AF7C]">
+          <div className="rounded-2xl bg-[#141414] border border-[#D4AF7C]/25 p-3.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 text-[#D4AF7C]">
                 <Gift className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-semibold text-[#F5F5F5] truncate">Free slot limit reached ({activeCount}/{2 + bonusSlots})</div>
-                <div className="text-xs text-[#A0A0A0] truncate">Invite a mate & unlock +1 slot for free</div>
+                <div className="text-xs font-semibold text-[#F5F5F5] truncate">Free slot limit reached ({activeCount}/{2 + bonusSlots})</div>
+                <div className="text-[11px] text-[#A0A0A0] truncate">Invite a mate & unlock +1 slot for free</div>
               </div>
             </div>
             <button
               type="button"
               onClick={onOpenGiftSlot}
-              className="btn-champagne shrink-0 px-3.5 py-2 rounded-full text-xs font-bold text-[#0A0A0A] active:scale-[0.975] transition-all cursor-pointer"
+              className="btn-champagne shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold text-[#0A0A0A] active:scale-[0.975] transition-all cursor-pointer"
             >
               +1 Free Slot
             </button>
@@ -702,55 +693,51 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         )}
 
         {/* Total Potential Charges & Cash-Flow Projection Card */}
-        <div className="rounded-[24px] bg-[#141416] border border-white/[0.07] p-5 space-y-4 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)]">
+        <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-[12px] font-bold uppercase tracking-wider text-[#9A9AA2]">Total Potential Charges</div>
-              <div className="flex items-baseline gap-2.5 mt-1.5">
-                <span className="text-[28px] font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
+              <div className="text-xs font-medium text-[#A0A0A0]">Total Potential Charges</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
                   <AnimatedCounter
                     value={monthlyTotal}
                     currencySymbol={currencySymbol}
                     className="text-[#F5F5F5]"
                   />
                 </span>
-                <span className="text-[12px] font-medium text-[#9A9AA2]">
-                  /mo · <strong className="text-[#D4AF7C] font-bold">{formatPrice(annualTotal, currencySymbol)}/yr</strong>
+                <span className="text-xs text-[#A0A0A0]">
+                  /mo · <strong className="text-[#F5F5F5] font-semibold">{formatPrice(annualTotal, currencySymbol)}/yr</strong>
                 </span>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowCalendarSheet((v) => !v)}
-              className="min-h-[38px] px-3.5 py-1.5 rounded-full bg-[#222226] border border-white/[0.08] hover:border-[#D4AF7C]/40 text-xs font-bold text-[#D4AF7C] flex items-center gap-1.5 active:scale-[0.975] transition-all cursor-pointer shrink-0"
+              className="h-8 px-3 rounded-full bg-[#1C1C1E] border border-white/[0.07] hover:border-[#D4AF7C]/40 text-xs font-semibold text-[#D4AF7C] flex items-center gap-1.5 active:scale-[0.975] transition-all cursor-pointer shrink-0"
             >
               <CalendarDays className="w-3.5 h-3.5 text-[#D4AF7C]" />
               <span>{showCalendarSheet ? 'Hide Calendar' : 'Calendar'}</span>
             </button>
           </div>
 
-          {/* Sleek Capsule Bar Chart Visual (6-Month Projection) */}
-          <div className="rounded-2xl bg-[#1C1C20]/70 border border-white/[0.05] p-3.5 space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-[#9A9AA2]">Monthly Renewal Forecast</span>
-              <span className="rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/25 px-2.5 py-0.5 text-[10.5px] text-[#D4AF7C] font-bold">
-                {trialCount} active trials
-              </span>
+          {/* Clean Bar Chart Visual (6-Month Projection — No Nested Box) */}
+          <div className="pt-2.5 border-t border-white/[0.05] space-y-2">
+            <div className="flex items-center justify-between text-[11px] text-[#A0A0A0]">
+              <span>Monthly Renewal Forecast</span>
+              <span className="text-[#D4AF7C] font-semibold">{trialCount} active trials</span>
             </div>
-            <div className="h-[68px] flex items-end justify-between gap-2 px-2 pt-1">
+            <div className="h-14 flex items-end justify-between gap-2 pt-1">
               {monthlyChartBars.map((bar, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                  <div className="w-5 sm:w-6 bg-[#0A0A0A]/90 rounded-full h-full max-h-[44px] p-0.5 flex items-end overflow-hidden border border-white/[0.04]">
-                    <div
-                      className={`w-full rounded-full transition-all duration-500 ${
-                        bar.active
-                          ? 'bg-gradient-to-t from-[#B79B6B] via-[#D4AF7C] to-[#E5C391] shadow-[0_0_8px_rgba(212,175,124,0.35)]'
-                          : 'bg-gradient-to-t from-[#28282E] to-[#B79B6B]/60'
-                      }`}
-                      style={{ height: bar.height }}
-                    />
-                  </div>
-                  <span className={`text-[10.5px] font-mono leading-none ${bar.active ? 'text-[#D4AF7C] font-bold' : 'text-[#8E8E93]'}`}>
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+                  <div
+                    className={`w-full max-w-[26px] rounded-t-md transition-all duration-500 ${
+                      bar.active
+                        ? 'bg-gradient-to-t from-[#B79B6B] to-[#D4AF7C]'
+                        : 'bg-[#232327]'
+                    }`}
+                    style={{ height: bar.height }}
+                  />
+                  <span className={`text-[9.5px] font-mono leading-none ${bar.active ? 'text-[#D4AF7C] font-bold' : 'text-[#A0A0A0]'}`}>
                     {bar.label}
                   </span>
                 </div>
@@ -759,7 +746,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {userPlan === 'free' && (
-            <div className="pt-2.5 border-t border-white/[0.05] flex items-center justify-between text-xs text-[#9A9AA2] flex-wrap gap-2">
+            <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-xs text-[#A0A0A0] flex-wrap gap-2">
               <span className="flex items-center gap-1.5">
                 <span>
                   Free slots: <strong className="text-[#F5F5F5] font-mono">{activeCount}/{2 + bonusSlots}</strong>
@@ -805,54 +792,53 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
         </div>
 
-        {/* UK Free Trial Radar — Emma Feature Card Craftsmanship (Zero Truncation) */}
-        <section className="rounded-[24px] bg-[#141416] border border-white/[0.07] p-5 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)] space-y-3.5">
+        {/* UK Free Trial Radar — Compact, Restrained Card (Zero Truncation) */}
+        <section className="rounded-2xl bg-[#141414] border border-white/[0.06] p-3.5">
           <div className="flex items-center justify-between gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#D4AF7C]/25 bg-[#1C1C20] text-[#D4AF7C]">
-              <Gift className="h-4.5 w-4.5" />
-            </span>
-            <span className="rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/25 px-3 py-1 text-[10.5px] font-bold text-[#D4AF7C]">
-              Auto-Alarm · 10:00 AM
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            <h3 className="text-[17px] font-extrabold text-[#F5F5F5] tracking-tight leading-snug">
-              UK Free Trial Radar
-            </h3>
-            <p className="text-[13px] text-[#9A9AA2] leading-relaxed">
-              Curated UK trials with 10:00 AM cancellation alarm so you can test services risk-free before renewal.
-            </p>
-          </div>
-
-          <div className="pt-0.5">
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D4AF7C]/20 bg-[#1C1C1E] text-[#D4AF7C] mt-0.5">
+                <Gift className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[13.5px] font-bold text-[#F5F5F5] tracking-tight">
+                    UK Free Trial Radar
+                  </span>
+                  <span className="rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 px-2 py-0.5 text-[9.5px] font-semibold text-[#D4AF7C]">
+                    Auto-Alarm
+                  </span>
+                </div>
+                <p className="text-[11.5px] text-[#A0A0A0] leading-snug mt-0.5">
+                  Curated UK trials with 10:00 AM cancellation alarm
+                </p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => setShowTrialRadar((v) => !v)}
-              className="min-h-[40px] inline-flex items-center justify-center gap-2 rounded-full bg-[#222226] border border-white/[0.08] hover:border-[#D4AF7C]/40 px-4 py-2 text-xs font-bold text-[#F5F5F5] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+              className="shrink-0 h-8 rounded-full border border-white/[0.07] bg-[#1C1C1E] px-3 text-xs font-semibold text-[#D4AF7C] hover:border-[#D4AF7C]/35 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
             >
-              <span>{showTrialRadar ? 'Hide UK Trials' : `Explore (${CURATED_UK_TRIALS.length})`}</span>
-              <ChevronRight className={`w-3.5 h-3.5 text-[#D4AF7C] transition-transform ${showTrialRadar ? 'rotate-90' : ''}`} />
+              {showTrialRadar ? 'Hide' : `Explore (${CURATED_UK_TRIALS.length})`}
             </button>
           </div>
 
           {showTrialRadar && (
-            <div className="mt-4 space-y-3 pt-4 border-t border-white/[0.06]">
+            <div className="mt-3 space-y-2.5 pt-3 border-t border-white/[0.05]">
               {CURATED_UK_TRIALS.map((deal) => {
                 const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: deal.name }, s));
                 return (
                   <div
                     key={deal.id}
-                    className="rounded-2xl border border-white/[0.06] bg-[#1C1C20]/90 p-4 flex flex-col justify-between gap-3"
+                    className="rounded-xl border border-white/[0.06] bg-[#1A1A1C] p-3 flex flex-col justify-between gap-2.5"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-[15px] text-[#F5F5F5]">{deal.name}</span>
-                        <span className="shrink-0 rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/25 px-2.5 py-0.5 text-[10px] font-bold text-[#D4AF7C]">
+                        <span className="font-bold text-[13.5px] text-[#F5F5F5]">{deal.name}</span>
+                        <span className="shrink-0 rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 px-2 py-0.5 text-[9.5px] font-semibold text-[#D4AF7C]">
                           {deal.badge}
                         </span>
                       </div>
-                      <p className="text-[13px] text-[#9A9AA2] mt-1 leading-relaxed">{deal.highlight}</p>
+                      <p className="text-xs text-[#A0A0A0] mt-0.5 leading-snug">{deal.highlight}</p>
                     </div>
                     <button
                       type="button"
@@ -866,9 +852,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           onOpenAddModal();
                         }
                       }}
-                      className={`rounded-full font-bold min-h-[44px] w-full px-4 py-2.5 text-[13px] flex items-center justify-center gap-1.5 transition-all duration-150 ease-out ${
+                      className={`rounded-full font-bold h-9 w-full px-3.5 text-xs flex items-center justify-center gap-1.5 transition-all duration-150 ease-out ${
                         isTracked
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default opacity-90'
+                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 cursor-default opacity-90'
                           : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm active:scale-[0.975] cursor-pointer'
                       }`}
                     >
@@ -891,37 +877,38 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
         </section>
 
-        {/* Savings Trophy & Achievements */}
+        {/* Savings Trophy & Achievements (Restrained Trophy Icon & Comfortable Breathing Room) */}
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
-          className="relative overflow-hidden rounded-[24px] bg-[#141416] border border-white/[0.07] p-5 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)] space-y-4"
+          className="relative overflow-hidden rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-3"
         >
           <div className="relative z-10 flex items-start justify-between gap-3">
-            <div className="space-y-1.5">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
-                <Trophy className="w-3 h-3 text-[#D4AF7C]" />
-                {t('home.savedSoFarTitle')}
-              </span>
+            <div className="space-y-1.5 min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/20">
+                  <Trophy className="w-2.5 h-2.5 text-[#D4AF7C]" />
+                  {t('home.savedSoFarTitle')}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-[#1A1A1C] px-2.5 py-0.5 text-[11px]">
+                  <span className="text-[#A0A0A0]">{t('home.thisMonthSavings')}</span>
+                  <span className="font-semibold text-[#D4AF7C]">{formatPrice(thisMonthSavings, currencySymbol)}</span>
+                </span>
+              </div>
 
               <div className="flex items-baseline gap-2 pt-0.5">
-                <span className="text-[28px] font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
+                <span className="text-2xl font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
                   <AnimatedCounter
                     value={totalSavings}
                     currencySymbol={currencySymbol}
                     className={`text-[#D4AF7C] ${isSavingsBoosted ? 'animate-savings-counter' : ''}`}
                   />
                 </span>
-                <span className="text-xs text-[#9A9AA2] font-medium">{t('home.savedPerMonth')}</span>
+                <span className="text-xs text-[#A0A0A0] font-medium">{t('home.savedPerMonth')}</span>
               </div>
 
-              <div className="mt-1.5 inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-[#1C1C20] px-3 py-1 text-xs">
-                <span className="text-[#9A9AA2]">{t('home.thisMonthSavings')}</span>
-                <span className="font-bold text-[#D4AF7C]">{formatPrice(thisMonthSavings, currencySymbol)}</span>
-              </div>
-
-              <p className="text-[13px] text-[#9A9AA2] leading-relaxed pt-0.5">
+              <p className="text-xs text-[#A0A0A0] leading-relaxed">
                 {cancelledCount > 0
                   ? cancelledCount === 1
                     ? t('home.savedSubsCountSingle')
@@ -938,15 +925,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 playSuccessFanfare();
               }}
               aria-label={t('home.celebrateSavings')}
-              className="w-11 h-11 rounded-2xl bg-[#1C1C20] border border-[#D4AF7C]/30 flex items-center justify-center shrink-0 cursor-pointer"
+              className="w-8 h-8 rounded-lg bg-[#1A1A1C] border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 cursor-pointer hover:border-[#D4AF7C]/40 transition-colors"
             >
-              <Trophy className="w-5 h-5 text-[#D4AF7C] fill-[#D4AF7C]/25 animate-trophy" />
+              <Trophy className="w-4 h-4 text-[#D4AF7C]" />
             </motion.button>
           </div>
 
           {cancelledCount > 0 && (
-            <div className="relative z-10 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-[#F5F5F5] font-medium">
-              <span className="flex items-center gap-1.5 text-[#9A9AA2]">
+            <div className="relative z-10 pt-2.5 border-t border-white/[0.05] flex items-center justify-between text-xs text-[#F5F5F5] font-medium">
+              <span className="flex items-center gap-1.5 text-[#A0A0A0]">
                 <TrendingUp className="w-3.5 h-3.5 text-[#D4AF7C]" />
                 {t('home.annualizedSavings')}:
               </span>
@@ -956,43 +943,40 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
           )}
 
-          {/* Achievements Row — Balanced Grid with Non-Truncated Titles */}
-          <div className="pt-3 border-t border-white/[0.06] space-y-2.5">
+          {/* Achievements Row — Compact, Restrained Pills */}
+          <div className="pt-2.5 border-t border-white/[0.05] space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#9A9AA2]">
+              <span className="text-[11px] font-semibold text-[#A0A0A0]">
                 {t('home.achievements')}
               </span>
-              <span className="text-xs font-bold text-[#D4AF7C]">
+              <span className="text-[11px] font-semibold text-[#D4AF7C]">
                 {t('home.achievementsUnlocked', {
                   unlocked: unlockedAchievementIds.length,
                   total: ACHIEVEMENTS.length,
                 })}
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {ACHIEVEMENTS.map((achievement, index) => {
                 const isUnlocked = unlockedAchievementIds.includes(achievement.id);
                 const isCelebrating = celebratingAchievementIds.includes(achievement.id);
                 const AchievementIcon = [BadgeCheck, CircleDollarSign, Coins, Scissors, Medal][index];
-                const isLastOdd = index === ACHIEVEMENTS.length - 1 && ACHIEVEMENTS.length % 2 === 1;
 
                 return (
                   <div
                     key={achievement.id}
-                    className={`flex items-center gap-2.5 rounded-2xl border px-3.5 py-3 ${
-                      isLastOdd ? 'col-span-2' : ''
-                    } ${
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${
                       isUnlocked
-                        ? 'border-[#D4AF7C]/30 bg-[#D4AF7C]/12 text-[#D4AF7C]'
-                        : 'border-white/[0.05] bg-[#1C1C20]/80 text-[#9A9AA2]/75'
+                        ? 'border-[#D4AF7C]/25 bg-[#D4AF7C]/10 text-[#D4AF7C]'
+                        : 'border-white/[0.05] bg-[#1A1A1C] text-[#A0A0A0]/80'
                     } ${isCelebrating ? 'animate-achievement-unlock' : ''}`}
                     aria-label={`${t(achievement.titleKey)}${
                       isUnlocked ? `, ${t('home.achievementUnlocked')}` : `, ${t('home.achievementLocked')}`
                     }`}
                   >
-                    <AchievementIcon className="h-4 w-4 shrink-0 text-[#D4AF7C]/80" />
+                    <AchievementIcon className="h-3.5 w-3.5 shrink-0 text-[#D4AF7C]/75" />
                     <div className="min-w-0">
-                      <div className="text-[12px] font-semibold leading-snug">
+                      <div className="text-[11px] font-medium leading-tight">
                         {t(achievement.titleKey)}
                       </div>
                     </div>
@@ -1005,18 +989,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Smart Trial Reminder Notifications Mobile Card */}
         {activeSubs.length > 0 && (
-          <div className="rounded-[24px] bg-[#141416] border border-white/[0.07] p-5 space-y-3.5 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)]">
+          <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-2.5">
             <div className="flex items-center justify-between">
-              <h3 className="text-[16px] font-extrabold text-[#F5F5F5] tracking-tight">
+              <h3 className="text-[14px] font-bold text-[#F5F5F5] tracking-tight">
                 Smart Trial Alerts
               </h3>
-              <span className="text-xs font-bold text-[#D4AF7C] flex items-center gap-1">
+              <span className="text-[11px] font-semibold text-[#D4AF7C] flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 10:00 AM Guard
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {activeSubs.slice(0, 2).map((sub, idx) => {
                 const days = Math.max(1, getDaysUntilNextPayment(sub.nextPaymentDate));
                 const displayName = sub.name.replace(' UK Standard', '').replace(' Premium UK', '').replace(' UK', '');
@@ -1025,41 +1009,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <div
                     key={sub.id}
                     onClick={() => onOpenSubscriptionDetail(sub)}
-                    className="rounded-2xl border border-white/[0.06] bg-[#1C1C20]/85 p-4 space-y-3 cursor-pointer hover:border-[#D4AF7C]/25 active:scale-[0.99] transition-all duration-150 select-none"
+                    className="rounded-xl border border-white/[0.05] bg-[#1A1A1C] p-3 space-y-2 cursor-pointer hover:border-white/[0.12] active:scale-[0.99] transition-all duration-150 select-none"
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="h-9 w-9 rounded-2xl bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="flex items-start gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-[#D4AF7C]/10 border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 mt-0.5">
                         <GoldBellIcon size="xs" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold text-[#9A9AA2] uppercase tracking-wider">Monetry</span>
-                          <span className="text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/20">
+                          <span className="text-[11px] font-semibold text-[#A0A0A0]">Monetry</span>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/10 text-[#D4AF7C]">
                             {days}d left
                           </span>
                         </div>
-                        <p className="text-[14.5px] text-[#F5F5F5] mt-1 font-bold leading-snug">
+                        <p className="text-[13px] text-[#F5F5F5] mt-0.5 font-semibold leading-snug">
                           {idx === 0
                             ? `${displayName} trial ends in ${days} days`
                             : `Upcoming: ${displayName} renewal`}
                         </p>
-                        <p className="text-xs text-[#9A9AA2] mt-0.5 leading-snug">
+                        <p className="text-[11.5px] text-[#A0A0A0] mt-0.5 leading-snug">
                           {formatPrice(sub.price, sub.currency || currencySymbol)}/{sub.frequency === 'yearly' ? 'yr' : 'mo'} · 10:00 AM auto-alert active
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2.5 pt-2.5 border-t border-white/[0.05]">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenSubscriptionDetail(sub);
-                        }}
-                        className="min-h-[38px] rounded-full bg-[#25252A] border border-white/[0.08] py-1.5 px-3.5 text-xs font-bold text-[#F5F5F5] active:scale-[0.975] transition-all cursor-pointer"
-                      >
-                        View
-                      </button>
+                    <div className="flex items-center justify-end gap-2 pt-1.5 border-t border-white/[0.04]">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1067,9 +1041,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           if (onOpenCancelSub) onOpenCancelSub(sub);
                           else onOpenSubscriptionDetail(sub);
                         }}
-                        className="btn-cancel-soft min-h-[38px] py-1.5 px-3.5 text-xs font-bold rounded-full active:scale-[0.975] transition-all cursor-pointer"
+                        className="btn-cancel-soft py-1 px-3 text-[11px] font-semibold rounded-full active:scale-[0.975] transition-all cursor-pointer"
                       >
                         Cancel Trial
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenSubscriptionDetail(sub);
+                        }}
+                        className="rounded-full bg-[#242428] border border-white/[0.07] py-1 px-3 text-[11px] font-semibold text-[#F5F5F5] active:scale-[0.975] transition-all cursor-pointer"
+                      >
+                        View
                       </button>
                     </div>
                   </div>

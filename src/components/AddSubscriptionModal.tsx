@@ -515,7 +515,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
       {/* Native Mobile Slide-Up Bottom Sheet / Responsive Centered Dialog */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-2xl mx-auto h-[88dvh] sm:h-auto sm:max-h-[88dvh] w-full rounded-t-[32px] sm:rounded-3xl bg-[#161616] border-t sm:border border-white/15 shadow-[0_-12px_40px_rgba(0,0,0,0.8)] z-50 flex flex-col overflow-hidden modal-sheet-enter"
+        className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-2xl mx-auto h-[88dvh] sm:h-auto sm:max-h-[88dvh] w-full rounded-t-2xl sm:rounded-2xl bg-[#121214] border-t sm:border border-white/[0.08] shadow-[0_-12px_40px_rgba(0,0,0,0.8)] z-50 flex flex-col overflow-hidden modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-sub-title"
@@ -523,28 +523,28 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
         {/* Native iOS Top Drag-Handle Pill */}
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150 sm:hidden"
+          className="w-10 h-1 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-2.5 shrink-0 cursor-pointer active:scale-95 transition-all duration-150 sm:hidden"
         />
 
         {/* Header */}
-        <div className="px-5 py-3.5 border-b border-white/[0.07] flex items-center justify-between shrink-0 bg-[#141416]">
-          <div className="flex items-center gap-2.5">
-            <h2 id="add-sub-title" className="text-[17px] font-extrabold text-[#F5F5F5] tracking-tight">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between shrink-0 bg-[#121214]">
+          <div className="flex items-center gap-2">
+            <h2 id="add-sub-title" className="text-[15.5px] font-bold text-[#F5F5F5] tracking-tight">
               {t('add.title')}
             </h2>
             {userPlan === 'free' ? (
-              <span className="text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/25">
                 {t('add.freeCounter', { count: currentSubscriptionCount })}
               </span>
             ) : (
-              <span className="text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/25">
                 Lifetime Unlimited
               </span>
             )}
           </div>
           <button
             onClick={onClose}
-            className="h-9 w-9 flex items-center justify-center rounded-full bg-[#1C1C20] border border-white/[0.08] text-[#9A9AA2] hover:text-[#F5F5F5] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+            className="h-8 w-8 flex items-center justify-center rounded-full bg-[#1C1C1E] border border-white/[0.06] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -552,13 +552,13 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
         </div>
 
         {/* Compact AI and Pro access */}
-        <div className="flex gap-2.5 px-5 pt-3 pb-1.5 bg-[#141416] shrink-0">
+        <div className="flex gap-2 px-4 pt-2.5 pb-1 bg-[#121214] shrink-0">
           <button
             onClick={() => {
               onClose();
               onOpenAiScanner();
             }}
-            className="min-h-[40px] flex min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[#1C1C20] border border-white/[0.08] hover:border-[#D4AF7C]/40 px-3.5 py-2 text-xs font-bold text-[#F5F5F5] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
+            className="h-9 flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#1C1C1E] border border-white/[0.07] hover:border-[#D4AF7C]/35 px-3 text-xs font-semibold text-[#F5F5F5] active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer"
           >
             <Camera className="h-3.5 w-3.5 shrink-0 text-[#D4AF7C]" />
             <span className="truncate">{t('add.aiScannerBannerTitle')}</span>
@@ -570,11 +570,11 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                 onClose();
                 onOpenPaywall();
               }}
-              className="min-h-[40px] group flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-[#D4AF7C]/35 bg-[#D4AF7C]/12 px-3.5 py-2 text-xs font-extrabold text-[#D4AF7C] active:scale-[0.97] transition-all duration-150 ease-out hover:bg-[#D4AF7C]/20 cursor-pointer"
+              className="h-9 group flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-[#D4AF7C]/30 bg-[#D4AF7C]/10 px-3 text-xs font-bold text-[#D4AF7C] active:scale-[0.97] transition-all duration-150 ease-out hover:bg-[#D4AF7C]/18 cursor-pointer"
             >
               <Crown className="h-3.5 w-3.5 shrink-0 text-[#D4AF7C]" />
               <span className="truncate">{t('paywall.lifetimeProTitle')}</span>
-              <span className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] px-2 py-0.5 text-[10px] font-black text-[#0A0A0A] shrink-0">
+              <span className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] px-1.5 py-0.5 text-[9.5px] font-extrabold text-[#0A0A0A] shrink-0">
                 {t('settings.upgradeButton')}
               </span>
             </button>
@@ -582,23 +582,23 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
         </div>
 
         {/* Tabs: Quick-Add vs Manual */}
-        <div className="flex border-b border-white/[0.08] px-5 pt-1 bg-[#141416] shrink-0">
+        <div className="flex border-b border-white/[0.06] px-4 pt-0.5 bg-[#121214] shrink-0">
           <button
             onClick={() => setActiveTab('quick')}
-            className={`min-h-[40px] flex-1 py-2 text-xs font-bold text-center border-b-2 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
+            className={`h-9 flex-1 text-xs font-bold text-center border-b-2 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
               activeTab === 'quick'
                 ? 'border-[#D4AF7C] text-[#D4AF7C]'
-                : 'border-transparent text-[#9A9AA2] hover:text-[#F5F5F5]'
+                : 'border-transparent text-[#A0A0A0] hover:text-[#F5F5F5]'
             }`}
           >
             {t('add.tabQuick')} ({POPULAR_PRESETS.length})
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`min-h-[40px] flex-1 py-2 text-xs font-bold text-center border-b-2 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
+            className={`h-9 flex-1 text-xs font-bold text-center border-b-2 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
               activeTab === 'manual'
                 ? 'border-[#D4AF7C] text-[#D4AF7C]'
-                : 'border-transparent text-[#9A9AA2] hover:text-[#F5F5F5]'
+                : 'border-transparent text-[#A0A0A0] hover:text-[#F5F5F5]'
             }`}
           >
             {t('add.tabManual')}
@@ -606,7 +606,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
         </div>
 
         {/* Content body */}
-        <div className="px-4 py-3.5 overflow-y-auto overscroll-y-contain flex-1 space-y-3 bg-[#0A0A0A]">
+        <div className="px-4 py-3 overflow-y-auto overscroll-y-contain flex-1 space-y-2.5 bg-[#0A0A0A]">
           {pendingAffiliateTrial && pendingTimingPreview && (
             <aside
               className="rounded-3xl border border-[#D4AF7C]/40 bg-[#161616] p-3.5 shadow-lg space-y-3"
@@ -675,11 +675,11 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
           )}
 
           {activeTab === 'quick' ? (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {/* Instant Live Search Bar & Horizontal Category Pills */}
-              <div className="space-y-2.5 sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-xl pb-2 pt-0.5">
+              <div className="space-y-2 sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-xl pb-1.5 pt-0.5">
                 <div className="relative">
-                  <Search className="w-4 h-4 text-[#D4AF7C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-3.5 h-3.5 text-[#D4AF7C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -687,14 +687,14 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                     onChange={(e) => setPresetSearch(e.target.value)}
                     placeholder="Search 49 UK services... (Search 45+ UK presets)"
                     aria-label="Search 49 UK services (Search 45+ UK presets)"
-                    className="input-luxury w-full min-h-[44px] rounded-full pl-10 pr-9 py-2 text-xs"
+                    className="input-luxury w-full h-9 rounded-full pl-9 pr-8 text-xs"
                   />
                   {presetSearch && (
                     <button
                       type="button"
                       onClick={() => setPresetSearch('')}
                       aria-label="Clear preset search"
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-[#9A9AA2] hover:text-[#F5F5F5] cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[#A0A0A0] hover:text-[#F5F5F5] cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -710,10 +710,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                         key={group}
                         type="button"
                         onClick={() => setSelectedFilterGroup(group)}
-                        className={`min-h-[34px] px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
+                        className={`h-7 px-3 rounded-full text-[11px] font-semibold shrink-0 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
                           active
-                            ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm'
-                            : 'bg-[#141416] text-[#9A9AA2] border border-white/[0.08] hover:text-[#F5F5F5] hover:border-[#D4AF7C]/40'
+                            ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
+                            : 'bg-[#141414] text-[#A0A0A0] border border-white/[0.06] hover:text-[#F5F5F5] hover:border-white/[0.12]'
                         }`}
                       >
                         {group}
@@ -723,15 +723,15 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-[11.5px] text-[#9A9AA2] font-medium px-1">
+              <div className="flex items-center justify-between text-[11px] text-[#A0A0A0] px-1">
                 <span>Tap Free Trial for 10am alarm or + to track active</span>
-                <span className="shrink-0 font-mono text-[#D4AF7C] font-bold ml-2">
+                <span className="shrink-0 font-mono text-[#D4AF7C] font-semibold ml-2">
                   {filteredPresets.length} services
                 </span>
               </div>
 
               {filteredPresets.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-1.5">
                   {filteredPresets.map((preset) => {
                     const affiliateOffer = getAffiliateOffer(preset.name);
                     const defaultDays = preset.defaultTrialDays ?? affiliateOffer?.trialDays ?? 30;
@@ -743,9 +743,9 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                     return (
                       <div
                         key={preset.id}
-                        className="rounded-[22px] overflow-hidden border border-white/[0.07] bg-[#141416] transition-colors shadow-[0_8px_20px_-12px_rgba(0,0,0,0.6)]"
+                        className="rounded-xl overflow-hidden border border-white/[0.05] bg-[#141414] hover:border-white/[0.1] transition-colors"
                       >
-                        {/* Balanced Service Row — Clean Single-Line Titles & Crisp Actions */}
+                        {/* Compact, Lightweight Service Row */}
                         <div
                           onClick={() => handlePresetAffiliateTrial(preset)}
                           role="button"
@@ -756,51 +756,51 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                               handlePresetAffiliateTrial(preset);
                             }
                           }}
-                          className="p-3.5 flex items-center justify-between gap-2.5 cursor-pointer select-none active:scale-[0.99] transition-transform duration-150 ease-out"
+                          className="py-2.5 px-3 flex items-center justify-between gap-2.5 cursor-pointer select-none active:scale-[0.99] transition-transform duration-150 ease-out"
                         >
-                          {/* Left: 44x44px Icon + Service Name & Price/Trial Metadata */}
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {/* Left: Preset Icon + Service Name & Price/Trial Metadata */}
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
                             <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" linkContext="discovery" />
                             <div className="min-w-0 flex-1">
-                              <div className="font-bold text-[14.5px] text-[#F5F5F5] leading-snug truncate">
+                              <div className="font-semibold text-[13.5px] text-[#F5F5F5] leading-snug truncate">
                                 {preset.name}
                               </div>
-                              <div className="flex flex-wrap items-center gap-1.5 text-[11.5px] text-[#9A9AA2] mt-1">
-                                <span className="font-mono font-bold text-[#F5F5F5] tabular-nums">
+                              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#A0A0A0] mt-0.5">
+                                <span className="font-mono font-semibold text-[#F5F5F5]/90 tabular-nums">
                                   {formatPrice(preset.price, preset.currency)}/{preset.frequency === 'yearly' ? 'yr' : 'mo'}
                                 </span>
                                 <span className="text-white/20">·</span>
                                 {(() => {
                                   if (!preset.hasFreeTrial && preset.trialType === 'none') {
                                     return (
-                                      <span className="rounded-full bg-[#1C1C20] border border-white/[0.08] px-2 py-0.5 text-[10px] font-semibold text-[#9A9AA2]">
+                                      <span className="text-[10px] text-[#A0A0A0]">
                                         No UK Free Trial
                                       </span>
                                     );
                                   }
                                   if (preset.trialType === 'cooling_off') {
                                     return (
-                                      <span className="rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                                      <span className="text-[10px] font-medium text-amber-300/90">
                                         14-Day Cooling-Off
                                       </span>
                                     );
                                   }
                                   if (preset.trialType === 'money_back') {
                                     return (
-                                      <span className="rounded-full bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 text-[10px] font-semibold text-sky-300">
+                                      <span className="text-[10px] font-medium text-sky-300/90">
                                         30-Day Refund Shield
                                       </span>
                                     );
                                   }
                                   if (preset.trialType === 'promo_discount') {
                                     return (
-                                      <span className="rounded-full bg-purple-500/10 border border-purple-500/30 px-2 py-0.5 text-[10px] font-semibold text-purple-300">
+                                      <span className="text-[10px] font-medium text-purple-300/90">
                                         Promo Intro Offer
                                       </span>
                                     );
                                   }
                                   return (
-                                    <span className="rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/25 px-2 py-0.5 text-[10px] font-bold text-[#D4AF7C]">
+                                    <span className="text-[10px] font-semibold text-[#D4AF7C]">
                                       {defaultDays}-Day Trial
                                     </span>
                                   );
@@ -849,10 +849,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                   onClose();
                                 }}
                                 aria-label={`Start ${preset.name} free trial`}
-                                className={`min-h-[36px] px-2.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition-all duration-150 ease-out ${
+                                className={`h-7 px-2.5 rounded-full text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition-all duration-150 ease-out ${
                                   isDrawerOpen
                                     ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm border-transparent cursor-pointer active:scale-[0.97]'
-                                    : 'border border-[#D4AF7C]/35 text-[#D4AF7C] hover:border-[#D4AF7C] bg-[#1C1C20] cursor-pointer active:scale-[0.97]'
+                                    : 'border border-[#D4AF7C]/30 text-[#D4AF7C] hover:border-[#D4AF7C] bg-[#1C1C1E] cursor-pointer active:scale-[0.97]'
                                 }`}
                               >
                                 <Gift className="w-3 h-3 shrink-0" />
@@ -869,16 +869,17 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                 handleQuickAdd(preset);
                               }}
                               aria-label={isTracked ? `${preset.name} already added` : `Add ${preset.name}`}
-                              className={`min-h-[36px] px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center justify-center gap-1 whitespace-nowrap shadow-sm transition-all ${
+                              className={`h-7 px-2.5 rounded-full text-[11px] font-bold flex items-center justify-center gap-1 whitespace-nowrap transition-all ${
                                 isTracked
                                   ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 cursor-default'
-                                  : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] hover:brightness-110 active:scale-[0.97] cursor-pointer'
+                                  : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] hover:brightness-105 active:scale-[0.97] cursor-pointer'
                               }`}
                             >
                               {isTracked ? (
                                 <>
                                   <Check className="w-3 h-3 stroke-[2.75]" />
-                                  <span>Added ✓</span>
+                                  <span>Added</span>
+                                  <span className="sr-only">Added ✓</span>
                                 </>
                               ) : (
                                 <>

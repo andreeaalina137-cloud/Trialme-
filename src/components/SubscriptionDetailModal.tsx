@@ -186,7 +186,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-md modal-backdrop-enter sm:items-center sm:p-4">
       <div
-        className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-2xl mx-auto h-[88dvh] sm:h-auto sm:max-h-[88dvh] w-full bg-[#161616] border-t sm:border border-white/15 rounded-t-[32px] sm:rounded-3xl flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter"
+        className="fixed inset-x-0 bottom-0 sm:relative sm:inset-auto max-w-2xl mx-auto h-[88dvh] sm:h-auto sm:max-h-[88dvh] w-full bg-[#121214] border-t sm:border border-white/[0.08] rounded-t-2xl sm:rounded-2xl flex flex-col shadow-[0_-12px_40px_rgba(0,0,0,0.8)] overflow-hidden modal-sheet-enter"
         role="dialog"
         aria-modal="true"
         aria-labelledby="detail-modal-title"
@@ -194,11 +194,11 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
         {/* Native iOS Bottom Sheet Drag Handle */}
         <div
           onClick={onClose}
-          className="w-12 h-1.5 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-3 shrink-0 cursor-pointer active:scale-95 transition-all duration-150 sm:hidden"
+          className="w-10 h-1 bg-white/20 hover:bg-white/35 rounded-full mx-auto my-2.5 shrink-0 cursor-pointer active:scale-95 transition-all duration-150 sm:hidden"
         />
 
         {/* Header with real brand icon */}
-        <div className="p-4 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-[#161616]">
+        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between shrink-0 bg-[#121214]">
           <div className="flex items-center gap-3">
             <BrandIcon
               name={subscription.name}
@@ -206,7 +206,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
               color={subscription.color}
             />
             <div>
-              <h2 id="detail-modal-title" className="text-base font-bold text-[#F5F5F5]">
+              <h2 id="detail-modal-title" className="text-[15.5px] font-bold text-[#F5F5F5]">
                 {subscription.name}
               </h2>
               <div className="flex items-center gap-2 text-xs text-[#A0A0A0]">
@@ -219,23 +219,23 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
           <div className="flex items-center gap-1">
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="p-2 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
+              className="p-2 rounded-full hover:bg-[#1C1C1E] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
               aria-label={isEditing ? 'Cancel Edit' : 'Edit Subscription'}
             >
               <Edit3 className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-[#1F1F1F] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
+              className="p-2 rounded-full hover:bg-[#1C1C1E] text-[#A0A0A0] hover:text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 cursor-pointer"
               aria-label="Close"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4.5 h-4.5" />
             </button>
           </div>
         </div>
 
         {/* Content body */}
-        <div className="p-4 overflow-y-auto space-y-4 text-xs">
+        <div className="p-4 overflow-y-auto space-y-3.5 text-xs">
           {isEditing ? (
             <form onSubmit={handleSaveEdit} className="space-y-3">
               <div>
@@ -325,13 +325,13 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
             </form>
           ) : (
             <>
-              {/* Cost card — Emma-inspired unified stat surface with subtle hairline divider */}
-              <div className="grid grid-cols-2 divide-x divide-white/[0.07] rounded-[22px] bg-[#1F1F1F]/90 border border-white/[0.06] py-3.5 px-2">
+              {/* Cost card — Unified stat surface with subtle hairline divider */}
+              <div className="grid grid-cols-2 divide-x divide-white/[0.06] rounded-2xl bg-[#18181B] border border-white/[0.06] py-3 px-2">
                 <div className="px-3">
                   <div className="text-[11px] text-[#A0A0A0] font-medium">
                     {t('detail.currentCost')}
                   </div>
-                  <div className="text-xl font-extrabold text-[#F5F5F5] mt-0.5 font-mono tabular-nums">
+                  <div className="text-lg font-extrabold text-[#F5F5F5] mt-0.5 font-mono tabular-nums">
                     {formatPrice(subscription.price, subscription.currency || currencySymbol)}
                     <span className="text-xs font-normal text-[#A0A0A0]">
                       /{subscription.frequency === 'yearly' ? 'yr' : subscription.frequency === 'weekly' ? 'wk' : 'mo'}
@@ -342,7 +342,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                   <div className="text-[11px] text-[#A0A0A0] font-medium">
                     {t('detail.annualForecast')}
                   </div>
-                  <div className="text-xl font-extrabold text-[#D4AF7C] mt-0.5 font-mono tabular-nums">
+                  <div className="text-lg font-extrabold text-[#D4AF7C] mt-0.5 font-mono tabular-nums">
                     {formatPrice(annualCost, subscription.currency || currencySymbol)}
                     <span className="text-xs font-normal text-[#A0A0A0]">/yr</span>
                   </div>
@@ -351,7 +351,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
 
               {/* UK Price Hike Alert Banner */}
               {priceHikeAlert && (
-                <div className="rounded-[22px] border border-[#D4AF7C]/25 bg-[#1F1F1F]/90 p-3.5 flex items-start gap-3">
+                <div className="rounded-2xl border border-[#D4AF7C]/25 bg-[#18181B] p-3 flex items-start gap-2.5">
                   <TrendingUp className="w-4 h-4 text-[#D4AF7C] shrink-0 mt-0.5" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
@@ -370,7 +370,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
               )}
 
               {canSwitchAnnual && affiliateOffer?.annualUrl && (
-                <aside className="rounded-[22px] border border-[#D4AF7C]/25 bg-[#1F1F1F]/90 p-3.5">
+                <aside className="rounded-2xl border border-[#D4AF7C]/25 bg-[#18181B] p-3">
                   <button
                     type="button"
                     onClick={() => window.open(affiliateOffer.annualUrl, '_blank', 'noopener,noreferrer')}
@@ -384,7 +384,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                   <button
                     type="button"
                     onClick={handleAnnualSwitch}
-                    className="btn-champagne mt-2.5 flex w-full items-center justify-center gap-2 rounded-full px-3.5 py-2.5 text-xs font-bold text-[#0A0A0A] cursor-pointer"
+                    className="btn-champagne mt-2 flex w-full items-center justify-center gap-2 rounded-full px-3.5 py-2 text-xs font-bold text-[#0A0A0A] cursor-pointer"
                   >
                     {t('affiliate.annualSwitch', {
                       price: formatPrice(annualPlanPrice, subscription.currency || currencySymbol),
@@ -394,19 +394,19 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
               )}
 
               {/* Status and Next Payment */}
-              <div className="p-4 rounded-[22px] bg-[#141416] border border-white/[0.07] space-y-2.5">
-                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-                  <span className="text-[#9A9AA2] font-medium">{t('detail.statusLabel')}</span>
+              <div className="p-3.5 rounded-2xl bg-[#18181B] border border-white/[0.06] space-y-2">
+                <div className="flex items-center justify-between pb-2 border-b border-white/[0.05]">
+                  <span className="text-[#A0A0A0] font-medium">{t('detail.statusLabel')}</span>
                   {isCancelled ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                    <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
                       {t('home.cancelledBadge')}
                     </span>
                   ) : isTrial ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#D4AF7C]/20 text-[#D4AF7C] border border-[#D4AF7C]/35">
+                    <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30">
                       {t('home.trialBadge')}
                     </span>
                   ) : (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#D4AF7C]/20 text-[#D4AF7C] border border-[#D4AF7C]/35">
+                    <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/30">
                       {t('home.filterActive')}
                     </span>
                   )}
@@ -414,13 +414,13 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
 
                 {!isCancelled && (
                   <>
-                    <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-                      <span className="text-[#9A9AA2] font-medium">{t('detail.nextBilling')}</span>
+                    <div className="flex items-center justify-between pb-2 border-b border-white/[0.05]">
+                      <span className="text-[#A0A0A0] font-medium">{t('detail.nextBilling')}</span>
                       <span className="font-semibold text-[#F5F5F5] font-mono">{subscription.nextPaymentDate}</span>
                     </div>
 
-                    <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-                      <span className="text-[#9A9AA2] font-medium">{t('detail.timeRemaining')}</span>
+                    <div className="flex items-center justify-between pb-2 border-b border-white/[0.05]">
+                      <span className="text-[#A0A0A0] font-medium">{t('detail.timeRemaining')}</span>
                       <span className={`font-semibold ${daysRemaining <= 3 ? 'text-[#D4AF7C]' : 'text-[#F5F5F5]'}`}>
                         {daysRemaining < 0
                           ? `Billed ${Math.abs(daysRemaining)} days ago`
@@ -435,7 +435,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 )}
 
                 <div className="flex items-center justify-between">
-                  <span className="text-[#9A9AA2] font-medium">{t('detail.remindersLabel')}</span>
+                  <span className="text-[#A0A0A0] font-medium">{t('detail.remindersLabel')}</span>
                   <span className="font-semibold text-[#F5F5F5]">
                     {isCancelled
                       ? t('home.cancelledBadge')
@@ -444,8 +444,8 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 </div>
 
                 {!isCancelled && (
-                  <div className="border-t border-white/[0.06] pt-2.5 space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#9A9AA2] flex items-center justify-between">
+                  <div className="border-t border-white/[0.05] pt-2.5 space-y-2">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#A0A0A0] flex items-center justify-between">
                       <span>Phone Calendar Auto-Alarm ({reminderDaysBefore}d before)</span>
                       <span className="text-[#D4AF7C] font-semibold">Works offline</span>
                     </div>
@@ -490,7 +490,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                     )}
 
                     {!calendarReminderDate && (
-                      <p className="mt-1.5 text-[10px] text-[#9A9AA2]">{t('detail.calendarUnavailable')}</p>
+                      <p className="mt-1.5 text-[10px] text-[#A0A0A0]">{t('detail.calendarUnavailable')}</p>
                     )}
                   </div>
                 )}
@@ -538,7 +538,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 </div>
               )}
 
-              <div className="p-4 rounded-[22px] bg-[#1F1F1F]/90 border border-white/[0.06] space-y-2.5">
+              <div className="p-3.5 rounded-2xl bg-[#18181B] border border-white/[0.06] space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#F5F5F5]">{t('detail.historyLabel')}</span>
                   <span className="text-[10px] text-[#D4AF7C]">Direct Debit verified</span>
@@ -548,7 +548,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                     {subscription.paymentHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between py-2 px-3.5 rounded-full bg-[#0A0A0A]/80 border border-white/[0.06]"
+                        className="flex items-center justify-between py-1.5 px-3 rounded-full bg-[#0A0A0A]/80 border border-white/[0.06]"
                       >
                         <span className="text-[#A0A0A0] font-mono text-[11px]">{item.date}</span>
                         <span className="font-mono font-bold text-[#F5F5F5]">
@@ -558,7 +558,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                     ))}
                   </div>
                 ) : (
-                  <div className="py-2 text-center text-[#A0A0A0] text-[11px]">
+                  <div className="py-1.5 text-center text-[#A0A0A0] text-[11px]">
                     Billing scheduled starting {subscription.createdAt || 'this month'}
                   </div>
                 )}
@@ -568,7 +568,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-white/[0.08] shrink-0 bg-[#161616]/95 space-y-2">
+        <div className="px-4 py-3 border-t border-white/[0.06] shrink-0 bg-[#121214] space-y-2">
           {!isCancelled ? (
             <button
               onClick={() => {
@@ -577,7 +577,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                 onOpenCancelAssistant(subscription);
               }}
               disabled={isCancelled}
-              className="btn-cancel-soft w-full py-4 px-6 rounded-full font-bold text-sm active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+              className="btn-cancel-soft w-full h-10 px-5 rounded-full font-bold text-xs active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
             >
               <ShieldAlert className="w-4 h-4 text-rose-300" />
               <span>{t('detail.cancelThis')}</span>
@@ -585,7 +585,7 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
           ) : (
             <button
               onClick={handleReactivate}
-              className="btn-secondary-luxury w-full py-4 px-4 rounded-full font-bold text-sm active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
+              className="btn-secondary-luxury w-full h-10 px-4 rounded-full font-bold text-xs active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
             >
               <RotateCcw className="w-4 h-4 text-[#D4AF7C]" />
               <span>{t('detail.reactivate')}</span>

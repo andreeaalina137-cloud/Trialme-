@@ -83,10 +83,10 @@ const BrandIconInner: FC<BrandIconProps> = ({
   size = 'card',
 }) => {
   const n = name.toLowerCase();
-  const dimensions = size === 'preset' ? 'h-10 w-10 rounded-[13px]' : 'h-11 w-11 rounded-[14px]';
-  const circleDimensions = size === 'preset' ? 'h-10 w-10 rounded-full' : 'h-11 w-11 rounded-full';
-  const baseClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.45)] ring-1 ring-inset ring-white/[0.12] ${dimensions}`;
-  const circleClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.45)] ring-1 ring-inset ring-white/[0.12] ${circleDimensions}`;
+  const dimensions = size === 'preset' ? 'h-9 w-9 rounded-lg' : 'h-10 w-10 rounded-xl';
+  const circleDimensions = size === 'preset' ? 'h-9 w-9 rounded-full' : 'h-10 w-10 rounded-full';
+  const baseClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-sm ring-1 ring-inset ring-white/[0.08] ${dimensions}`;
+  const circleClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-sm ring-1 ring-inset ring-white/[0.08] ${circleDimensions}`;
 
   // 1. NETFLIX — Jet black tile (#0A0A0A) + official Netflix red 'N' (#E50914)
   if (n.includes('netflix')) {

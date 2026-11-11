@@ -39,7 +39,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       aria-label="Bottom Navigation"
       className="fixed bottom-0 inset-x-0 z-40 select-none flex justify-center pointer-events-none"
     >
-      <div className="pointer-events-auto w-full max-w-[520px] h-[72px] pb-safe px-2 backdrop-blur-2xl bg-[#0A0A0A]/95 border-t border-white/[0.07] sm:border-x sm:border-x-white/[0.06] grid grid-cols-5 items-center">
+      <div className="pointer-events-auto w-full max-w-3xl h-16 pb-safe px-2 backdrop-blur-xl bg-[#0A0A0A]/92 border-t border-white/[0.06] grid grid-cols-5 items-center">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = isTabActive(tab.id);
@@ -50,28 +50,26 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               type="button"
               onClick={() => onChangeTab(tab.id)}
               aria-current={active ? 'page' : undefined}
-              className={`min-h-[52px] flex flex-col items-center justify-center gap-1 rounded-2xl active:scale-[0.94] transition-all duration-180 ease-out cursor-pointer relative group ${
+              className={`min-h-[48px] flex flex-col items-center justify-center gap-0.5 rounded-xl active:scale-[0.95] transition-all duration-150 ease-out cursor-pointer relative group ${
                 active
                   ? 'text-[#D4AF7C]'
                   : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
               }`}
             >
-              <div className={`relative flex items-center justify-center px-3 py-1 rounded-full transition-all duration-200 ${
-                active ? 'bg-[#D4AF7C]/12' : 'bg-transparent'
-              }`}>
+              <div className="relative flex items-center justify-center">
                 <Icon
-                  className={`w-5 h-5 transition-all duration-200 ${
-                    active ? 'text-[#D4AF7C] stroke-[2.3]' : 'text-[#A0A0A0] stroke-[1.9] group-hover:text-[#F5F5F5]'
+                  className={`w-5 h-5 transition-all duration-150 ${
+                    active ? 'text-[#D4AF7C] stroke-[2.25]' : 'text-[#A0A0A0] stroke-[1.85] group-hover:text-[#F5F5F5]'
                   }`}
                 />
                 {typeof tab.badge === 'number' && tab.badge > 0 && (
-                  <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] px-1 rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-extrabold text-[9px] flex items-center justify-center shadow-sm">
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-[16px] px-1 rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-extrabold text-[9px] flex items-center justify-center shadow-sm">
                     {tab.badge}
                   </span>
                 )}
               </div>
               <span
-                className={`text-[10px] leading-tight tracking-tight transition-all duration-200 ${
+                className={`text-[10px] leading-tight tracking-tight transition-all duration-150 ${
                   active ? 'font-bold text-[#D4AF7C]' : 'font-medium text-[#A0A0A0] group-hover:text-[#F5F5F5]'
                 }`}
               >

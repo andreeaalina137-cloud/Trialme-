@@ -227,7 +227,7 @@ ${subscriptions
         </span>
       </header>
 
-      <div className="space-y-5 px-4 pt-4 pb-28 w-full text-xs text-[#F5F5F5]">
+      <div className="space-y-4 px-4 pt-3 pb-24 w-full text-xs text-[#F5F5F5]">
 
         {/* Toast Alert */}
         {toastMessage && (
@@ -238,21 +238,21 @@ ${subscriptions
         )}
 
         {/* Plan Status Card */}
-        <div className="p-5 rounded-[24px] bg-[#141416] border border-[#D4AF7C]/25 space-y-3.5 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)]">
+        <div className="p-4 rounded-2xl bg-[#141414] border border-[#D4AF7C]/25 space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-[#1C1C20] text-[#D4AF7C] border border-[#D4AF7C]/25 flex items-center justify-center shrink-0">
-                <Crown className="w-5 h-5 text-[#D4AF7C]" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#1C1C1E] text-[#D4AF7C] border border-[#D4AF7C]/20 flex items-center justify-center shrink-0">
+                <Crown className="w-4.5 h-4.5 text-[#D4AF7C]" />
               </div>
               <div>
-                <div className="font-extrabold text-[15.5px] text-[#F5F5F5] tracking-tight">
+                <div className="font-bold text-sm text-[#F5F5F5] tracking-tight">
                   {userPlan === 'pro'
                     ? t('settings.planPro')
                     : userPlan === 'standard'
                     ? t('settings.planStandard')
                     : t('settings.planFree')}
                 </div>
-                <div className="text-[12.5px] text-[#9A9AA2] leading-snug mt-0.5">
+                <div className="text-xs text-[#A0A0A0] leading-snug mt-0.5">
                   {userPlan === 'free'
                     ? 'Limit of 2 subscriptions on free tier'
                     : 'Unlimited subscriptions & renewal alerts for life'}
@@ -262,19 +262,19 @@ ${subscriptions
             {userPlan === 'free' ? (
               <button
                 onClick={onOpenPaywall}
-                className="bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-extrabold shadow-sm px-4 py-2 rounded-full text-xs cursor-pointer active:scale-[0.975] transition-all duration-150 ease-out shrink-0"
+                className="bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm px-3.5 py-1.5 rounded-full text-xs cursor-pointer active:scale-[0.975] transition-all duration-150 ease-out shrink-0"
               >
                 {t('settings.upgradeButton')}
               </button>
             ) : (
-              <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25 shrink-0">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/20 shrink-0">
                 {t('settings.activeLifetime')}
               </span>
             )}
           </div>
 
           {activeLicenseKey && (
-            <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2 text-xs">
+            <div className="pt-2.5 border-t border-white/[0.05] flex items-center justify-between gap-2 text-xs">
               <span className="flex items-center gap-1.5 text-[#F5F5F5]/90">
                 <KeyRound className="w-3.5 h-3.5 text-[#D4AF7C] shrink-0" />
                 <span>License Key: <strong className="font-mono text-[#D4AF7C]">{activeLicenseKey}</strong></span>
@@ -282,7 +282,7 @@ ${subscriptions
               <button
                 type="button"
                 onClick={handleCopyLicenseKey}
-                className="inline-flex items-center gap-1 rounded-full bg-[#1C1C20] border border-white/[0.07] px-3 py-1 text-[11px] font-semibold text-[#D4AF7C] hover:border-[#D4AF7C]/40 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-full bg-[#1C1C1E] border border-white/[0.07] px-2.5 py-1 text-[11px] font-semibold text-[#D4AF7C] hover:border-[#D4AF7C]/40 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
               >
                 <Copy className="w-3 h-3" />
                 Copy
@@ -292,17 +292,17 @@ ${subscriptions
         </div>
 
         {/* Account & Session Card */}
-        <div className="p-5 rounded-[24px] bg-[#141416] border border-white/[0.07] space-y-3 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)]">
+        <div className="p-4 rounded-2xl bg-[#141414] border border-white/[0.06] space-y-2.5">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-[#1C1C20] border border-white/[0.06] flex items-center justify-center shrink-0 text-[#D4AF7C]">
-                <ShieldCheck className="w-5 h-5 text-[#D4AF7C]" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#1C1C1E] border border-white/[0.06] flex items-center justify-center shrink-0 text-[#D4AF7C]">
+                <ShieldCheck className="w-4.5 h-4.5 text-[#D4AF7C]" />
               </div>
               <div>
-                <div className="font-extrabold text-[15.5px] text-[#F5F5F5] tracking-tight">
+                <div className="font-bold text-sm text-[#F5F5F5] tracking-tight">
                   {currentUser ? currentUser.email : 'Guest / Logged Out'}
                 </div>
-                <div className="text-[12.5px] text-[#9A9AA2] leading-snug mt-0.5">
+                <div className="text-xs text-[#A0A0A0] leading-snug mt-0.5">
                   {currentUser ? 'Signed in · Cloud Sync & Shield Active' : 'Sign in to access your saved trials'}
                 </div>
               </div>
@@ -311,7 +311,7 @@ ${subscriptions
               <button
                 type="button"
                 onClick={onLogout}
-                className="px-3.5 py-2 rounded-full bg-[#1C1C20] border border-white/[0.08] hover:border-white/20 text-[#9A9AA2] hover:text-[#F5F5F5] text-xs font-semibold active:scale-[0.975] transition-all cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-full bg-[#1C1C1E] border border-white/[0.07] hover:border-white/20 text-[#A0A0A0] hover:text-[#F5F5F5] text-xs font-semibold active:scale-[0.975] transition-all cursor-pointer shrink-0"
               >
                 Log Out
               </button>
@@ -319,7 +319,7 @@ ${subscriptions
               <button
                 type="button"
                 onClick={onRequestAuth}
-                className="bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-extrabold shadow-sm px-4 py-2 rounded-full text-xs cursor-pointer active:scale-[0.975] transition-all shrink-0"
+                className="bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm px-3.5 py-1.5 rounded-full text-xs cursor-pointer active:scale-[0.975] transition-all shrink-0"
               >
                 Sign In
               </button>
@@ -328,19 +328,19 @@ ${subscriptions
         </div>
 
         {/* Section: General Preferences & Language Selector */}
-        <div className="space-y-2.5">
-          <div className="text-[15px] font-bold text-[#F5F5F5] px-1 tracking-tight">
+        <div className="space-y-2">
+          <div className="text-[13.5px] font-bold text-[#F5F5F5] px-1 tracking-tight">
             {t('settings.sectionGeneral')}
           </div>
-          <div className="rounded-[22px] bg-[#161616] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
-            <div className="px-4 py-3.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+          <div className="rounded-2xl bg-[#141414] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden">
+            <div className="px-3.5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <Languages className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
                 <div>
-                  <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.languageLabel')}</span>
-                  <div className="text-xs text-[#A0A0A0]">6 languages supported</div>
+                  <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.languageLabel')}</span>
+                  <div className="text-[11px] text-[#A0A0A0]">6 languages supported</div>
                 </div>
               </div>
               <select
@@ -361,12 +361,12 @@ ${subscriptions
               </select>
             </div>
 
-            <div className="px-4 py-3.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+            <div className="px-3.5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <Coins className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
-                <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.currencyLabel')}</span>
+                <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.currencyLabel')}</span>
               </div>
               <select
                 value={currentCurrency}
@@ -381,61 +381,61 @@ ${subscriptions
               </select>
             </div>
 
-            <div className="px-4 py-3.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+            <div className="px-3.5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   {isDarkMode ? <Moon className="w-4 h-4 text-[#D4AF7C]" /> : <Sun className="w-4 h-4 text-[#D4AF7C]" />}
                 </div>
-                <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.darkModeLabel')}</span>
+                <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.darkModeLabel')}</span>
               </div>
               <button
                 onClick={onToggleDarkMode}
-                className={`w-12 h-7 rounded-full transition-all duration-150 ease-out active:scale-[0.97] relative p-0.5 cursor-pointer ${
+                className={`w-11 h-6 rounded-full transition-all duration-150 ease-out active:scale-[0.97] relative p-0.5 cursor-pointer ${
                   isDarkMode ? 'bg-[#D4AF7C]' : 'bg-[#1F1F1F]'
                 }`}
                 aria-label="Toggle Dark Mode"
               >
                 <div
-                  className={`w-6 h-6 rounded-full bg-[#0A0A0A] shadow-md transition-transform duration-150 ease-out ${
+                  className={`w-5 h-5 rounded-full bg-[#0A0A0A] shadow-md transition-transform duration-150 ease-out ${
                     isDarkMode ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
-            <div className="px-4 py-3.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+            <div className="px-3.5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   {soundEffectsEnabled ? <Volume2 className="w-4 h-4 text-[#D4AF7C]" /> : <VolumeX className="w-4 h-4 text-[#A0A0A0]" />}
                 </div>
-                <span className="font-semibold text-[14px] text-[#F5F5F5]">Sound Effects</span>
+                <span className="font-semibold text-[13px] text-[#F5F5F5]">Sound Effects</span>
               </div>
               <button
                 type="button"
                 role="switch"
                 aria-checked={soundEffectsEnabled}
                 onClick={onToggleSoundEffects}
-                className={`w-12 h-7 rounded-full transition-all duration-150 ease-out active:scale-[0.97] relative p-0.5 cursor-pointer ${
+                className={`w-11 h-6 rounded-full transition-all duration-150 ease-out active:scale-[0.97] relative p-0.5 cursor-pointer ${
                   soundEffectsEnabled ? 'bg-[#D4AF7C]' : 'bg-[#1F1F1F]'
                 }`}
                 aria-label="Sound Effects"
               >
                 <div
-                  className={`w-6 h-6 rounded-full bg-[#0A0A0A] shadow-md transition-transform duration-150 ease-out ${
+                  className={`w-5 h-5 rounded-full bg-[#0A0A0A] shadow-md transition-transform duration-150 ease-out ${
                     soundEffectsEnabled ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
-            <div className="px-4 py-3.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+            <div className="px-3.5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <Bell className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
                 <div>
-                  <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.remindersLabel')}</span>
-                  <div className="text-xs text-[#A0A0A0] flex items-center gap-1.5 mt-0.5">
+                  <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.remindersLabel')}</span>
+                  <div className="text-[11px] text-[#A0A0A0] flex items-center gap-1.5 mt-0.5">
                     <span>3d & 1d alerts at 09:30 AM</span>
                     <span className="text-white/20">·</span>
                     {notificationsEnabled && permissionStatus === 'granted' ? (
@@ -450,27 +450,27 @@ ${subscriptions
               </div>
               <button
                 onClick={onToggleNotifications}
-                className={`w-12 h-7 rounded-full transition-all duration-150 ease-out active:scale-[0.97] relative p-0.5 cursor-pointer ${
+                className={`w-11 h-6 rounded-full transition-all duration-150 ease-out active:scale-[0.97] relative p-0.5 cursor-pointer ${
                   notificationsEnabled ? 'bg-[#D4AF7C]' : 'bg-[#1F1F1F]'
                 }`}
                 aria-label="Toggle Notifications"
               >
                 <div
-                  className={`w-6 h-6 rounded-full bg-[#0A0A0A] shadow-md transition-transform duration-150 ease-out ${
+                  className={`w-5 h-5 rounded-full bg-[#0A0A0A] shadow-md transition-transform duration-150 ease-out ${
                     notificationsEnabled ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
-            <div className="px-4 py-3 flex items-center justify-between bg-[#1F1F1F]/40">
+            <div className="px-3.5 py-2.5 flex items-center justify-between bg-[#1A1A1C]/50">
               <div>
                 <span className="text-xs text-[#A0A0A0] block">Preview 3-sec alert:</span>
-                <span className="text-[11px] text-[#A0A0A0]/70">Simulates scheduled renewal alarm</span>
+                <span className="text-[10.5px] text-[#A0A0A0]/70">Simulates scheduled renewal alarm</span>
               </div>
               <button
                 onClick={onTriggerTestNotification}
-                className="text-xs font-semibold text-[#D4AF7C] hover:text-[#F5F5F5] bg-[#D4AF7C]/12 px-3.5 py-1.5 rounded-full border border-[#D4AF7C]/25 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                className="text-xs font-semibold text-[#D4AF7C] hover:text-[#F5F5F5] bg-[#D4AF7C]/10 px-3 py-1 rounded-full border border-[#D4AF7C]/20 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
               >
                 {t('settings.testAlert')}
               </button>
@@ -479,49 +479,49 @@ ${subscriptions
         </div>
 
         {/* Section: Data, Cloud-Free Backup & Reports */}
-        <div className="space-y-2.5">
-          <div className="text-[15px] font-bold text-[#F5F5F5] px-1 tracking-tight">
+        <div className="space-y-2">
+          <div className="text-[13.5px] font-bold text-[#F5F5F5] px-1 tracking-tight">
             {t('settings.sectionData')}
           </div>
-          <div className="rounded-[24px] bg-[#141416] divide-y divide-white/[0.05] border border-white/[0.07] overflow-hidden shadow-[0_12px_32px_-12px_rgba(0,0,0,0.65)]">
+          <div className="rounded-2xl bg-[#141414] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden">
             <button
               onClick={handleExportData}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+              className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-2xl bg-[#1C1C20] border border-white/[0.06] flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <Download className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
                 <div>
-                  <div className="font-semibold text-[14px] text-[#F5F5F5] flex items-center gap-2">
+                  <div className="font-semibold text-[13px] text-[#F5F5F5] flex items-center gap-2">
                     {t('settings.exportReport')}
                     {userPlan !== 'pro' && (
-                      <span className="text-[9px] uppercase px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25 font-bold">
+                      <span className="text-[9px] uppercase px-2 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/20 font-bold">
                         Pro
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-[#9A9AA2] mt-0.5">{t('settings.exportSub')}</div>
+                  <div className="text-[11px] text-[#A0A0A0] mt-0.5">{t('settings.exportSub')}</div>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#9A9AA2] shrink-0" />
+              <ChevronRight className="w-4 h-4 text-[#A0A0A0] shrink-0" />
             </button>
 
-            <div className="px-4 py-3.5 space-y-3">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-9 h-9 rounded-2xl bg-[#1C1C20] border border-white/[0.06] flex items-center justify-center shrink-0">
+            <div className="px-3.5 py-3 space-y-2.5">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold text-[14px] text-[#F5F5F5]">Device Backup & Restore (.json)</div>
-                  <div className="text-xs text-[#9A9AA2] mt-0.5">Keep your subscriptions & license safe across devices</div>
+                  <div className="font-semibold text-[13px] text-[#F5F5F5]">Device Backup & Restore (.json)</div>
+                  <div className="text-[11px] text-[#A0A0A0] mt-0.5">Keep your subscriptions & license safe across devices</div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2.5 pl-12">
+              <div className="grid grid-cols-2 gap-2 pl-11">
                 <button
                   type="button"
                   onClick={handleExportJsonBackup}
-                  className="min-h-[36px] px-3.5 py-1.5 rounded-full bg-[#1C1C20] border border-[#D4AF7C]/30 text-[#D4AF7C] font-bold text-xs hover:border-[#D4AF7C] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer flex items-center justify-center gap-1.5"
+                  className="h-8 px-3 rounded-full bg-[#1C1C1E] border border-[#D4AF7C]/25 text-[#D4AF7C] font-semibold text-xs hover:border-[#D4AF7C] active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Backup</span>
@@ -529,7 +529,7 @@ ${subscriptions
                 <button
                   type="button"
                   onClick={() => backupInputRef.current?.click()}
-                  className="min-h-[36px] px-3.5 py-1.5 rounded-full bg-[#1C1C20] border border-white/[0.08] text-[#F5F5F5] font-bold text-xs hover:border-[#D4AF7C]/50 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer flex items-center justify-center gap-1.5"
+                  className="h-8 px-3 rounded-full bg-[#1C1C1E] border border-white/[0.07] text-[#F5F5F5] font-semibold text-xs hover:border-[#D4AF7C]/45 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Upload className="w-3.5 h-3.5 text-[#D4AF7C]" />
                   <span>Import</span>
@@ -549,40 +549,40 @@ ${subscriptions
                 handleRestorePurchases();
                 setShowRestoreKeyModal(true);
               }}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+              className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-2xl bg-[#1C1C20] border border-white/[0.06] flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <RotateCcw className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
                 <div>
-                  <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.restorePurchases')}</span>
-                  <div className="text-xs text-[#9A9AA2] mt-0.5">Verify via License Key or Purchase Email</div>
+                  <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.restorePurchases')}</span>
+                  <div className="text-[11px] text-[#A0A0A0] mt-0.5">Verify via License Key or Purchase Email</div>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#9A9AA2] shrink-0" />
+              <ChevronRight className="w-4 h-4 text-[#A0A0A0] shrink-0" />
             </button>
           </div>
         </div>
 
         {/* Section: Community & Legal */}
-        <div className="space-y-2.5">
-          <div className="text-[15px] font-bold text-[#F5F5F5] px-1 tracking-tight">
+        <div className="space-y-2">
+          <div className="text-[13.5px] font-bold text-[#F5F5F5] px-1 tracking-tight">
             {t('settings.sectionAbout')}
           </div>
-          <div className="rounded-[22px] bg-[#161616] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]">
+          <div className="rounded-2xl bg-[#141414] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden">
             {onReplayOnboarding && (
               <button
                 onClick={onReplayOnboarding}
-                className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+                className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                     <Compass className="w-4 h-4 text-[#D4AF7C]" />
                   </div>
                   <div>
-                    <span className="font-semibold text-[14px] text-[#F5F5F5]">Replay 3-Step Onboarding</span>
-                    <div className="text-xs text-[#A0A0A0] mt-0.5">Review core features and value pillars</div>
+                    <span className="font-semibold text-[13px] text-[#F5F5F5]">Replay 3-Step Onboarding</span>
+                    <div className="text-[11px] text-[#A0A0A0] mt-0.5">Review core features and value pillars</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-[#A0A0A0] shrink-0" />
@@ -590,13 +590,13 @@ ${subscriptions
             )}
             <button
               onClick={() => setShowRatingModal(true)}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+              className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <Star className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
-                <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.rateApp')}</span>
+                <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.rateApp')}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-[#A0A0A0] shrink-0" />
             </button>
@@ -604,20 +604,20 @@ ${subscriptions
               <button
                 type="button"
                 onClick={onOpenGiftSlot}
-                className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+                className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                     <Gift className="w-4 h-4 text-[#D4AF7C]" />
                   </div>
                   <div className="min-w-0">
-                    <span className="font-semibold text-[14px] text-[#F5F5F5] block">Gift a Slot · Invite Friends</span>
-                    <span className="text-xs text-[#A0A0A0] block mt-0.5">Give a mate +1 slot and unlock +1 for yourself</span>
+                    <span className="font-semibold text-[13px] text-[#F5F5F5] block">Gift a Slot · Invite Friends</span>
+                    <span className="text-[11px] text-[#A0A0A0] block mt-0.5">Give a mate +1 slot and unlock +1 for yourself</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {bonusSlots > 0 && (
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/20">
                       +{bonusSlots} Unlocked
                     </span>
                   )}
@@ -627,37 +627,37 @@ ${subscriptions
             )}
             <button
               onClick={handleShareApp}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+              className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <Share2 className="w-4 h-4 text-[#D4AF7C]" />
                 </div>
-                <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.shareApp')}</span>
+                <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.shareApp')}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-[#A0A0A0] shrink-0" />
             </button>
             <button
               onClick={() => setShowLegalModal('privacy')}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+              className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-4 h-4 text-[#A0A0A0]" />
                 </div>
-                <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.privacy')}</span>
+                <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.privacy')}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-[#A0A0A0] shrink-0" />
             </button>
             <button
               onClick={() => setShowLegalModal('terms')}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.025] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
+              className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-[#1F1F1F] border border-white/[0.05] flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
                   <FileText className="w-4 h-4 text-[#A0A0A0]" />
                 </div>
-                <span className="font-semibold text-[14px] text-[#F5F5F5]">{t('settings.terms')}</span>
+                <span className="font-semibold text-[13px] text-[#F5F5F5]">{t('settings.terms')}</span>
               </div>
               <ChevronRight className="w-4 h-4 text-[#A0A0A0] shrink-0" />
             </button>
