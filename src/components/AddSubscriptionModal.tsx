@@ -581,27 +581,47 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
           )}
         </div>
 
-        {/* Tabs: Quick-Add vs Manual */}
-        <div className="flex border-b border-white/[0.06] px-4 pt-0.5 bg-[#121214] shrink-0">
+        {/* Tabs: Quick-Add vs Manual Entry vs Add Free Trial */}
+        <div className="grid grid-cols-3 gap-1.5 border-b border-white/[0.06] px-4 py-2 bg-[#121214] shrink-0">
           <button
+            type="button"
             onClick={() => setActiveTab('quick')}
-            className={`h-9 flex-1 text-xs font-bold text-center border-b-2 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
+            className={`h-8 rounded-full text-[11px] font-semibold text-center transition cursor-pointer ${
               activeTab === 'quick'
-                ? 'border-[#D4AF7C] text-[#D4AF7C]'
-                : 'border-transparent text-[#A0A0A0] hover:text-[#F5F5F5]'
+                ? 'btn-gold'
+                : 'border border-white/10 bg-white/[0.03] text-white/60 hover:text-white'
             }`}
           >
             {t('add.tabQuick')} ({POPULAR_PRESETS.length})
           </button>
           <button
-            onClick={() => setActiveTab('manual')}
-            className={`h-9 flex-1 text-xs font-bold text-center border-b-2 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
-              activeTab === 'manual'
-                ? 'border-[#D4AF7C] text-[#D4AF7C]'
-                : 'border-transparent text-[#A0A0A0] hover:text-[#F5F5F5]'
+            type="button"
+            onClick={() => {
+              setIsTrial(false);
+              setActiveTab('manual');
+            }}
+            className={`h-8 rounded-full text-[11px] font-semibold text-center transition cursor-pointer ${
+              activeTab === 'manual' && !isTrial
+                ? 'btn-gold'
+                : 'border border-white/10 bg-white/[0.03] text-white/60 hover:text-white'
             }`}
           >
             {t('add.tabManual')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsTrial(true);
+              applyManualTrialDuration(manualTrialDays);
+              setActiveTab('manual');
+            }}
+            className={`h-8 rounded-full text-[11px] font-semibold text-center transition cursor-pointer ${
+              activeTab === 'manual' && isTrial
+                ? 'btn-gold'
+                : 'border border-white/10 bg-white/[0.03] text-white/60 hover:text-white'
+            }`}
+          >
+            Add Free Trial
           </button>
         </div>
 
@@ -743,7 +763,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                     return (
                       <div
                         key={preset.id}
-                        className="rounded-xl overflow-hidden border border-white/[0.05] bg-[#141414] hover:border-white/[0.1] transition-colors"
+                        className="specular overflow-hidden transition hover:border-[#D4AF7C]/35"
                       >
                         {/* Compact, Lightweight Service Row */}
                         <div

@@ -1,50 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Check,
   Plus,
-  Trophy,
   Search,
-  ShieldCheck,
-  TrendingUp,
-  BadgeCheck,
-  CircleDollarSign,
-  Coins,
-  Scissors,
-  Medal,
+  Sparkles,
   Trash2,
   X,
-  Gift,
-  CalendarDays,
-  BellRing,
-  ChevronRight,
-  SlidersHorizontal,
-  Check,
 } from 'lucide-react';
 import type { Subscription, UserPlan } from '../types/subscription';
-import { SubscriptionCard } from './SubscriptionCard';
-import { AnimatedCounter } from './AnimatedCounter';
-import { CalendarView } from './CalendarView';
 import {
-  calculateMonthlyTotal,
   calculateAnnualTotal,
-  calculateTotalSavings,
-  calculateAnnualSavings,
+  calculateMonthlyTotal,
   calculateRenewalForecast,
+  calculateTotalSavings,
   convertFrequencyToMonthly,
-  formatPrice,
   filterAndSortSubscriptions,
-  getDaysUntilNextPayment,
+  formatPrice,
   roundCurrency,
 } from '../utils/subscriptionCalculations';
 import { isDuplicateSubscription } from '../utils/subscriptionIdentity';
 import { CURATED_UK_TRIALS, type CuratedUkTrial } from '../utils/retentionAndTrust';
 import { POPULAR_PRESETS, hasActiveUkFreeTrial, type PopularPreset } from '../data/popularPresets';
 import { BrandIcon } from './BrandIcon';
-import { GoldBellIcon } from './GoldBellIcon';
 import { useTranslation } from '../i18n/LanguageContext';
-import { playAchievementChime, playSubtlePop, playSuccessFanfare } from '../utils/soundEffects';
-import { ACHIEVEMENTS, getUnlockedAchievementIds } from '../utils/achievements';
+import { playAchievementChime, playSubtlePop } from '../utils/soundEffects';
+import { getUnlockedAchievementIds } from '../utils/achievements';
 import type { ConfettiOrigin } from './ConfettiExplosion';
+import { TopBar } from './monetry/TopBar';
+import { CalendarDrawer } from './monetry/CalendarDrawer';
+import { OffersDrawer } from './monetry/OffersDrawer';
+import { UpcomingBanner } from './monetry/UpcomingBanner';
+import { HeroCard } from './monetry/HeroCard';
+import { TrialsSection } from './monetry/TrialsSection';
+import { SubPreviewList } from './monetry/SubPreviewList';
+import { SubRow } from './monetry/SubRow';
+import { AlertsCard } from './monetry/AlertsCard';
+import { RadarCard } from './monetry/RadarCard';
+import { SavingsCard } from './monetry/SavingsCard';
 
 interface HomeScreenProps {
   subscriptions: Subscription[];
@@ -75,7 +67,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenCancelSub,
   onLoadShowcaseTrials,
   onOpenPaywall,
-  onCelebrate,
   onClearCancelled,
   onStartRadarTrial,
   onQuickAddPreset,
@@ -86,49 +77,60 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchBar, setShowSearchBar] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'trial' | 'cancelled' | 'renewingSoon'>('all');
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'trial' | 'cancelled' | 'renewingSoon'
+  >('all');
   const [isConfirmingClearCancelled, setIsConfirmingClearCancelled] = useState(false);
-  const [showTrialRadar, setShowTrialRadar] = useState(false);
-  const [showCalendarSheet, setShowCalendarSheet] = useState(false);
+  const [showCalendarDrawer, setShowCalendarDrawer] = useState(false);
+  const [offersDrawerState, setOffersDrawerState] = useState<{
+    open: boolean;
+    mode: 'radar' | 'alternatives';
+  }>({ open: false, mode: 'radar' });
+  const [localSection, setLocalSection] = useState<'dashboard' | 'subscriptions'>(
+    activeSection === 'subscriptions' ? 'subscriptions' : 'dashboard'
+  );
+
+  useEffect(() => {
+    setLocalSection(activeSection === 'subscriptions' ? 'subscriptions' : 'dashboard');
+  }, [activeSection]);
 
   const monthlyTotal = calculateMonthlyTotal(subscriptions);
   const annualTotal = calculateAnnualTotal(subscriptions);
   const totalSavings = calculateTotalSavings(subscriptions);
-  const annualSavings = calculateAnnualSavings(subscriptions);
   const currentMonth = new Date().toISOString().slice(0, 7);
   const thisMonthSavings = roundCurrency(
     subscriptions
-      .filter((subscription) => subscription.status === 'cancelled' && subscription.cancelledAt?.slice(0, 7) === currentMonth)
+      .filter(
+        (subscription) =>
+          subscription.status === 'cancelled' &&
+          subscription.cancelledAt?.slice(0, 7) === currentMonth
+      )
       .reduce((sum, subscription) => {
-        const amt = subscription.monthlySavingsAmount ?? convertFrequencyToMonthly(subscription.price, subscription.frequency);
+        const amt =
+          subscription.monthlySavingsAmount ??
+          convertFrequencyToMonthly(subscription.price, subscription.frequency);
         return sum + (Number.isFinite(amt) ? amt : 0);
       }, 0)
   );
 
-  const activeSubs = subscriptions
-    .filter((s) => s.status === 'active' || s.status === 'trial')
-    .sort((a, b) => a.nextPaymentDate.localeCompare(b.nextPaymentDate));
+  const activeSubs = useMemo(
+    () =>
+      subscriptions
+        .filter((s) => s.status === 'active' || s.status === 'trial')
+        .sort((a, b) => a.nextPaymentDate.localeCompare(b.nextPaymentDate)),
+    [subscriptions]
+  );
 
   const activeOnlyCount = subscriptions.filter((s) => s.status === 'active').length;
   const activeCount = activeSubs.length;
-  const trialCount = subscriptions.filter((s) => s.status === 'trial').length;
+  const trialSubs = subscriptions.filter((s) => s.status === 'trial');
+  const trialCount = trialSubs.length;
   const cancelledCount = subscriptions.filter((s) => s.status === 'cancelled').length;
   const unlockedAchievementIds = getUnlockedAchievementIds(subscriptions);
   const previousSavings = useRef(totalSavings);
-  const [isSavingsBoosted, setIsSavingsBoosted] = useState(false);
-  const [celebratingAchievementIds, setCelebratingAchievementIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const oldSavings = previousSavings.current;
     previousSavings.current = totalSavings;
-    if (totalSavings <= oldSavings) {
-      if (totalSavings < oldSavings) setIsSavingsBoosted(false);
-      return;
-    }
-
-    setIsSavingsBoosted(true);
-    const timeout = window.setTimeout(() => setIsSavingsBoosted(false), 800);
-    return () => window.clearTimeout(timeout);
   }, [totalSavings]);
 
   useEffect(() => {
@@ -140,7 +142,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       previouslyUnlocked = [];
     }
 
-    const newlyUnlocked = unlockedAchievementIds.filter((id) => !previouslyUnlocked.includes(id));
+    const newlyUnlocked = unlockedAchievementIds.filter(
+      (id) => !previouslyUnlocked.includes(id)
+    );
     try {
       localStorage.setItem(
         'subcleaner_achievements_unlocked',
@@ -150,128 +154,87 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       // Storage unavailable fallback
     }
 
-    if (newlyUnlocked.length === 0) return;
-    setCelebratingAchievementIds(newlyUnlocked);
-    playAchievementChime();
-    const timeout = window.setTimeout(() => setCelebratingAchievementIds([]), 1200);
-    return () => window.clearTimeout(timeout);
-  }, [subscriptions]);
+    if (newlyUnlocked.length > 0) {
+      playAchievementChime();
+    }
+  }, [subscriptions, unlockedAchievementIds]);
 
-  const filteredSubs = filterAndSortSubscriptions(subscriptions, {
-    search: searchQuery,
-    statusFilter: activeSection === 'trials' ? 'trial' : statusFilter,
-    sortBy: 'renewal',
-  });
+  const filteredSubs = useMemo(
+    () =>
+      filterAndSortSubscriptions(subscriptions, {
+        search: searchQuery,
+        statusFilter: activeSection === 'trials' ? 'trial' : statusFilter,
+        sortBy: 'renewal',
+      }),
+    [subscriptions, searchQuery, activeSection, statusFilter]
+  );
 
-  const nearestSub =
-    activeSubs.find((s) => s.status === 'trial') ??
-    activeSubs[0] ??
-    null;
+  const matchingPresets = useMemo(
+    () =>
+      searchQuery.trim()
+        ? POPULAR_PRESETS.filter((preset) => {
+            const tokens = searchQuery.toLowerCase().trim().split(/\s+/);
+            const haystack = [
+              preset.name,
+              preset.category,
+              preset.filterGroup,
+              preset.description,
+              ...(preset.keywords || []),
+            ]
+              .join(' ')
+              .toLowerCase();
+            return tokens.every((token) => haystack.includes(token));
+          }).slice(0, 6)
+        : [],
+    [searchQuery]
+  );
 
-  const nearestDueDate = nearestSub
-    ? (nearestSub.status === 'trial' && nearestSub.trialEndDate ? nearestSub.trialEndDate : nearestSub.nextPaymentDate)
-    : null;
-  const nearestDaysLeft = nearestDueDate ? Math.max(0, getDaysUntilNextPayment(nearestDueDate)) : 0;
-  const nearestDuration = nearestSub?.trialDurationDays || 30;
-  const nearestProgressPercent = nearestSub
-    ? Math.min(92, Math.max(12, Math.round(((nearestDuration - Math.min(nearestDuration, nearestDaysLeft)) / nearestDuration) * 100)))
-    : 38;
-
-  const formatRenewalDate = (dateStr?: string) => {
-    if (!dateStr) return '24 Dec 2025';
-    const parsed = new Date(`${dateStr}T12:00:00`);
-    if (Number.isNaN(parsed.getTime())) return dateStr;
-    return parsed.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  };
-
-  const myTrialsList =
-    filteredSubs.length > 1 && nearestSub && statusFilter === 'all' && !searchQuery
-      ? filteredSubs.filter((s) => s.id !== nearestSub.id)
-      : filteredSubs;
-
-  const matchingPresets = searchQuery.trim()
-    ? POPULAR_PRESETS.filter((preset) => {
-        const tokens = searchQuery.toLowerCase().trim().split(/\s+/);
-        const haystack = [
-          preset.name,
-          preset.category,
-          preset.filterGroup,
-          preset.description,
-          ...(preset.keywords || []),
-        ]
-          .join(' ')
-          .toLowerCase();
-        return tokens.every((token) => haystack.includes(token));
-      }).slice(0, 6)
-    : [];
-
-  const renewalForecast = React.useMemo(
+  const renewalForecast = useMemo(
     () => calculateRenewalForecast(subscriptions, 6),
     [subscriptions]
   );
-  const maxForecastTotal = React.useMemo(
-    () => Math.max(...renewalForecast.map((m) => m.total), 1),
-    [renewalForecast]
-  );
-  const monthlyChartBars = React.useMemo(
-    () =>
-      renewalForecast.map((item) => {
-        const heightPercent =
-          item.total > 0
-            ? Math.max(18, Math.min(100, Math.round((item.total / maxForecastTotal) * 100)))
-            : 10;
-        return {
-          label: item.label,
-          total: item.total,
-          height: `${heightPercent}%`,
-          active: item.isCurrent,
-        };
-      }),
-    [renewalForecast, maxForecastTotal]
-  );
+
+  const handleStartCuratedTrial = (deal: CuratedUkTrial) => {
+    if (onStartRadarTrial) {
+      onStartRadarTrial(deal);
+    } else {
+      onOpenAddModal();
+    }
+  };
 
   return (
     <div className="min-h-full bg-[#0A0A0A]">
-      {/* Sticky Native Mobile App Bar */}
-      <header className="h-14 backdrop-blur-xl bg-[#0A0A0A]/92 sticky top-0 z-30 flex items-center justify-between px-4 border-b border-white/[0.06]">
-        <div className="flex items-center gap-2">
-          <span className="text-[21px] font-extrabold tracking-tight text-[#D4AF7C]">
-            Monetry
-          </span>
-          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/25 uppercase tracking-wider">
-            UK
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowSearchBar((v) => !v)}
-            className="h-10 w-10 rounded-full bg-[#161616] border border-white/[0.07] hover:bg-[#1F1F1F] flex items-center justify-center text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 ease-out cursor-pointer"
-            aria-label="Toggle search and filters"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-[#D4AF7C]" />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              playSubtlePop();
-              onOpenAddModal();
-            }}
-            className="h-10 w-10 rounded-full bg-[#161616] border border-white/[0.07] hover:bg-[#1F1F1F] flex items-center justify-center text-[#F5F5F5] active:scale-[0.95] transition-all duration-150 ease-out cursor-pointer"
-            aria-label={t('home.ctaAdd')}
-          >
-            <Plus className="w-5 h-5 text-[#F5F5F5] stroke-[2.2]" />
-          </button>
-        </div>
-      </header>
+      {/* Sticky Base44 TopBar */}
+      <TopBar
+        calendarOpen={showCalendarDrawer}
+        onToggleCalendar={() => setShowCalendarDrawer((v) => !v)}
+        onOpenFilters={() => setShowSearchBar((v) => !v)}
+        onOpenAdd={() => {
+          playSubtlePop();
+          onOpenAddModal();
+        }}
+      />
 
-      {/* Pure Mobile Feed (Compact, natural information density & refined proportions) */}
-      <div className="space-y-3.5 px-4 pt-3 pb-24">
-        {/* Search & Filter Drawer (when toggled or search active) */}
-        {(showSearchBar || searchQuery || statusFilter !== 'all') && (
-          <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-3.5 space-y-2.5">
+      {/* Slide-down Base44 Renewal Calendar Drawer */}
+      <CalendarDrawer
+        open={showCalendarDrawer}
+        subscriptions={subscriptions}
+        currencySymbol={currencySymbol}
+        formatPrice={formatPrice}
+        onSelect={onOpenSubscriptionDetail}
+        onClose={() => setShowCalendarDrawer(false)}
+      />
+
+      {/* Main Content Feed */}
+      <div className="space-y-4 px-4 pt-3 pb-24">
+        {/* Search & Filter Drawer (when toggled or in Subscriptions view) */}
+        {(showSearchBar ||
+          searchQuery ||
+          statusFilter !== 'all' ||
+          localSection === 'subscriptions') && (
+          <div className="specular p-3.5 space-y-2.5">
             <div className="relative">
-              <Search className="w-4 h-4 text-[#A0A0A0] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-white/45 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder={t('home.searchPlaceholder')}
@@ -284,7 +247,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#A0A0A0] hover:text-[#F5F5F5] cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/45 hover:text-white cursor-pointer"
                   aria-label="Clear search"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -292,777 +255,359 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11.5px] no-scrollbar">
-              {(['all', 'active', 'trial', 'renewingSoon', 'cancelled'] as const).map((filterKey) => {
-                const isSelected = statusFilter === filterKey;
-                const labels: Record<typeof filterKey, string> = {
-                  all: `${t('home.filterAll')} (${activeCount})`,
-                  active: `${t('home.filterActive')} (${activeOnlyCount})`,
-                  trial: `Free Trials (${trialCount})`,
-                  renewingSoon: t('home.filterDueSoon'),
-                  cancelled: `${t('home.filterCancelled')} (${cancelledCount})`,
-                };
-                return (
-                  <button
-                    key={filterKey}
-                    type="button"
-                    onClick={() => setStatusFilter(filterKey)}
-                    className={`px-3 py-1.5 rounded-full font-semibold shrink-0 active:scale-[0.97] transition-all duration-150 ease-out cursor-pointer ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
-                        : 'bg-[#1C1C1E] text-[#A0A0A0] border border-white/[0.06] hover:text-[#F5F5F5]'
-                    }`}
-                  >
-                    {labels[filterKey]}
-                  </button>
-                );
-              })}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px] no-scrollbar">
+              {(['all', 'active', 'trial', 'renewingSoon', 'cancelled'] as const).map(
+                (filterKey) => {
+                  const isSelected = statusFilter === filterKey;
+                  const labels: Record<typeof filterKey, string> = {
+                    all: `${t('home.filterAll')} (${activeCount})`,
+                    active: `${t('home.filterActive')} (${activeOnlyCount})`,
+                    trial: `Free Trials (${trialCount})`,
+                    renewingSoon: t('home.filterDueSoon'),
+                    cancelled: `${t('home.filterCancelled')} (${cancelledCount})`,
+                  };
+                  return (
+                    <button
+                      key={filterKey}
+                      type="button"
+                      onClick={() => setStatusFilter(filterKey)}
+                      className={`px-3 py-1.5 rounded-full font-semibold shrink-0 transition cursor-pointer ${
+                        isSelected
+                          ? 'btn-gold'
+                          : 'border border-white/10 bg-white/[0.03] text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {labels[filterKey]}
+                    </button>
+                  );
+                }
+              )}
             </div>
           </div>
         )}
 
-        {/* HERO CARD: "Upcoming Deadline" */}
-        {activeSection !== 'subscriptions' && (
-          <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[12px] font-semibold text-[#A0A0A0]">
-                Upcoming Deadline
-              </span>
-              <span className="rounded-full bg-[#D4AF7C]/15 border border-[#D4AF7C]/25 px-2.5 py-0.5 text-[11px] font-bold text-[#D4AF7C]">
-                {nearestDaysLeft === 0
-                  ? 'Ends today'
-                  : nearestDaysLeft === 1
-                  ? '1 day left'
-                  : `${nearestDaysLeft} days left`}
-              </span>
-            </div>
-
-            {nearestSub ? (
-              <>
-                <div
-                  onClick={() => onOpenSubscriptionDetail(nearestSub)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onOpenSubscriptionDetail(nearestSub);
-                    }
-                  }}
-                  className="flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.985] transition-all duration-150 ease-out"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <BrandIcon
-                      name={nearestSub.name}
-                      category={nearestSub.category}
-                      color={nearestSub.color}
-                    />
-                    <div className="min-w-0">
-                      <div className="text-[15.5px] font-bold text-[#F5F5F5] tracking-tight leading-snug group-hover:text-[#D4AF7C] transition-colors">
-                        {nearestSub.name.replace(' UK Standard', '').replace(' UK', '')}
-                      </div>
-                      <div className="text-xs text-[#A0A0A0] leading-snug mt-0.5">
-                        {nearestSub.status === 'trial' ? 'Free trial' : 'Active subscription'} · {nearestSub.category}
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#A0A0A0]/60 group-hover:text-[#D4AF7C] shrink-0" />
-                </div>
-
-                {/* Clean Inline Charge Summary + Thin Progress Track (No Heavy Inner Container) */}
-                <div className="space-y-1.5 pt-2 border-t border-white/[0.05]">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#A0A0A0]">Expected charge</span>
-                    <span className="font-bold text-[#F5F5F5] tabular-nums">
-                      {formatPrice(nearestSub.price, nearestSub.currency || currencySymbol)}/month · Renews {formatRenewalDate(nearestSub.nextPaymentDate)}
-                    </span>
-                  </div>
-
-                  <div className="w-full h-1.5 rounded-full bg-[#1F1F22] overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] transition-all duration-500"
-                      style={{ width: `${nearestProgressPercent}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Two Compact, Equal Touch Buttons: View Details & Cancel Trial */}
-                <div className="grid grid-cols-2 gap-2.5 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={() => onOpenSubscriptionDetail(nearestSub)}
-                    className="h-9 rounded-full bg-[#1C1C1E] border border-white/[0.07] hover:border-white/20 px-3 text-xs font-semibold text-[#F5F5F5] text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
-                  >
-                    View Details
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (onOpenCancelSub) {
-                        onOpenCancelSub(nearestSub);
-                      } else {
-                        onOpenSubscriptionDetail(nearestSub);
-                      }
-                    }}
-                    className="btn-cancel-soft h-9 rounded-full px-3 text-xs font-semibold text-center active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
-                  >
-                    Cancel Trial
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="py-3 text-center space-y-2.5">
-                <p className="text-xs text-[#A0A0A0]">No upcoming trial deadlines yet.</p>
-                <button
-                  type="button"
-                  onClick={onOpenAddModal}
-                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm px-4 py-2 text-xs active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
-                >
-                  + Add Your First Free Trial
-                </button>
+        {localSection === 'subscriptions' ? (
+          /* Dedicated Subscriptions View (Base44 subscriptions.jsx layout) */
+          <section className="space-y-3">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="eyebrow">All Recurring Plans</p>
+                <h1 className="font-heading text-[20px] font-bold tracking-tight text-white">
+                  Subscriptions
+                </h1>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* MY TRIALS / ALL SUBSCRIPTIONS SECTION */}
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between gap-2 px-0.5 flex-wrap">
-            <h2 className="text-[14.5px] font-bold text-[#F5F5F5] tracking-tight">
-              {activeSection === 'subscriptions' ? 'All Subscriptions' : 'My Trials'}
-            </h2>
-            <div className="flex items-center gap-2">
-              {cancelledCount > 0 && activeSection !== 'trials' && (
-                <div className="inline-flex items-center rounded-full bg-[#141414] border border-white/[0.07] p-0.5 text-[11px]">
-                  <button
-                    type="button"
-                    onClick={() => setStatusFilter('all')}
-                    className={`px-2.5 py-0.5 rounded-full font-semibold transition-all cursor-pointer ${
-                      statusFilter !== 'cancelled'
-                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
-                        : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
-                    }`}
-                  >
-                    Active ({activeCount})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStatusFilter('cancelled')}
-                    className={`px-2.5 py-0.5 rounded-full font-semibold transition-all cursor-pointer ${
-                      statusFilter === 'cancelled'
-                        ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm'
-                        : 'text-[#A0A0A0] hover:text-[#F5F5F5]'
-                    }`}
-                  >
-                    Cancelled / Saved ({cancelledCount})
-                  </button>
-                </div>
-              )}
-              {onLoadShowcaseTrials && subscriptions.length <= 2 && (
-                <button
-                  type="button"
-                  onClick={onLoadShowcaseTrials}
-                  className="text-xs font-semibold text-[#D4AF7C] hover:underline cursor-pointer"
-                >
-                  + Load 5 Trials
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowSearchBar((v) => !v)}
-                className="text-xs font-medium text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
-              >
-                See all
-              </button>
+              <span className="chip-gold rounded-full px-3 py-1 font-mono text-[11.5px] font-semibold tabular-nums">
+                {formatPrice(monthlyTotal, currencySymbol)}/mo
+              </span>
             </div>
-          </div>
 
-          {statusFilter === 'cancelled' && cancelledCount > 0 && (
-            <div className="flex justify-end">
-              {isConfirmingClearCancelled ? (
-                <div className="flex items-center gap-2 rounded-full border border-rose-400/20 bg-[#141414] px-3 py-1 text-[10px]">
-                  <span className="text-[#A0A0A0]">{t('home.confirmClearCancelled')}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClearCancelled();
-                      setIsConfirmingClearCancelled(false);
-                    }}
-                    className="font-bold text-rose-300 transition-colors hover:text-white"
-                  >
-                    {t('home.clearCancelledConfirm')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsConfirmingClearCancelled(false)}
-                    className="rounded-full p-0.5 text-[#A0A0A0] transition-colors hover:text-[#F5F5F5]"
-                    aria-label={t('home.cancelClearCancelled')}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsConfirmingClearCancelled(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-[#141414] px-3 py-1 text-[10px] font-semibold text-[#A0A0A0] transition-colors hover:border-[#D4AF7C]/35 hover:text-[#F5F5F5]"
-                >
-                  <Trash2 className="h-3 w-3" />
-                  {t('home.clearCancelled')}
-                </button>
-              )}
-            </div>
-          )}
-
-          {filteredSubs.length > 0 ? (
-            <div className="space-y-2.5">
-              <AnimatePresence mode="popLayout" initial={false}>
-                {(activeSection === 'subscriptions'
-                  ? filteredSubs
-                  : myTrialsList.length > 0
-                  ? myTrialsList
-                  : filteredSubs
-                ).map((sub) => (
-                  <SubscriptionCard
-                    key={sub.id}
-                    subscription={sub}
-                    onClick={() => onOpenSubscriptionDetail(sub)}
-                    currencySymbol={currencySymbol}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-5 text-center space-y-3">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-[#D4AF7C]/25 bg-[#D4AF7C]/10 text-[#D4AF7C]">
-                {subscriptions.length === 0 && !searchQuery ? (
-                  <Gift className="h-4.5 w-4.5" />
+            {statusFilter === 'cancelled' && cancelledCount > 0 && (
+              <div className="flex justify-end">
+                {isConfirmingClearCancelled ? (
+                  <div className="flex items-center gap-2 rounded-full border border-rose-400/25 bg-[#131315] px-3 py-1 text-[10.5px]">
+                    <span className="text-white/60">{t('home.confirmClearCancelled')}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClearCancelled();
+                        setIsConfirmingClearCancelled(false);
+                      }}
+                      className="font-bold text-rose-300 transition hover:text-white"
+                    >
+                      {t('home.clearCancelledConfirm')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmingClearCancelled(false)}
+                      className="rounded-full p-0.5 text-white/45 hover:text-white"
+                      aria-label={t('home.cancelClearCancelled')}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 ) : (
-                  <Search className="h-4.5 w-4.5" />
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingClearCancelled(true)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10.5px] font-medium text-white/65 transition hover:border-[#D4AF7C]/35 hover:text-white"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    {t('home.clearCancelled')}
+                  </button>
                 )}
               </div>
-              <div>
-                <p className="font-bold text-sm text-[#F5F5F5]">
+            )}
+
+            {filteredSubs.length > 0 ? (
+              <div className="specular divide-y divide-white/[0.05] p-1.5">
+                {filteredSubs.map((sub) => (
+                  <SubRow
+                    key={sub.id}
+                    sub={sub}
+                    currencySymbol={currencySymbol}
+                    formatPrice={formatPrice}
+                    onSelect={onOpenSubscriptionDetail}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="specular p-6 text-center space-y-2.5">
+                <p className="text-[13.5px] font-semibold text-white">
                   {subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialTitle')
                     : t('home.noSubsFound')}
                 </p>
-                <p className="text-xs text-[#A0A0A0] mt-1 leading-relaxed">
+                <p className="text-[11.5px] text-white/50">
                   {subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialDesc')
                     : searchQuery
-                    ? t('home.noSubsFoundDesc')
-                    : t('home.noSubsStart')}
+                      ? t('home.noSubsFoundDesc')
+                      : t('home.noSubsStart')}
                 </p>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-0.5">
-                {subscriptions.length > 0 && (searchQuery !== '' || statusFilter !== 'all') && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setStatusFilter('all');
-                    }}
-                    className="btn-secondary-luxury h-9 inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 text-xs font-semibold cursor-pointer"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                    <span>Reset Filters</span>
-                  </button>
-                )}
                 <button
+                  type="button"
                   onClick={onOpenAddModal}
-                  className="rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm h-9 inline-flex items-center justify-center gap-1.5 px-4 text-xs active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                  className="btn-gold inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[11.5px] font-semibold"
                 >
-                  <Gift className="h-3.5 w-3.5" />
-                  <span>
-                    {subscriptions.length === 0 && !searchQuery
-                      ? t('home.emptyTrialCta')
-                      : t('home.addPopularNow')}
-                  </span>
+                  <Plus className="h-3.5 w-3.5" />
+                  {subscriptions.length === 0 && !searchQuery
+                    ? t('home.emptyTrialCta')
+                    : t('home.addPopularNow')}
                 </button>
               </div>
-            </div>
-          )}
+            )}
+          </section>
+        ) : (
+          /* Base44 Dashboard Feed (index.jsx layout) */
+          <>
+            {/* 1. Upcoming Banner */}
+            <UpcomingBanner
+              subscriptions={subscriptions}
+              currencySymbol={currencySymbol}
+              onSelect={onOpenSubscriptionDetail}
+            />
 
-          {/* Matching UK Presets when searching */}
-          {matchingPresets.length > 0 && (
-            <div className="space-y-2 pt-1.5">
-              <div className="flex items-center justify-between text-xs text-[#D4AF7C] font-semibold px-1">
-                <span>Quick-Add from UK Preset Directory ({matchingPresets.length})</span>
-                <span className="text-[10px] text-[#A0A0A0]">1-Tap Setup</span>
-              </div>
-              <div className="space-y-2">
-                {matchingPresets.map((preset) => {
-                  const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: preset.name }, s));
-                  return (
-                    <div
-                      key={preset.id}
-                      className="py-2.5 px-3.5 rounded-2xl bg-[#141414] border border-white/[0.06] flex items-center justify-between gap-2.5"
+            {/* 2. Hero Card with 6-Month Renewal Forecast */}
+            <HeroCard
+              monthlyTotal={monthlyTotal}
+              annualTotal={annualTotal}
+              trialCount={trialCount}
+              forecastMonths={renewalForecast}
+              currencySymbol={currencySymbol}
+              formatPrice={formatPrice}
+              userPlan={userPlan}
+              freeSlotsUsed={activeCount}
+              freeSlotsLimit={2 + bonusSlots}
+              onOpenGiftSlot={onOpenGiftSlot || onOpenPaywall}
+              onOpenPaywall={onOpenPaywall}
+            />
+
+            {/* 3. My Trials Section */}
+            <TrialsSection
+              trials={trialSubs}
+              currencySymbol={currencySymbol}
+              formatPrice={formatPrice}
+              onSelect={onOpenSubscriptionDetail}
+              onAddTrial={onOpenAddModal}
+              onBrowseTrials={() =>
+                setOffersDrawerState({ open: true, mode: 'radar' })
+              }
+              onLoadSampleTrials={onLoadShowcaseTrials}
+            />
+
+            {/* 4. All Subscriptions Preview List (or Filtered Search View) */}
+            {searchQuery || statusFilter !== 'all' ? (
+              <section className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-heading text-[15px] font-semibold text-white">
+                    {statusFilter === 'cancelled'
+                      ? `Cancelled / Saved (${cancelledCount})`
+                      : `Filtered Subscriptions (${filteredSubs.length})`}
+                  </h2>
+                  {statusFilter === 'cancelled' && cancelledCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={onClearCancelled}
+                      className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10.5px] font-medium text-white/65 hover:text-white"
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" linkContext="discovery" />
-                        <div className="min-w-0 flex-1">
-                          <div className="font-semibold text-[13.5px] text-[#F5F5F5] leading-snug truncate">
-                            {preset.name}
-                          </div>
-                          <div className="text-[11px] text-[#A0A0A0] mt-0.5">
-                            {formatPrice(preset.price, preset.currency)}/
-                            {preset.frequency === 'yearly' ? 'yr' : 'mo'} · {preset.category}
+                      <Trash2 className="h-3 w-3" />
+                      {t('home.clearCancelled')}
+                    </button>
+                  )}
+                </div>
+                {filteredSubs.length > 0 ? (
+                  <div className="specular divide-y divide-white/[0.05] p-1.5">
+                    {filteredSubs.map((sub) => (
+                      <SubRow
+                        key={sub.id}
+                        sub={sub}
+                        currencySymbol={currencySymbol}
+                        formatPrice={formatPrice}
+                        onSelect={onOpenSubscriptionDetail}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="specular p-4 text-center text-[12px] text-white/50">
+                    {t('home.noSubsFound')}
+                  </div>
+                )}
+              </section>
+            ) : (
+              <SubPreviewList
+                subscriptions={subscriptions}
+                currencySymbol={currencySymbol}
+                formatPrice={formatPrice}
+                onSelect={onOpenSubscriptionDetail}
+                onViewAll={() => setLocalSection('subscriptions')}
+                onAddFirst={onOpenAddModal}
+              />
+            )}
+
+            {/* Matching UK Presets when searching */}
+            {matchingPresets.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-xs text-[#D4AF7C] font-semibold px-1">
+                  <span>
+                    Quick-Add from UK Preset Directory ({matchingPresets.length})
+                  </span>
+                  <span className="text-[10px] text-white/45">1-Tap Setup</span>
+                </div>
+                <div className="space-y-2">
+                  {matchingPresets.map((preset) => {
+                    const isTracked = activeSubs.some((s) =>
+                      isDuplicateSubscription({ name: preset.name }, s)
+                    );
+                    return (
+                      <div
+                        key={preset.id}
+                        className="specular py-2.5 px-3.5 flex items-center justify-between gap-2.5"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <BrandIcon
+                            name={preset.name}
+                            category={preset.category}
+                            color={preset.color}
+                            size="preset"
+                            linkContext="discovery"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-[13px] text-white truncate">
+                              {preset.name}
+                            </div>
+                            <div className="text-[11px] text-white/45 mt-0.5">
+                              {formatPrice(preset.price, preset.currency)}/
+                              {preset.frequency === 'yearly' ? 'yr' : 'mo'} ·{' '}
+                              {preset.category}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {hasActiveUkFreeTrial(preset) && !isTracked && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {hasActiveUkFreeTrial(preset) && !isTracked && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onQuickAddPreset) {
+                                  onQuickAddPreset(preset, true);
+                                  setSearchQuery('');
+                                } else {
+                                  onOpenAddModal();
+                                }
+                              }}
+                              className="chip-gold h-8 rounded-full px-2.5 text-[11px] font-semibold flex items-center gap-1"
+                            >
+                              <Sparkles className="w-3 h-3 shrink-0" />
+                              <span>Free Trial</span>
+                            </button>
+                          )}
                           <button
                             type="button"
+                            disabled={isTracked}
                             onClick={() => {
+                              if (isTracked) return;
                               if (onQuickAddPreset) {
-                                onQuickAddPreset(preset, true);
+                                onQuickAddPreset(preset, false);
                                 setSearchQuery('');
                               } else {
                                 onOpenAddModal();
                               }
                             }}
-                            className="btn-secondary-luxury h-8 rounded-full px-2.5 text-[11px] font-semibold text-[#D4AF7C] flex items-center gap-1 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
+                            className={`h-8 px-3 rounded-full text-[11px] font-semibold flex items-center justify-center gap-1 ${
+                              isTracked
+                                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 cursor-default'
+                                : 'btn-gold cursor-pointer'
+                            }`}
                           >
-                            <Gift className="w-3 h-3 shrink-0" />
-                            <span>Free Trial</span>
+                            {isTracked ? (
+                              <>
+                                <Check className="w-3 h-3" />
+                                <span>Added</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="w-3 h-3" />
+                                <span>Add</span>
+                              </>
+                            )}
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          disabled={isTracked}
-                          onClick={() => {
-                            if (isTracked) return;
-                            if (onQuickAddPreset) {
-                              onQuickAddPreset(preset, false);
-                              setSearchQuery('');
-                            } else {
-                              onOpenAddModal();
-                            }
-                          }}
-                          className={`h-8 px-3 rounded-full text-[11px] font-bold flex items-center justify-center gap-1 shadow-sm transition-all duration-150 ease-out ${
-                            isTracked
-                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 cursor-default opacity-90'
-                              : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] active:scale-[0.975] cursor-pointer'
-                          }`}
-                          aria-label={isTracked ? `${preset.name} already added` : `Add ${preset.name}`}
-                        >
-                          {isTracked ? (
-                            <>
-                              <Check className="w-3 h-3 stroke-[2.75]" />
-                              <span>Added</span>
-                              <span className="sr-only">Added ✓</span>
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="w-3 h-3 stroke-[2.75]" />
-                              <span>Add</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Free Tier Limit Reached Banner */}
-        {userPlan === 'free' && activeCount >= 2 + bonusSlots && onOpenGiftSlot && (
-          <div className="rounded-2xl bg-[#141414] border border-[#D4AF7C]/25 p-3.5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-8 w-8 rounded-lg bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 text-[#D4AF7C]">
-                <Gift className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-semibold text-[#F5F5F5] truncate">Free slot limit reached ({activeCount}/{2 + bonusSlots})</div>
-                <div className="text-[11px] text-[#A0A0A0] truncate">Invite a mate & unlock +1 slot for free</div>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onOpenGiftSlot}
-              className="btn-champagne shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold text-[#0A0A0A] active:scale-[0.975] transition-all cursor-pointer"
-            >
-              +1 Free Slot
-            </button>
-          </div>
-        )}
-
-        {/* Total Potential Charges & Cash-Flow Projection Card */}
-        <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="text-xs font-medium text-[#A0A0A0]">Total Potential Charges</div>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
-                  <AnimatedCounter
-                    value={monthlyTotal}
-                    currencySymbol={currencySymbol}
-                    className="text-[#F5F5F5]"
-                  />
-                </span>
-                <span className="text-xs text-[#A0A0A0]">
-                  /mo · <strong className="text-[#F5F5F5] font-semibold">{formatPrice(annualTotal, currencySymbol)}/yr</strong>
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowCalendarSheet((v) => !v)}
-              className="h-8 px-3 rounded-full bg-[#1C1C1E] border border-white/[0.07] hover:border-[#D4AF7C]/40 text-xs font-semibold text-[#D4AF7C] flex items-center gap-1.5 active:scale-[0.975] transition-all cursor-pointer shrink-0"
-            >
-              <CalendarDays className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              <span>{showCalendarSheet ? 'Hide Calendar' : 'Calendar'}</span>
-            </button>
-          </div>
-
-          {/* Clean Bar Chart Visual (6-Month Projection — No Nested Box) */}
-          <div className="pt-2.5 border-t border-white/[0.05] space-y-2">
-            <div className="flex items-center justify-between text-[11px] text-[#A0A0A0]">
-              <span>Monthly Renewal Forecast</span>
-              <span className="text-[#D4AF7C] font-semibold">{trialCount} active trials</span>
-            </div>
-            <div className="h-14 flex items-end justify-between gap-2 pt-1">
-              {monthlyChartBars.map((bar, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                  <div
-                    className={`w-full max-w-[26px] rounded-t-md transition-all duration-500 ${
-                      bar.active
-                        ? 'bg-gradient-to-t from-[#B79B6B] to-[#D4AF7C]'
-                        : 'bg-[#232327]'
-                    }`}
-                    style={{ height: bar.height }}
-                  />
-                  <span className={`text-[9.5px] font-mono leading-none ${bar.active ? 'text-[#D4AF7C] font-bold' : 'text-[#A0A0A0]'}`}>
-                    {bar.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {userPlan === 'free' && (
-            <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-xs text-[#A0A0A0] flex-wrap gap-2">
-              <span className="flex items-center gap-1.5">
-                <span>
-                  Free slots: <strong className="text-[#F5F5F5] font-mono">{activeCount}/{2 + bonusSlots}</strong>
-                </span>
-                {bonusSlots > 0 && (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/15 text-[#D4AF7C] border border-[#D4AF7C]/25">
-                    +{bonusSlots} bonus
-                  </span>
-                )}
-              </span>
-              <div className="flex items-center gap-2">
-                {onOpenGiftSlot && (
-                  <button
-                    type="button"
-                    onClick={onOpenGiftSlot}
-                    className="font-semibold text-[#D4AF7C] hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    <Gift className="w-3 h-3" />
-                    <span>Invite for +1 slot</span>
-                  </button>
-                )}
-                {onOpenGiftSlot && <span className="text-white/20">·</span>}
-                <button
-                  type="button"
-                  onClick={onOpenPaywall}
-                  className="font-semibold text-[#D4AF7C] hover:underline cursor-pointer"
-                >
-                  {t('home.unlockLifetime')}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {showCalendarSheet && (
-            <div className="pt-2">
-              <CalendarView
-                subscriptions={subscriptions}
-                currencySymbol={currencySymbol}
-                onSelectSubscription={onOpenSubscriptionDetail}
-                compact
-              />
-            </div>
-          )}
-        </div>
-
-        {/* UK Free Trial Radar — Compact, Restrained Card (Zero Truncation) */}
-        <section className="rounded-2xl bg-[#141414] border border-white/[0.06] p-3.5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-start gap-3 min-w-0 flex-1">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D4AF7C]/20 bg-[#1C1C1E] text-[#D4AF7C] mt-0.5">
-                <Gift className="h-4 w-4" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[13.5px] font-bold text-[#F5F5F5] tracking-tight">
-                    UK Free Trial Radar
-                  </span>
-                  <span className="rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 px-2 py-0.5 text-[9.5px] font-semibold text-[#D4AF7C]">
-                    Auto-Alarm
-                  </span>
-                </div>
-                <p className="text-[11.5px] text-[#A0A0A0] leading-snug mt-0.5">
-                  Curated UK trials with 10:00 AM cancellation alarm
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowTrialRadar((v) => !v)}
-              className="shrink-0 h-8 rounded-full border border-white/[0.07] bg-[#1C1C1E] px-3 text-xs font-semibold text-[#D4AF7C] hover:border-[#D4AF7C]/35 active:scale-[0.975] transition-all duration-150 ease-out cursor-pointer"
-            >
-              {showTrialRadar ? 'Hide' : `Explore (${CURATED_UK_TRIALS.length})`}
-            </button>
-          </div>
-
-          {showTrialRadar && (
-            <div className="mt-3 space-y-2.5 pt-3 border-t border-white/[0.05]">
-              {CURATED_UK_TRIALS.map((deal) => {
-                const isTracked = activeSubs.some((s) => isDuplicateSubscription({ name: deal.name }, s));
-                return (
-                  <div
-                    key={deal.id}
-                    className="rounded-xl border border-white/[0.06] bg-[#1A1A1C] p-3 flex flex-col justify-between gap-2.5"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-[13.5px] text-[#F5F5F5]">{deal.name}</span>
-                        <span className="shrink-0 rounded-full bg-[#D4AF7C]/12 border border-[#D4AF7C]/20 px-2 py-0.5 text-[9.5px] font-semibold text-[#D4AF7C]">
-                          {deal.badge}
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#A0A0A0] mt-0.5 leading-snug">{deal.highlight}</p>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={isTracked}
-                      onClick={() => {
-                        if (isTracked) return;
-                        window.open(deal.trialUrl, '_blank', 'noopener,noreferrer');
-                        if (onStartRadarTrial) {
-                          onStartRadarTrial(deal);
-                        } else {
-                          onOpenAddModal();
-                        }
-                      }}
-                      className={`rounded-full font-bold h-9 w-full px-3.5 text-xs flex items-center justify-center gap-1.5 transition-all duration-150 ease-out ${
-                        isTracked
-                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 cursor-default opacity-90'
-                          : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow-sm active:scale-[0.975] cursor-pointer'
-                      }`}
-                    >
-                      {isTracked ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 shrink-0" />
-                          <span>Tracked ✓</span>
-                        </>
-                      ) : (
-                        <>
-                          <BellRing className="w-3.5 h-3.5 shrink-0" />
-                          <span>Start Trial + 3-Day Alarm</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* Savings Trophy & Achievements (Restrained Trophy Icon & Comfortable Breathing Room) */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="relative overflow-hidden rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-3"
-        >
-          <div className="relative z-10 flex items-start justify-between gap-3">
-            <div className="space-y-1.5 min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#D4AF7C]/12 text-[#D4AF7C] border border-[#D4AF7C]/20">
-                  <Trophy className="w-2.5 h-2.5 text-[#D4AF7C]" />
-                  {t('home.savedSoFarTitle')}
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-[#1A1A1C] px-2.5 py-0.5 text-[11px]">
-                  <span className="text-[#A0A0A0]">{t('home.thisMonthSavings')}</span>
-                  <span className="font-semibold text-[#D4AF7C]">{formatPrice(thisMonthSavings, currencySymbol)}</span>
-                </span>
-              </div>
-
-              <div className="flex items-baseline gap-2 pt-0.5">
-                <span className="text-2xl font-extrabold text-[#F5F5F5] tracking-tight tabular-nums leading-none">
-                  <AnimatedCounter
-                    value={totalSavings}
-                    currencySymbol={currencySymbol}
-                    className={`text-[#D4AF7C] ${isSavingsBoosted ? 'animate-savings-counter' : ''}`}
-                  />
-                </span>
-                <span className="text-xs text-[#A0A0A0] font-medium">{t('home.savedPerMonth')}</span>
-              </div>
-
-              <p className="text-xs text-[#A0A0A0] leading-relaxed">
-                {cancelledCount > 0
-                  ? cancelledCount === 1
-                    ? t('home.savedSubsCountSingle')
-                    : t('home.savedSubsCount', { count: cancelledCount })
-                  : t('home.savedZeroDesc')}
-              </p>
-            </div>
-
-            <motion.button
-              type="button"
-              whileTap={{ scale: 0.94 }}
-              onClick={(event) => {
-                onCelebrate({ x: event.clientX, y: event.clientY });
-                playSuccessFanfare();
-              }}
-              aria-label={t('home.celebrateSavings')}
-              className="w-8 h-8 rounded-lg bg-[#1A1A1C] border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 cursor-pointer hover:border-[#D4AF7C]/40 transition-colors"
-            >
-              <Trophy className="w-4 h-4 text-[#D4AF7C]" />
-            </motion.button>
-          </div>
-
-          {cancelledCount > 0 && (
-            <div className="relative z-10 pt-2.5 border-t border-white/[0.05] flex items-center justify-between text-xs text-[#F5F5F5] font-medium">
-              <span className="flex items-center gap-1.5 text-[#A0A0A0]">
-                <TrendingUp className="w-3.5 h-3.5 text-[#D4AF7C]" />
-                {t('home.annualizedSavings')}:
-              </span>
-              <span className="font-bold text-[#D4AF7C] font-mono tabular-nums">
-                +{formatPrice(annualSavings, currencySymbol)} {t('home.savedAnnualEst')}
-              </span>
-            </div>
-          )}
-
-          {/* Achievements Row — Compact, Restrained Pills */}
-          <div className="pt-2.5 border-t border-white/[0.05] space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-[#A0A0A0]">
-                {t('home.achievements')}
-              </span>
-              <span className="text-[11px] font-semibold text-[#D4AF7C]">
-                {t('home.achievementsUnlocked', {
-                  unlocked: unlockedAchievementIds.length,
-                  total: ACHIEVEMENTS.length,
-                })}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {ACHIEVEMENTS.map((achievement, index) => {
-                const isUnlocked = unlockedAchievementIds.includes(achievement.id);
-                const isCelebrating = celebratingAchievementIds.includes(achievement.id);
-                const AchievementIcon = [BadgeCheck, CircleDollarSign, Coins, Scissors, Medal][index];
-
-                return (
-                  <div
-                    key={achievement.id}
-                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${
-                      isUnlocked
-                        ? 'border-[#D4AF7C]/25 bg-[#D4AF7C]/10 text-[#D4AF7C]'
-                        : 'border-white/[0.05] bg-[#1A1A1C] text-[#A0A0A0]/80'
-                    } ${isCelebrating ? 'animate-achievement-unlock' : ''}`}
-                    aria-label={`${t(achievement.titleKey)}${
-                      isUnlocked ? `, ${t('home.achievementUnlocked')}` : `, ${t('home.achievementLocked')}`
-                    }`}
-                  >
-                    <AchievementIcon className="h-3.5 w-3.5 shrink-0 text-[#D4AF7C]/75" />
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-medium leading-tight">
-                        {t(achievement.titleKey)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Smart Trial Reminder Notifications Mobile Card */}
-        {activeSubs.length > 0 && (
-          <div className="rounded-2xl bg-[#141414] border border-white/[0.06] p-4 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[14px] font-bold text-[#F5F5F5] tracking-tight">
-                Smart Trial Alerts
-              </h3>
-              <span className="text-[11px] font-semibold text-[#D4AF7C] flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                10:00 AM Guard
-              </span>
-            </div>
-
-            <div className="space-y-2">
-              {activeSubs.slice(0, 2).map((sub, idx) => {
-                const days = Math.max(1, getDaysUntilNextPayment(sub.nextPaymentDate));
-                const displayName = sub.name.replace(' UK Standard', '').replace(' Premium UK', '').replace(' UK', '');
-
-                return (
-                  <div
-                    key={sub.id}
-                    onClick={() => onOpenSubscriptionDetail(sub)}
-                    className="rounded-xl border border-white/[0.05] bg-[#1A1A1C] p-3 space-y-2 cursor-pointer hover:border-white/[0.12] active:scale-[0.99] transition-all duration-150 select-none"
-                  >
-                    <div className="flex items-start gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-[#D4AF7C]/10 border border-[#D4AF7C]/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <GoldBellIcon size="xs" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-semibold text-[#A0A0A0]">Monetry</span>
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D4AF7C]/10 text-[#D4AF7C]">
-                            {days}d left
-                          </span>
                         </div>
-                        <p className="text-[13px] text-[#F5F5F5] mt-0.5 font-semibold leading-snug">
-                          {idx === 0
-                            ? `${displayName} trial ends in ${days} days`
-                            : `Upcoming: ${displayName} renewal`}
-                        </p>
-                        <p className="text-[11.5px] text-[#A0A0A0] mt-0.5 leading-snug">
-                          {formatPrice(sub.price, sub.currency || currencySymbol)}/{sub.frequency === 'yearly' ? 'yr' : 'mo'} · 10:00 AM auto-alert active
-                        </p>
                       </div>
-                    </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-                    <div className="flex items-center justify-end gap-2 pt-1.5 border-t border-white/[0.04]">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onOpenCancelSub) onOpenCancelSub(sub);
-                          else onOpenSubscriptionDetail(sub);
-                        }}
-                        className="btn-cancel-soft py-1 px-3 text-[11px] font-semibold rounded-full active:scale-[0.975] transition-all cursor-pointer"
-                      >
-                        Cancel Trial
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenSubscriptionDetail(sub);
-                        }}
-                        className="rounded-full bg-[#242428] border border-white/[0.07] py-1 px-3 text-[11px] font-semibold text-[#F5F5F5] active:scale-[0.975] transition-all cursor-pointer"
-                      >
-                        View
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+            {/* 5. Smart Trial & Renewal Alerts Card */}
+            <AlertsCard
+              subscriptions={subscriptions}
+              currencySymbol={currencySymbol}
+              formatPrice={formatPrice}
+              onSelect={onOpenSubscriptionDetail}
+              onCancelSub={(sub) => {
+                if (onOpenCancelSub) onOpenCancelSub(sub);
+                else onOpenSubscriptionDetail(sub);
+              }}
+            />
+
+            {/* 6. UK Free Trial Radar Card */}
+            <RadarCard
+              trials={CURATED_UK_TRIALS}
+              onExplore={() =>
+                setOffersDrawerState({ open: true, mode: 'radar' })
+              }
+              onSelectTrial={handleStartCuratedTrial}
+            />
+
+            {/* 7. Savings Trophy & Achievements Card */}
+            <SavingsCard
+              monthlySavings={totalSavings}
+              thisMonthSavings={thisMonthSavings}
+              cancelledCount={cancelledCount}
+              unlockedAchievementIds={unlockedAchievementIds}
+              currencySymbol={currencySymbol}
+              formatPrice={formatPrice}
+              onExploreAlternatives={() =>
+                setOffersDrawerState({ open: true, mode: 'alternatives' })
+              }
+              t={t}
+            />
+          </>
         )}
       </div>
+
+      {/* Offers Drawer (UK Free Trial Radar & Cheaper Alternatives) */}
+      <OffersDrawer
+        open={offersDrawerState.open}
+        mode={offersDrawerState.mode}
+        trials={CURATED_UK_TRIALS}
+        currencySymbol={currencySymbol}
+        formatPrice={formatPrice}
+        onStartTrial={handleStartCuratedTrial}
+        onClose={() =>
+          setOffersDrawerState((prev) => ({ ...prev, open: false }))
+        }
+      />
     </div>
   );
 };

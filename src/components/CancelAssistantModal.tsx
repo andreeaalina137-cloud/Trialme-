@@ -28,6 +28,7 @@ export const CancelAssistantModal: React.FC<CancelAssistantModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [copiedType, setCopiedType] = useState<'email' | 'sms' | null>(null);
+  const [templateTab, setTemplateTab] = useState<'email' | 'sms'>('email');
   const [userEmail, setUserEmail] = useState('');
   const [accountName, setAccountName] = useState('');
   const [isAlternativeDismissed, setIsAlternativeDismissed] = useState(false);
@@ -202,29 +203,32 @@ ${accountName || '[Your Full Name]'}`;
             </ol>
           </div>
 
-          {/* Email Template */}
-          <div className="p-4 rounded-3xl bg-[#1F1F1F]/70 border border-white/[0.08] space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-[#F5F5F5] flex items-center gap-1.5">
-                <Mail className="w-4 h-4 text-[#D4AF7C]" />
-                {t('cancel.emailTemplateTitle')}
-              </h3>
+          {/* Base44 Template Tabs: Formal Email vs SMS / In-App */}
+          <div className="specular p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-1.5 rounded-full border border-white/10 bg-white/[0.03] p-1">
               <button
                 type="button"
-                onClick={() => copyToClipboard(`${emailSubject}\n\n${emailBody}`, 'email')}
-                className="px-3 py-1.5 rounded-full bg-[#0A0A0A] border border-white/10 hover:border-[#D4AF7C] text-[#F5F5F5] flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer shrink-0"
+                onClick={() => setTemplateTab('email')}
+                className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 text-[11px] font-semibold transition cursor-pointer ${
+                  templateTab === 'email'
+                    ? 'btn-gold'
+                    : 'text-white/60 hover:text-white'
+                }`}
               >
-                {copiedType === 'email' ? (
-                  <>
-                    <Check className="w-3 h-3 text-[#D4AF7C]" />
-                    {t('cancel.copied')}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3 h-3" />
-                    {t('cancel.copyEmail')}
-                  </>
-                )}
+                <Mail className="w-3.5 h-3.5" />
+                Formal email
+              </button>
+              <button
+                type="button"
+                onClick={() => setTemplateTab('sms')}
+                className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 text-[11px] font-semibold transition cursor-pointer ${
+                  templateTab === 'sms'
+                    ? 'btn-gold'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                SMS / in-app
               </button>
             </div>
 
@@ -245,49 +249,76 @@ ${accountName || '[Your Full Name]'}`;
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#0A0A0A] border border-white/[0.08] font-mono text-[11px] text-[#A0A0A0] max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed">
-              <strong className="text-[#F5F5F5] font-sans block mb-1">Subject: {emailSubject}</strong>
-              {emailBody}
-            </div>
+            {templateTab === 'email' ? (
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[#F5F5F5] flex items-center gap-1.5">
+                    <Mail className="w-4 h-4 text-[#D4AF7C]" />
+                    {t('cancel.emailTemplateTitle')}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(`${emailSubject}\n\n${emailBody}`, 'email')}
+                    className="chip-gold px-3 py-1 rounded-full flex items-center gap-1 text-[11px] font-semibold transition cursor-pointer shrink-0"
+                  >
+                    {copiedType === 'email' ? (
+                      <>
+                        <Check className="w-3 h-3" />
+                        {t('cancel.copied')}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        {t('cancel.copyEmail')}
+                      </>
+                    )}
+                  </button>
+                </div>
 
-            {subscription.cancelEmail && (
-              <a
-                href={`mailto:${subscription.cancelEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`}
-                className="block text-center py-2 px-3 rounded-full bg-[#D4AF7C]/20 hover:bg-[#D4AF7C]/30 text-[#D4AF7C] font-semibold border border-[#D4AF7C]/35 transition-colors"
-              >
-                {t('cancel.openInMail')} ({subscription.cancelEmail})
-              </a>
-            )}
-          </div>
+                <div className="p-2.5 rounded-2xl bg-[#0A0A0A] border border-white/[0.08] font-mono text-[11px] text-[#A0A0A0] max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                  <strong className="text-[#F5F5F5] font-sans block mb-1">Subject: {emailSubject}</strong>
+                  {emailBody}
+                </div>
 
-          {/* SMS Template */}
-          <div className="p-4 rounded-3xl bg-[#1F1F1F]/70 border border-white/[0.08] space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-[#F5F5F5] flex items-center gap-1.5">
-                <MessageSquare className="w-4 h-4 text-[#D4AF7C]" />
-                {t('cancel.smsTemplateTitle')}
-              </h3>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(smsText, 'sms')}
-                className="px-3 py-1.5 rounded-full bg-[#0A0A0A] border border-white/10 hover:border-[#D4AF7C] text-[#F5F5F5] flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer"
-              >
-                {copiedType === 'sms' ? (
-                  <>
-                    <Check className="w-3 h-3 text-[#D4AF7C]" />
-                    {t('cancel.copied')}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3 h-3" />
-                    {t('cancel.copySms')}
-                  </>
+                {subscription.cancelEmail && (
+                  <a
+                    href={`mailto:${subscription.cancelEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`}
+                    className="block text-center py-2 px-3 rounded-full bg-[#D4AF7C]/20 hover:bg-[#D4AF7C]/30 text-[#D4AF7C] font-semibold border border-[#D4AF7C]/35 transition-colors"
+                  >
+                    {t('cancel.openInMail')} ({subscription.cancelEmail})
+                  </a>
                 )}
-              </button>
-            </div>
-            <div className="p-2 rounded-2xl bg-[#0A0A0A] border border-white/[0.08] font-mono text-[11px] text-[#A0A0A0]">
-              {smsText}
-            </div>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[#F5F5F5] flex items-center gap-1.5">
+                    <MessageSquare className="w-4 h-4 text-[#D4AF7C]" />
+                    {t('cancel.smsTemplateTitle')}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(smsText, 'sms')}
+                    className="chip-gold px-3 py-1 rounded-full flex items-center gap-1 text-[11px] font-semibold transition cursor-pointer"
+                  >
+                    {copiedType === 'sms' ? (
+                      <>
+                        <Check className="w-3 h-3" />
+                        {t('cancel.copied')}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        {t('cancel.copySms')}
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="p-2.5 rounded-2xl bg-[#0A0A0A] border border-white/[0.08] font-mono text-[11px] text-[#A0A0A0]">
+                  {smsText}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -325,13 +325,13 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
             </form>
           ) : (
             <>
-              {/* Cost card — Unified stat surface with subtle hairline divider */}
-              <div className="grid grid-cols-2 divide-x divide-white/[0.06] rounded-2xl bg-[#18181B] border border-white/[0.06] py-3 px-2">
+              {/* Cost card — Unified Base44 specular stat surface with hairline divider */}
+              <div className="specular grid grid-cols-2 divide-x divide-white/[0.06] py-3.5 px-2">
                 <div className="px-3">
-                  <div className="text-[11px] text-[#A0A0A0] font-medium">
+                  <div className="eyebrow">
                     {t('detail.currentCost')}
                   </div>
-                  <div className="text-lg font-extrabold text-[#F5F5F5] mt-0.5 font-mono tabular-nums">
+                  <div className="text-lg font-extrabold text-[#F5F5F5] mt-1 font-mono tabular-nums">
                     {formatPrice(subscription.price, subscription.currency || currencySymbol)}
                     <span className="text-xs font-normal text-[#A0A0A0]">
                       /{subscription.frequency === 'yearly' ? 'yr' : subscription.frequency === 'weekly' ? 'wk' : 'mo'}
@@ -339,10 +339,10 @@ export const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = (
                   </div>
                 </div>
                 <div className="px-3">
-                  <div className="text-[11px] text-[#A0A0A0] font-medium">
+                  <div className="eyebrow">
                     {t('detail.annualForecast')}
                   </div>
-                  <div className="text-lg font-extrabold text-[#D4AF7C] mt-0.5 font-mono tabular-nums">
+                  <div className="text-lg font-extrabold text-[#D4AF7C] mt-1 font-mono tabular-nums">
                     {formatPrice(annualCost, subscription.currency || currencySymbol)}
                     <span className="text-xs font-normal text-[#A0A0A0]">/yr</span>
                   </div>

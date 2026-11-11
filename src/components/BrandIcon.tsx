@@ -46,7 +46,7 @@ export interface BrandIconProps {
   name: string;
   category: SubscriptionCategory;
   color?: string;
-  size?: 'card' | 'preset';
+  size?: 'card' | 'preset' | 'sm' | 'md' | 'lg';
   enableLinkPill?: boolean;
   linkContext?: ServiceLinkContext;
 }
@@ -83,10 +83,20 @@ const BrandIconInner: FC<BrandIconProps> = ({
   size = 'card',
 }) => {
   const n = name.toLowerCase();
-  const dimensions = size === 'preset' ? 'h-9 w-9 rounded-lg' : 'h-10 w-10 rounded-xl';
-  const circleDimensions = size === 'preset' ? 'h-9 w-9 rounded-full' : 'h-10 w-10 rounded-full';
-  const baseClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-sm ring-1 ring-inset ring-white/[0.08] ${dimensions}`;
-  const circleClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-sm ring-1 ring-inset ring-white/[0.08] ${circleDimensions}`;
+  const dimensions =
+    size === 'sm' || size === 'preset'
+      ? 'h-9 w-9 rounded-[11px]'
+      : size === 'lg'
+        ? 'h-12 w-12 rounded-[15px]'
+        : 'h-10 w-10 rounded-[13px]';
+  const circleDimensions =
+    size === 'sm' || size === 'preset'
+      ? 'h-9 w-9 rounded-full'
+      : size === 'lg'
+        ? 'h-12 w-12 rounded-full'
+        : 'h-10 w-10 rounded-full';
+  const baseClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-sm ring-1 ring-inset ring-white/[0.1] ${dimensions}`;
+  const circleClass = `relative inline-flex shrink-0 items-center justify-center overflow-hidden shadow-sm ring-1 ring-inset ring-white/[0.1] ${circleDimensions}`;
 
   // 1. NETFLIX — Jet black tile (#0A0A0A) + official Netflix red 'N' (#E50914)
   if (n.includes('netflix')) {

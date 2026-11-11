@@ -211,18 +211,18 @@ ${subscriptions
 
   return (
     <div className="min-h-full flex flex-col bg-[#0A0A0A]">
-      {/* Sticky Blurred Mobile App Bar */}
+      {/* Sticky Blurred Base44 Mobile App Bar */}
       <header className="h-14 backdrop-blur-xl bg-[#0A0A0A]/92 sticky top-0 z-30 border-b border-white/[0.06] px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-2xl bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] flex items-center justify-center shadow-sm">
-            <Crown className="w-4 h-4 stroke-[2.4]" />
+          <div className="brand-frame w-8 h-8 rounded-xl text-[#D4AF7C] flex items-center justify-center shadow-sm">
+            <Crown className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
-            <div className="text-[16px] font-extrabold text-[#F5F5F5] tracking-tight leading-tight">Profile & Settings</div>
-            <div className="text-[11px] text-[#9A9AA2] leading-tight">Account, Backup & Preferences</div>
+            <div className="font-heading text-[15px] font-bold text-[#F5F5F5] tracking-tight leading-tight">Profile &amp; Vault Settings</div>
+            <div className="text-[11px] text-white/45 leading-tight">Encrypted Local Vault &amp; Preferences</div>
           </div>
         </div>
-        <span className="px-3 py-1 rounded-full text-[10.5px] font-bold bg-[#141416] text-[#D4AF7C] border border-[#D4AF7C]/25">
+        <span className="chip-gold px-3 py-1 rounded-full text-[10.5px] font-semibold">
           {userPlan === 'free' ? 'Free Tier' : t('settings.activeLifetime')}
         </span>
       </header>
@@ -238,7 +238,7 @@ ${subscriptions
         )}
 
         {/* Plan Status Card */}
-        <div className="p-4 rounded-2xl bg-[#141414] border border-[#D4AF7C]/25 space-y-3">
+        <div className="specular p-4 border-[#D4AF7C]/25 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-[#1C1C1E] text-[#D4AF7C] border border-[#D4AF7C]/20 flex items-center justify-center shrink-0">
@@ -292,7 +292,7 @@ ${subscriptions
         </div>
 
         {/* Account & Session Card */}
-        <div className="p-4 rounded-2xl bg-[#141414] border border-white/[0.06] space-y-2.5">
+        <div className="specular p-4 space-y-2.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-[#1C1C1E] border border-white/[0.06] flex items-center justify-center shrink-0 text-[#D4AF7C]">
@@ -329,10 +329,10 @@ ${subscriptions
 
         {/* Section: General Preferences & Language Selector */}
         <div className="space-y-2">
-          <div className="text-[13.5px] font-bold text-[#F5F5F5] px-1 tracking-tight">
+          <div className="eyebrow px-1">
             {t('settings.sectionGeneral')}
           </div>
-          <div className="rounded-2xl bg-[#141414] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden">
+          <div className="specular divide-y divide-white/[0.05] overflow-hidden">
             <div className="px-3.5 py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] border border-white/[0.05] flex items-center justify-center shrink-0">
@@ -480,10 +480,10 @@ ${subscriptions
 
         {/* Section: Data, Cloud-Free Backup & Reports */}
         <div className="space-y-2">
-          <div className="text-[13.5px] font-bold text-[#F5F5F5] px-1 tracking-tight">
+          <div className="eyebrow px-1">
             {t('settings.sectionData')}
           </div>
-          <div className="rounded-2xl bg-[#141414] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden">
+          <div className="specular divide-y divide-white/[0.05] overflow-hidden">
             <button
               onClick={handleExportData}
               className="w-full px-3.5 py-3 flex items-center justify-between hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-150 ease-out text-left cursor-pointer"
@@ -567,10 +567,10 @@ ${subscriptions
 
         {/* Section: Community & Legal */}
         <div className="space-y-2">
-          <div className="text-[13.5px] font-bold text-[#F5F5F5] px-1 tracking-tight">
+          <div className="eyebrow px-1">
             {t('settings.sectionAbout')}
           </div>
-          <div className="rounded-2xl bg-[#141414] divide-y divide-white/[0.05] border border-white/[0.06] overflow-hidden">
+          <div className="specular divide-y divide-white/[0.05] overflow-hidden">
             {onReplayOnboarding && (
               <button
                 onClick={onReplayOnboarding}

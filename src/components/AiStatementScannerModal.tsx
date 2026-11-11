@@ -437,99 +437,84 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
         </div>
       )}
 
-      {/* Main Upload & Results Layout: Clean Single-Surface Card */}
+      {/* Main Upload & Results Layout: Base44 scan.index & scan.results aesthetic */}
       <div className="max-w-xl mx-auto space-y-3.5">
-        {/* Upload & Scanner Controls Card */}
-        <div className="w-full rounded-2xl bg-[#141414] border border-white/[0.06] p-4 sm:p-5 text-center space-y-3.5">
-          {/* Restrained Document + Gold Magnifying Glass Illustration */}
-          <div className="relative mx-auto w-14 h-14 flex items-center justify-center">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-full bg-[#D4AF7C]/15 blur-xl"
-            />
-            <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-[0_6px_14px_rgba(0,0,0,0.5)] relative z-10">
-              <defs>
-                <linearGradient id="docGlass" x1="20" y1="15" x2="90" y2="105" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#2B3B5E" />
-                  <stop offset="100%" stopColor="#162038" />
-                </linearGradient>
-                <linearGradient id="goldLens" x1="50" y1="45" x2="105" y2="105" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#FFF3D1" />
-                  <stop offset="45%" stopColor="#D4AF7C" />
-                  <stop offset="100%" stopColor="#9A7B4C" />
-                </linearGradient>
-              </defs>
-              <rect
-                x="24"
-                y="14"
-                width="58"
-                height="76"
-                rx="10"
-                fill="url(#docGlass)"
-                stroke="#475569"
-                strokeWidth="1.5"
-              />
-              <rect x="34" y="28" width="24" height="4" rx="2" fill="#A0A0A0" fillOpacity="0.6" />
-              <rect x="34" y="38" width="38" height="3.5" rx="1.75" fill="#A0A0A0" fillOpacity="0.4" />
-              <rect x="34" y="47" width="34" height="3.5" rx="1.75" fill="#D4AF7C" fillOpacity="0.7" />
-              <rect x="34" y="56" width="30" height="3.5" rx="1.75" fill="#A0A0A0" fillOpacity="0.4" />
-              <rect x="34" y="65" width="22" height="3.5" rx="1.75" fill="#D4AF7C" fillOpacity="0.55" />
-              <circle
-                cx="68"
-                cy="62"
-                r="20"
-                fill="#0A0A0A"
-                fillOpacity="0.55"
-                stroke="url(#goldLens)"
-                strokeWidth="5"
-              />
-              <line
-                x1="83"
-                y1="77"
-                x2="99"
-                y2="93"
-                stroke="url(#goldLens)"
-                strokeWidth="6.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-
+        {/* Privacy Pill + Title */}
+        <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-[16px] font-bold text-[#F5F5F5] tracking-tight leading-snug">
+            <p className="eyebrow">AI Statement Scanner</p>
+            <h3 className="font-heading text-[18px] font-bold text-white tracking-tight">
               Find your subscriptions automatically
             </h3>
-            <p className="mt-1 text-xs text-[#A0A0A0] leading-relaxed max-w-xs mx-auto">
-              Connect your bank statement or upload a PDF. Our AI will find recurring payments and free trials.
-            </p>
           </div>
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/[0.08] px-2.5 py-1 text-[10px] font-semibold text-emerald-300">
+            <Lock className="w-3 h-3" />
+            100% On-Device • Zero Cloud Upload
+          </span>
+        </div>
 
-          {/* Primary Champagne Gold Upload Button */}
-          <div className="pt-0.5">
-            <label className="btn-champagne h-10 w-full rounded-full px-5 text-xs font-extrabold text-[#0A0A0A] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.97] transition-all duration-150">
+        {/* Base44 3-Stage Verification Card */}
+        <div className="specular p-4 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="eyebrow">3-stage verification</span>
+            <span className="chip-gold rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold">
+              MONETRY-SEMANTIC-V1
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-[10.5px]">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-2.5">
+              <p className="font-semibold text-[#D4AF7C]">1. Gate 1 • Retail</p>
+              <p className="mt-0.5 text-white/45 leading-snug">
+                Filters groceries, fuel, pubs &amp; one-off shopping
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-2.5">
+              <p className="font-semibold text-[#D4AF7C]">2. Gate 2 • Recurrence</p>
+              <p className="mt-0.5 text-white/45 leading-snug">
+                Verifies billing cadence &amp; Direct Debit markers
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-2.5">
+              <p className="font-semibold text-[#D4AF7C]">3. Gate 3 • AI Classifier</p>
+              <p className="mt-0.5 text-white/45 leading-snug">
+                On-device semantic validation &amp; refund matching
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Upload & Scanner Controls Card */}
+        <div className="specular p-4 sm:p-5 text-center space-y-3.5">
+          {/* Dashed Gold Dropzone */}
+          <label className="group block rounded-2xl border border-dashed border-[#D4AF7C]/35 bg-[#211C14]/35 p-5 transition hover:border-[#D4AF7C]/65 cursor-pointer">
+            <div className="mx-auto mb-2.5 flex h-11 w-11 items-center justify-center rounded-2xl border border-[#D4AF7C]/30 bg-[#211C14] text-[#D4AF7C]">
               {isScanning ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-[#0A0A0A]" />
-                  <span>Scanning statement...</span>
-                </>
+                <Loader2 className="w-5 h-5 animate-spin text-[#D4AF7C]" />
               ) : (
-                <>
-                  <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Upload Statement</span>
-                </>
+                <Upload className="w-5 h-5" />
               )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,application/pdf,.csv"
-                onClick={resetScannerState}
-                onChange={handleFileUpload}
-                className="sr-only"
-              />
-            </label>
-          </div>
+            </div>
+            <p className="text-[13.5px] font-semibold text-white">
+              {isScanning ? 'Scanning statement...' : 'Upload Statement'}
+            </p>
+            <p className="mt-0.5 text-[11px] text-white/50">
+              Supports Barclays, Monzo, Revolut, Lloyds, HSBC, NatWest &amp; Starling (PDF, CSV, Images)
+            </p>
+            <span className="btn-gold mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[11.5px] font-semibold">
+              <Upload className="w-3.5 h-3.5" />
+              Select PDF, CSV or Screenshot
+            </span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,application/pdf,.csv"
+              onClick={resetScannerState}
+              onChange={handleFileUpload}
+              className="sr-only"
+            />
+          </label>
 
-          {/* Supported Formats — Clean Inline Row (No Heavy Nested Pills) */}
+          {/* Supported Formats — Clean Inline Row */}
           <div className="flex items-center justify-center gap-4 text-[11px] text-[#A0A0A0] pt-0.5">
             <span className="inline-flex items-center gap-1.5 font-medium text-[#F5F5F5]/90">
               <FileText className="w-3.5 h-3.5 text-[#D4AF7C]" />
@@ -557,7 +542,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
 
           {/* Quick Demo Statement Triggers */}
           <div className="space-y-1.5 pt-1">
-            <span className="text-[10px] uppercase tracking-wider text-[#A0A0A0] font-semibold block">
+            <span className="eyebrow block">
               Quick Test Samples
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -565,7 +550,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                 type="button"
                 disabled={isScanning}
                 onClick={() => void handleScanSample('barclays')}
-                className="h-8 rounded-full border border-white/[0.07] bg-[#1C1C1E] px-3 text-[11px] font-semibold text-[#D4AF7C] hover:border-[#D4AF7C]/45 transition-colors cursor-pointer disabled:opacity-50"
+                className="chip-gold h-8 rounded-full px-3 text-[11px] font-semibold hover:border-[#D4AF7C]/60 transition cursor-pointer disabled:opacity-50"
               >
                 Try Barclays UK Sample
               </button>
@@ -573,7 +558,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
                 type="button"
                 disabled={isScanning}
                 onClick={() => void handleScanSample('revolut')}
-                className="h-8 rounded-full border border-white/[0.07] bg-[#1C1C1E] px-3 text-[11px] font-semibold text-[#D4AF7C] hover:border-[#D4AF7C]/45 transition-colors cursor-pointer disabled:opacity-50"
+                className="chip-gold h-8 rounded-full px-3 text-[11px] font-semibold hover:border-[#D4AF7C]/60 transition cursor-pointer disabled:opacity-50"
               >
                 Try Revolut Sample
               </button>
