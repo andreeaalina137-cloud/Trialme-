@@ -751,7 +751,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
               </div>
 
               {filteredPresets.length > 0 ? (
-                <div className="space-y-1.5">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {filteredPresets.map((preset) => {
                     const affiliateOffer = getAffiliateOffer(preset.name);
                     const defaultDays = preset.defaultTrialDays ?? affiliateOffer?.trialDays ?? 30;
@@ -763,7 +763,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                     return (
                       <div
                         key={preset.id}
-                        className="specular overflow-hidden transition hover:border-[#D4AF7C]/35"
+                        className="specular overflow-hidden transition hover:border-[#D5B886]/35"
                       >
                         {/* Compact, Lightweight Service Row */}
                         <div
@@ -776,51 +776,51 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                               handlePresetAffiliateTrial(preset);
                             }
                           }}
-                          className="py-2.5 px-3 flex items-center justify-between gap-2.5 cursor-pointer select-none active:scale-[0.99] transition-transform duration-150 ease-out"
+                          className="px-2.5 py-2 flex items-center justify-between gap-2 cursor-pointer select-none active:scale-[0.99] transition-transform duration-150 ease-out"
                         >
                           {/* Left: Preset Icon + Service Name & Price/Trial Metadata */}
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
                             <BrandIcon name={preset.name} category={preset.category} color={preset.color} size="preset" linkContext="discovery" />
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-[13.5px] text-[#F5F5F5] leading-snug truncate">
+                              <div className="font-medium text-[12.5px] text-white leading-tight truncate">
                                 {preset.name}
                               </div>
-                              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#A0A0A0] mt-0.5">
-                                <span className="font-mono font-semibold text-[#F5F5F5]/90 tabular-nums">
+                              <div className="flex flex-wrap items-center gap-1 text-[10px] text-white/40 mt-0.5 leading-tight">
+                                <span className="font-semibold text-white/70 tabular-nums">
                                   {formatPrice(preset.price, preset.currency)}/{preset.frequency === 'yearly' ? 'yr' : 'mo'}
                                 </span>
                                 <span className="text-white/20">·</span>
                                 {(() => {
                                   if (!preset.hasFreeTrial && preset.trialType === 'none') {
                                     return (
-                                      <span className="text-[10px] text-[#A0A0A0]">
+                                      <span className="text-[9.5px] text-white/35">
                                         No UK Free Trial
                                       </span>
                                     );
                                   }
                                   if (preset.trialType === 'cooling_off') {
                                     return (
-                                      <span className="text-[10px] font-medium text-amber-300/90">
+                                      <span className="text-[9.5px] font-medium text-amber-300/80">
                                         14-Day Cooling-Off
                                       </span>
                                     );
                                   }
                                   if (preset.trialType === 'money_back') {
                                     return (
-                                      <span className="text-[10px] font-medium text-sky-300/90">
+                                      <span className="text-[9.5px] font-medium text-sky-300/80">
                                         30-Day Refund Shield
                                       </span>
                                     );
                                   }
                                   if (preset.trialType === 'promo_discount') {
                                     return (
-                                      <span className="text-[10px] font-medium text-purple-300/90">
+                                      <span className="text-[9.5px] font-medium text-purple-300/80">
                                         Promo Intro Offer
                                       </span>
                                     );
                                   }
                                   return (
-                                    <span className="text-[10px] font-semibold text-[#D4AF7C]">
+                                    <span className="text-[9.5px] font-medium text-[#D5B886]">
                                       {defaultDays}-Day Trial
                                     </span>
                                   );
@@ -830,7 +830,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                           </div>
 
                           {/* Right: Clean Action Cluster (Single 'Added ✓' pill when tracked) */}
-                          <div className="shrink-0 flex items-center gap-1.5">
+                          <div className="shrink-0 flex items-center gap-1">
                             {canTrial && !isTracked && (
                               <button
                                 type="button"
@@ -869,13 +869,8 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                   onClose();
                                 }}
                                 aria-label={`Start ${preset.name} free trial`}
-                                className={`h-7 px-2.5 rounded-full text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition-all duration-150 ease-out ${
-                                  isDrawerOpen
-                                    ? 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-bold shadow-sm border-transparent cursor-pointer active:scale-[0.97]'
-                                    : 'border border-[#D4AF7C]/30 text-[#D4AF7C] hover:border-[#D4AF7C] bg-[#1C1C1E] cursor-pointer active:scale-[0.97]'
-                                }`}
+                                className="chip-gold h-7 px-2 rounded-full text-[10px] font-medium flex items-center gap-1 whitespace-nowrap transition-colors hover:brightness-110 cursor-pointer active:scale-[0.97]"
                               >
-                                <Gift className="w-3 h-3 shrink-0" />
                                 <span>Free Trial</span>
                               </button>
                             )}
@@ -889,10 +884,10 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                 handleQuickAdd(preset);
                               }}
                               aria-label={isTracked ? `${preset.name} already added` : `Add ${preset.name}`}
-                              className={`h-7 px-2.5 rounded-full text-[11px] font-bold flex items-center justify-center gap-1 whitespace-nowrap transition-all ${
+                              className={`h-7 px-2.5 rounded-full text-[10px] font-semibold flex items-center justify-center gap-0.5 whitespace-nowrap transition-all ${
                                 isTracked
                                   ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 cursor-default'
-                                  : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] hover:brightness-105 active:scale-[0.97] cursor-pointer'
+                                  : 'btn-gold hover:opacity-90 active:scale-[0.97] cursor-pointer'
                               }`}
                             >
                               {isTracked ? (
@@ -903,7 +898,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
                                 </>
                               ) : (
                                 <>
-                                  <Plus className="w-3 h-3 stroke-[2.75]" />
+                                  <Plus className="w-3 h-3 stroke-[3]" />
                                   <span>Add</span>
                                 </>
                               )}

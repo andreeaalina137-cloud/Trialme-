@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
   Plus,
+  RotateCcw,
   Search,
   Sparkles,
   Trash2,
@@ -16,6 +17,7 @@ import {
   convertFrequencyToMonthly,
   filterAndSortSubscriptions,
   formatPrice,
+  rollForwardPaymentDate,
   roundCurrency,
 } from '../utils/subscriptionCalculations';
 import { isDuplicateSubscription } from '../utils/subscriptionIdentity';
@@ -53,6 +55,7 @@ interface HomeScreenProps {
   onClearCancelled: () => void;
   onStartRadarTrial?: (trial: CuratedUkTrial) => void;
   onQuickAddPreset?: (preset: PopularPreset, asTrial?: boolean) => void;
+  onUpdateSubscription?: (sub: Subscription) => void;
   activeSection?: 'dashboard' | 'trials' | 'subscriptions' | 'calendar' | 'reports';
   bonusSlots?: number;
   onOpenGiftSlot?: () => void;
@@ -70,6 +73,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onClearCancelled,
   onStartRadarTrial,
   onQuickAddPreset,
+  onUpdateSubscription,
   activeSection = 'dashboard',
   bonusSlots = 0,
   onOpenGiftSlot,
@@ -288,21 +292,66 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {localSection === 'subscriptions' ? (
           /* Dedicated Subscriptions View (Base44 subscriptions.jsx layout) */
-          <section className="space-y-3">
+          <section className="rise space-y-4">
             <div className="flex items-end justify-between">
               <div>
-                <p className="eyebrow">All Recurring Plans</p>
-                <h1 className="font-heading text-[20px] font-bold tracking-tight text-white">
+                <h1 className="font-heading text-[19px] font-semibold tracking-[-0.02em] text-white">
                   Subscriptions
                 </h1>
+                <p className="mt-0.5 text-[11px] text-white/40">
+                  Active plans, free trials and everything you have stopped.
+                </p>
               </div>
-              <span className="chip-gold rounded-full px-3 py-1 font-mono text-[11.5px] font-semibold tabular-nums">
+              <span className="chip-gold rounded-full px-3 py-1 font-mono text-[11px] font-semibold tabular-nums">
                 {formatPrice(monthlyTotal, currencySymbol)}/mo
               </span>
             </div>
 
+            {/* Top HeroCard on Subscriptions page */}
+            <HeroCard
+              monthlyTotal={monthlyTotal}
+              annualTotal={annualTotal}
+              trialCount={trialCount}
+              forecastMonths={renewalForecast}
+              currencySymbol={currencySymbol}
+              formatPrice={formatPrice}
+              userPlan={userPlan}
+              freeSlotsUsed={activeCount}
+              freeSlotsLimit={2 + bonusSlots}
+              onOpenGiftSlot={onOpenGiftSlot || onOpenPaywall}
+              onOpenPaywall={onOpenPaywall}
+            />
+
+            {/* Sticky Category Tabs Bar */}
+            <div className="sticky top-16 z-20 -mx-4 border-y border-white/[0.06] bg-[#0B0B0C]/95 px-4 py-2.5 backdrop-blur-xl">
+              <div className="flex gap-1 overflow-x-auto no-scrollbar">
+                {[
+                  { id: 'active' as const, label: `Active (${activeOnlyCount})` },
+                  { id: 'trial' as const, label: `Free Trials (${trialCount})` },
+                  { id: 'cancelled' as const, label: `Cancelled & Saved (${cancelledCount})` },
+                  { id: 'all' as const, label: `All (${subscriptions.length})` },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setStatusFilter(tab.id)}
+                    className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-[10.5px] transition-colors cursor-pointer ${
+                      statusFilter === tab.id
+                        ? 'border-[#D5B886]/45 bg-[#D5B886]/12 text-[#D5B886]'
+                        : 'border-white/[0.07] bg-white/[0.02] text-white/45 hover:text-white/75'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {statusFilter === 'cancelled' && cancelledCount > 0 && (
-              <div className="flex justify-end">
+              <div className="flex items-center justify-between px-1">
+                <p className="text-[10px] leading-relaxed text-white/35">
+                  Saved totals update the moment a cancellation is confirmed.
+                </p>
                 {isConfirmingClearCancelled ? (
                   <div className="flex items-center gap-2 rounded-full border border-rose-400/25 bg-[#131315] px-3 py-1 text-[10.5px]">
                     <span className="text-white/60">{t('home.confirmClearCancelled')}</span>
@@ -312,14 +361,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         onClearCancelled();
                         setIsConfirmingClearCancelled(false);
                       }}
-                      className="font-bold text-rose-300 transition hover:text-white"
+                      className="font-bold text-rose-300 transition hover:text-white cursor-pointer"
                     >
                       {t('home.clearCancelledConfirm')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsConfirmingClearCancelled(false)}
-                      className="rounded-full p-0.5 text-white/45 hover:text-white"
+                      className="rounded-full p-0.5 text-white/45 hover:text-white cursor-pointer"
                       aria-label={t('home.cancelClearCancelled')}
                     >
                       <X className="h-3.5 w-3.5" />
@@ -329,7 +378,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsConfirmingClearCancelled(true)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10.5px] font-medium text-white/65 transition hover:border-[#D4AF7C]/35 hover:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10.5px] font-medium text-white/65 transition hover:border-[#D4AF7C]/35 hover:text-white cursor-pointer"
                   >
                     <Trash2 className="h-3 w-3" />
                     {t('home.clearCancelled')}
@@ -339,7 +388,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             )}
 
             {filteredSubs.length > 0 ? (
-              <div className="specular divide-y divide-white/[0.05] p-1.5">
+              <div className="specular divide-y divide-white/[0.05] px-3 py-1">
                 {filteredSubs.map((sub) => (
                   <SubRow
                     key={sub.id}
@@ -347,34 +396,72 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     currencySymbol={currencySymbol}
                     formatPrice={formatPrice}
                     onSelect={onOpenSubscriptionDetail}
+                    showStatus={statusFilter !== 'active'}
+                    action={
+                      sub.status === 'cancelled' ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (userPlan === 'free' && activeCount >= 2 + bonusSlots) {
+                              onOpenPaywall();
+                              return;
+                            }
+                            if (onUpdateSubscription) {
+                              const rolled = rollForwardPaymentDate(sub.nextPaymentDate, sub.frequency);
+                              onUpdateSubscription({
+                                ...sub,
+                                status: 'active',
+                                nextPaymentDate: rolled,
+                                cancelledAt: undefined,
+                                monthlySavingsAmount: undefined,
+                              });
+                            }
+                          }}
+                          className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-white/[0.10] bg-white/[0.03] px-2.5 py-1 text-[9.5px] text-white/60 transition-colors hover:border-[#D5B886]/40 hover:text-[#D5B886] cursor-pointer"
+                        >
+                          <RotateCcw className="h-2.5 w-2.5" />
+                          Reactivate
+                        </button>
+                      ) : undefined
+                    }
                   />
                 ))}
               </div>
             ) : (
-              <div className="specular p-6 text-center space-y-2.5">
-                <p className="text-[13.5px] font-semibold text-white">
-                  {subscriptions.length === 0 && !searchQuery
+              <div className="specular p-8 text-center space-y-2.5">
+                <p className="text-[13px] font-medium text-white/60">
+                  {statusFilter === 'trial'
+                    ? 'No free trials running right now.'
+                    : statusFilter === 'cancelled'
+                    ? 'No cancelled subscriptions.'
+                    : subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialTitle')
                     : t('home.noSubsFound')}
                 </p>
-                <p className="text-[11.5px] text-white/50">
+                <p className="text-[11px] text-white/40">
                   {subscriptions.length === 0 && !searchQuery
                     ? t('home.emptyTrialDesc')
                     : searchQuery
                       ? t('home.noSubsFoundDesc')
+                      : statusFilter === 'trial'
+                      ? 'Track a free trial before it converts to paid.'
                       : t('home.noSubsStart')}
                 </p>
                 <button
                   type="button"
                   onClick={onOpenAddModal}
-                  className="btn-gold inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[11.5px] font-semibold"
+                  className="mt-1 rounded-full border border-[#D5B886]/30 bg-[#D5B886]/10 px-4 py-1.5 text-[10.5px] font-medium text-[#D5B886] cursor-pointer"
                 >
-                  <Plus className="h-3.5 w-3.5" />
-                  {subscriptions.length === 0 && !searchQuery
-                    ? t('home.emptyTrialCta')
-                    : t('home.addPopularNow')}
+                  {statusFilter === 'trial' ? 'Track a free trial' : 'Add a subscription'}
                 </button>
               </div>
+            )}
+
+            {statusFilter === 'cancelled' && cancelledCount > 0 && (
+              <p className="px-1 text-[10px] leading-relaxed text-white/25">
+                Saved totals update the moment a cancellation is confirmed, and stay separate from active spending.
+              </p>
             )}
           </section>
         ) : (
@@ -461,6 +548,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 onSelect={onOpenSubscriptionDetail}
                 onViewAll={() => setLocalSection('subscriptions')}
                 onAddFirst={onOpenAddModal}
+                onLoadSampleTrials={onLoadShowcaseTrials}
               />
             )}
 
@@ -592,6 +680,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               }
               t={t}
             />
+
+            <p className="pt-2 text-center text-[10px] leading-relaxed text-white/25">
+              Monetry · Stored privately on this device · Zero cloud telemetry
+            </p>
           </>
         )}
       </div>

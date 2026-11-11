@@ -1058,6 +1058,7 @@ function AppContent() {
                 onOpenGiftSlot={() => setIsGiftSlotOpen(true)}
                 onCelebrate={triggerCelebration}
                 onClearCancelled={handleClearCancelledSubscriptions}
+                onUpdateSubscription={handleUpdateSubscription}
                 activeSection={
                   currentTab === 'calendar'
                     ? 'calendar'

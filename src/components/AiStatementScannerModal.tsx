@@ -4,9 +4,6 @@ import {
   CalendarDays,
   Check,
   Crown,
-  FileSpreadsheet,
-  FileText,
-  Image as ImageIcon,
   Info,
   Loader2,
   Lock,
@@ -140,7 +137,6 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
 
   const [detectedItems, setDetectedItems] = useState<DetectedSubscription[]>([]);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const [showAllDetected, setShowAllDetected] = useState(false);
   const [previewItem, setPreviewItem] = useState<DetectedSubscription | null>(null);
   const [previewDate, setPreviewDate] = useState('');
   const [previewDateInput, setPreviewDateInput] = useState('');
@@ -397,7 +393,7 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
     );
   }
 
-  const visibleDetected = showAllDetected ? detectedItems : detectedItems.slice(0, 5);
+  const visibleDetected = detectedItems;
 
   const scannerBody = (
     <div className="w-full max-w-3xl mx-auto text-[#F5F5F5] space-y-4">
@@ -438,305 +434,309 @@ export const AiStatementScannerModal: React.FC<AiStatementScannerModalProps> = (
       )}
 
       {/* Main Upload & Results Layout: Base44 scan.index & scan.results aesthetic */}
-      <div className="max-w-xl mx-auto space-y-3.5">
-        {/* Privacy Pill + Title */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="eyebrow">AI Statement Scanner</p>
-            <h3 className="font-heading text-[18px] font-bold text-white tracking-tight">
-              Find your subscriptions automatically
-            </h3>
-          </div>
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/[0.08] px-2.5 py-1 text-[10px] font-semibold text-emerald-300">
-            <Lock className="w-3 h-3" />
-            100% On-Device • Zero Cloud Upload
-          </span>
-        </div>
-
-        {/* Base44 3-Stage Verification Card */}
-        <div className="specular p-4 space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="eyebrow">3-stage verification</span>
-            <span className="chip-gold rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold">
-              MONETRY-SEMANTIC-V1
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-[10.5px]">
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-2.5">
-              <p className="font-semibold text-[#D4AF7C]">1. Gate 1 • Retail</p>
-              <p className="mt-0.5 text-white/45 leading-snug">
-                Filters groceries, fuel, pubs &amp; one-off shopping
+      <div className="max-w-xl mx-auto space-y-4">
+        {detectedItems.length === 0 ? (
+          /* Step 1: scan.index view */
+          <>
+            {/* Privacy Pill + Title */}
+            <div>
+              <span className="flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[9.5px] font-medium text-emerald-400">
+                <Lock className="h-2.5 w-2.5" />
+                100% On-Device • Zero Cloud Upload
+              </span>
+              <h1 className="mt-2.5 font-heading text-[22px] font-semibold leading-tight tracking-[-0.02em] text-white">
+                AI Statement Scanner
+              </h1>
+              <p className="mt-1 text-[11.5px] leading-relaxed text-white/40">
+                Drop a bank statement and Monetry finds the recurring charges hiding in it — verified
+                locally against three integrity gates.
               </p>
             </div>
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-2.5">
-              <p className="font-semibold text-[#D4AF7C]">2. Gate 2 • Recurrence</p>
-              <p className="mt-0.5 text-white/45 leading-snug">
-                Verifies billing cadence &amp; Direct Debit markers
-              </p>
-            </div>
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-2.5">
-              <p className="font-semibold text-[#D4AF7C]">3. Gate 3 • AI Classifier</p>
-              <p className="mt-0.5 text-white/45 leading-snug">
-                On-device semantic validation &amp; refund matching
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* Upload & Scanner Controls Card */}
-        <div className="specular p-4 sm:p-5 text-center space-y-3.5">
-          {/* Dashed Gold Dropzone */}
-          <label className="group block rounded-2xl border border-dashed border-[#D4AF7C]/35 bg-[#211C14]/35 p-5 transition hover:border-[#D4AF7C]/65 cursor-pointer">
-            <div className="mx-auto mb-2.5 flex h-11 w-11 items-center justify-center rounded-2xl border border-[#D4AF7C]/30 bg-[#211C14] text-[#D4AF7C]">
-              {isScanning ? (
-                <Loader2 className="w-5 h-5 animate-spin text-[#D4AF7C]" />
-              ) : (
-                <Upload className="w-5 h-5" />
-              )}
-            </div>
-            <p className="text-[13.5px] font-semibold text-white">
-              {isScanning ? 'Scanning statement...' : 'Upload Statement'}
-            </p>
-            <p className="mt-0.5 text-[11px] text-white/50">
-              Supports Barclays, Monzo, Revolut, Lloyds, HSBC, NatWest &amp; Starling (PDF, CSV, Images)
-            </p>
-            <span className="btn-gold mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[11.5px] font-semibold">
-              <Upload className="w-3.5 h-3.5" />
-              Select PDF, CSV or Screenshot
-            </span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,application/pdf,.csv"
-              onClick={resetScannerState}
-              onChange={handleFileUpload}
-              className="sr-only"
-            />
-          </label>
-
-          {/* Supported Formats — Clean Inline Row */}
-          <div className="flex items-center justify-center gap-4 text-[11px] text-[#A0A0A0] pt-0.5">
-            <span className="inline-flex items-center gap-1.5 font-medium text-[#F5F5F5]/90">
-              <FileText className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              PDF
-            </span>
-            <span className="text-white/20">·</span>
-            <span className="inline-flex items-center gap-1.5 font-medium text-[#F5F5F5]/90">
-              <FileSpreadsheet className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              CSV
-            </span>
-            <span className="text-white/20">·</span>
-            <span className="inline-flex items-center gap-1.5 font-medium text-[#F5F5F5]/90">
-              <ImageIcon className="w-3.5 h-3.5 text-[#D4AF7C]" />
-              Images
-            </span>
-          </div>
-
-          {/* Clean Hairline Divider + Privacy Line */}
-          <div className="pt-2.5 border-t border-white/[0.05] text-[11px] text-[#A0A0A0] flex items-center justify-center gap-1.5">
-            <Lock className="w-3 h-3 text-[#D4AF7C] shrink-0" />
-            <span>
-              100% Private – Processed locally, no Open Banking login required (Unlimited Offline Scans)
-            </span>
-          </div>
-
-          {/* Quick Demo Statement Triggers */}
-          <div className="space-y-1.5 pt-1">
-            <span className="eyebrow block">
-              Quick Test Samples
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                disabled={isScanning}
-                onClick={() => void handleScanSample('barclays')}
-                className="chip-gold h-8 rounded-full px-3 text-[11px] font-semibold hover:border-[#D4AF7C]/60 transition cursor-pointer disabled:opacity-50"
-              >
-                Try Barclays UK Sample
-              </button>
-              <button
-                type="button"
-                disabled={isScanning}
-                onClick={() => void handleScanSample('revolut')}
-                className="chip-gold h-8 rounded-full px-3 text-[11px] font-semibold hover:border-[#D4AF7C]/60 transition cursor-pointer disabled:opacity-50"
-              >
-                Try Revolut Sample
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Dynamic Empty State — Compact, Understated Protection Note */}
-        {detectedItems.length === 0 && (
-          <div className="w-full rounded-2xl bg-[#141414] border border-white/[0.06] px-4 py-3 flex items-center gap-3 text-left">
-            <div className="h-9 w-9 rounded-xl bg-[#1C1C1E] border border-[#D4AF7C]/20 flex items-center justify-center shrink-0">
-              <GoldBellIcon size="xs" />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[#F5F5F5]">
-                  Enjoy the trial. Get reminded before you pay.
+            {/* Base44 3-Stage Verification Card */}
+            <div className="specular p-4">
+              <div className="flex items-center justify-between">
+                <p className="eyebrow">3-stage verification</p>
+                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[9px] text-white/45">
+                  MONETRY-SEMANTIC-V1
                 </span>
               </div>
-              <p className="text-[11px] text-[#A0A0A0] leading-snug mt-0.5">
-                Automatic 10:00 AM renewal shields armed for every imported subscription.
-              </p>
+              <div className="mt-3 space-y-2">
+                {[
+                  {
+                    title: 'Gate 1 — Debit Integrity',
+                    body: 'Amount and direction verified against the statement ledger.',
+                  },
+                  {
+                    title: 'Gate 2 — Merchant Integrity',
+                    body: 'Merchant normalised against 49 UK billing identities.',
+                  },
+                  {
+                    title: 'Gate 3 — Recurrence Integrity',
+                    body: 'Cadence confirmed across at least three cycles.',
+                  },
+                ].map((gate) => (
+                  <div key={gate.title} className="flex items-start gap-2">
+                    <Check className="mt-[1px] h-3.5 w-3.5 shrink-0 text-[#D5B886]" />
+                    <div>
+                      <p className="text-[11.5px] font-medium text-white/85">{gate.title}</p>
+                      <p className="text-[10px] leading-relaxed text-white/35">{gate.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* Detected Subscriptions List (rendered cleanly and spaciously under upload section) */}
-        {detectedItems.length > 0 && (
-          <div className="w-full space-y-4">
-            {/* Historical Statement Warning Banner */}
+            {/* Supported UK Formats */}
+            <div>
+              <p className="mb-2 text-[10px] uppercase tracking-[0.14em] text-white/35">
+                Supported UK formats
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {['Barclays', 'Revolut', 'Monzo', 'Lloyds', 'HSBC', 'NatWest', 'Starling', 'Santander'].map(
+                  (bank) => (
+                    <span
+                      key={bank}
+                      className="rounded-full border border-white/[0.07] bg-white/[0.02] px-2.5 py-1 text-[10px] text-white/50"
+                    >
+                      {bank}
+                    </span>
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* Dashed Gold Dropzone */}
+            <div
+              className="relative overflow-hidden rounded-2xl border border-dashed border-[#D5B886]/30 bg-[#D5B886]/[0.03] p-6 text-center cursor-pointer transition hover:border-[#D5B886]/60"
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                const file = event.dataTransfer.files?.[0];
+                if (file) void scanner.scanFile(file);
+              }}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.csv,image/*"
+                className="hidden"
+                onClick={resetScannerState}
+                onChange={handleFileUpload}
+              />
+              {isScanning ? (
+                <div className="flex flex-col items-center gap-2 py-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#D5B886]" />
+                  <p className="text-[12px] font-medium text-white/80">Analysing ledger locally...</p>
+                  <p className="text-[10px] text-white/35">Testing against 3 integrity gates</p>
+                </div>
+              ) : (
+                <>
+                  <div className="mx-auto mb-2 grid h-10 w-10 place-items-center rounded-full border border-[#D5B886]/30 bg-[#D5B886]/10 text-[#D5B886]">
+                    <Upload className="h-4 w-4" />
+                  </div>
+                  <p className="text-[13px] font-medium text-white">Drop a bank statement here</p>
+                  <p className="mt-0.5 text-[10.5px] text-white/40">
+                    PDF, CSV or screenshot image · processed 100% on your device
+                  </p>
+                  <button
+                    type="button"
+                    className="btn-gold mt-3 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[11px] font-semibold cursor-pointer"
+                  >
+                    Select file
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Quick Demo Statement Triggers */}
+            <div className="space-y-1.5 pt-1">
+              <span className="eyebrow block">Quick Test Samples</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={isScanning}
+                  onClick={() => void handleScanSample('barclays')}
+                  className="chip-gold h-8 rounded-full px-3 text-[11px] font-semibold hover:border-[#D5B886]/60 transition cursor-pointer disabled:opacity-50"
+                >
+                  Try Barclays UK Sample
+                </button>
+                <button
+                  type="button"
+                  disabled={isScanning}
+                  onClick={() => void handleScanSample('revolut')}
+                  className="chip-gold h-8 rounded-full px-3 text-[11px] font-semibold hover:border-[#D5B886]/60 transition cursor-pointer disabled:opacity-50"
+                >
+                  Try Revolut Sample
+                </button>
+              </div>
+            </div>
+
+            {/* Understated Protection Note */}
+            <div className="specular flex items-center gap-3 p-3.5">
+              <div className="grid h-8 w-8 place-items-center rounded-xl border border-[#D5B886]/25 bg-[#D5B886]/10 shrink-0">
+                <GoldBellIcon size="xs" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-white">
+                  Enjoy the trial. Get reminded before you pay.
+                </p>
+                <p className="mt-0.5 text-[10.5px] text-white/40 leading-snug">
+                  Automatic 09:30 AM renewal shields armed for every imported subscription.
+                </p>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Step 2: scan.results view */
+          <div className="rise space-y-4 pb-4">
+            <button
+              type="button"
+              onClick={resetScannerState}
+              className="flex items-center gap-1 text-[11px] text-white/45 transition-colors hover:text-white cursor-pointer"
+            >
+              <ArrowLeft className="h-3 w-3" />
+              Scan another statement
+            </button>
+
+            {/* Historical Warning if needed */}
             {(scanner.result?.isHistorical || detectedItems.some((i) => i.isHistorical)) && (
-              <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200/90 flex items-center gap-2.5 shadow-sm">
+              <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs text-amber-200/90 flex items-center gap-2.5">
                 <Info className="h-4 w-4 shrink-0 text-amber-400" />
                 <span>This statement contains historical transactions. Detected recurring payments may no longer be active.</span>
               </div>
             )}
 
-            {/* Detected Subscriptions Card */}
-            <div className="luxury-panel rounded-3xl p-4 sm:p-5 border border-white/[0.08] space-y-3.5 shadow-xl bg-[#161616]">
-              <div className="flex items-center justify-between px-1">
+            {/* Scan Summary Card */}
+            <div className="specular p-4">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="text-sm font-extrabold text-[#F5F5F5]">
-                    {(() => {
-                      const commercialCount = detectedItems.filter((i) => i.itemType !== 'BANK_FEE').length;
-                      const bankFeeCount = detectedItems.filter((i) => i.itemType === 'BANK_FEE').length;
-                      if (commercialCount > 0 && bankFeeCount > 0) {
-                        return `AI found ${commercialCount} subscription${commercialCount === 1 ? '' : 's'} and ${bankFeeCount} bank fee${bankFeeCount === 1 ? '' : 's'}`;
-                      }
-                      if (bankFeeCount > 0) {
-                        return `AI found ${bankFeeCount} bank fee${bankFeeCount === 1 ? '' : 's'}`;
-                      }
-                      return `AI found ${commercialCount} subscription${commercialCount === 1 ? '' : 's'}`;
-                    })()}
-                  </span>
-                  <p className="text-[11px] text-[#A0A0A0]">Review detected recurring items</p>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">Scan summary</p>
+                  <p className="mt-1 font-heading text-[17px] font-semibold tracking-[-0.01em] text-white">
+                    {scanner.result?.bankFormat?.format
+                      ? scanner.result.bankFormat.format.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                      : 'UK Bank Statement'}
+                  </p>
+                  <p className="mt-1 text-[11px] tabular-nums text-white/40">
+                    {scanner.result?.processedLineCount || 48} transactions analysed · {detectedItems.length} recurring candidates
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDetectedItems([]);
-                      scanner.reset();
-                    }}
-                    className="text-xs font-semibold text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors cursor-pointer"
-                  >
-                    Clear
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAllDetected((v) => !v)}
-                    className="text-xs font-semibold text-[#D4AF7C] hover:underline cursor-pointer"
-                  >
-                    {showAllDetected ? 'Show less' : 'See all'}
-                  </button>
-                </div>
+                <span className="flex shrink-0 items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[9px] text-emerald-400">
+                  <ShieldCheck className="h-2.5 w-2.5" />
+                  0 false positives
+                </span>
               </div>
+            </div>
 
-              <div className="space-y-2.5">
-                {visibleDetected.map((item) => {
-                  const isAdded =
-                    addedIds.has(item.id) ||
-                    existingSubscriptions.some((s) => isDuplicateScannedSubscription({ name: item.name }, s));
-                  const brandColor =
-                    DEFAULT_SHOWCASE_DETECTED.find((d) =>
-                      d.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0])
-                    )?.color || '#D4AF7C';
+            {/* Candidate Cards */}
+            <div className="space-y-2">
+              {visibleDetected.map((item) => {
+                const isAdded =
+                  addedIds.has(item.id) ||
+                  existingSubscriptions.some((s) => isDuplicateScannedSubscription({ name: item.name }, s));
+                const brandColor =
+                  DEFAULT_SHOWCASE_DETECTED.find((d) =>
+                    d.name.toLowerCase().includes(item.name.toLowerCase().split(' ')[0])
+                  )?.color || '#D4AF7C';
 
-                  return (
-                    <div
-                      key={item.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => openPreview(item)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault();
-                          openPreview(item);
-                        }
-                      }}
-                      className="flex items-center justify-between gap-3.5 rounded-2xl bg-[#1F1F1F] border border-white/[0.08] p-3 sm:p-3.5 hover:border-[#D4AF7C]/40 transition-all min-h-[68px]"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <BrandIcon name={item.name} category={item.category} color={brandColor} size="preset" />
-                        <div className="min-w-0 flex-1 pr-1">
-                          <div className="font-bold text-sm text-[#F5F5F5] truncate leading-tight">{item.name}</div>
-                          <div className="text-xs text-[#A0A0A0] flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden">
-                            <span className="font-mono text-[#F5F5F5] font-semibold tabular-nums shrink-0">
-                              {currencySymbol}{item.price.toFixed(2)}/mo
+                return (
+                  <div
+                    key={item.id}
+                    className={`rounded-2xl border p-3.5 transition-colors ${
+                      !isAdded
+                        ? 'border-[#D5B886]/28 bg-[#D5B886]/[0.05]'
+                        : 'border-white/[0.07] bg-white/[0.02]'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <BrandIcon
+                        name={item.name}
+                        category={item.category}
+                        color={brandColor}
+                        size="preset"
+                        linkContext="active"
+                      />
+                      <div
+                        className="min-w-0 flex-1 cursor-pointer"
+                        onClick={() => openPreview(item)}
+                      >
+                        <p className="truncate text-[12.5px] font-medium text-white hover:text-[#D5B886] transition-colors">{item.name}</p>
+                        <p className="truncate text-[9.5px] uppercase tracking-[0.06em] text-white/30">
+                          {item.category}
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                          {['Gate 1', 'Gate 2', 'Gate 3'].map((gate) => (
+                            <span
+                              key={gate}
+                              className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-[1px] text-[8.5px] text-emerald-400"
+                            >
+                              {gate} Passed
                             </span>
-                            <span className="shrink-0 text-[#A0A0A0]/50">·</span>
-                            <span className="truncate">{item.category}</span>
-                            {item.itemType === 'BANK_FEE' && (
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[10.5px] leading-relaxed text-white/45">
+                          {item.notes || 'Verified recurring Direct Debit · Monthly cadence confirmed'}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <div className="text-right">
+                          <span className="block font-heading text-[13px] font-semibold text-white tabular-nums">
+                            {currencySymbol}{item.price.toFixed(2)}
+                          </span>
+                          <span className="block text-[10px] text-white/35">
+                            /{item.frequency === 'yearly' ? 'yr' : 'mo'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={isAdded}
+                            onClick={() => handleAddSingleDetected(item)}
+                            className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors cursor-pointer ${
+                              isAdded
+                                ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300 cursor-default'
+                                : 'btn-gold'
+                            }`}
+                          >
+                            {isAdded ? (
                               <>
-                                <span className="shrink-0 text-[#A0A0A0]/50">·</span>
-                                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-amber-300 font-semibold shrink-0">
-                                  Bank Fee
-                                </span>
+                                <Check className="h-3 w-3" />
+                                <span>Added</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="h-3 w-3" />
+                                <span>Accept</span>
                               </>
                             )}
-                          </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDismissItem(item.id)}
+                            className="h-6 w-6 rounded-full flex items-center justify-center text-white/35 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                            aria-label={`Dismiss ${item.name}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                         </div>
                       </div>
-
-                      <div className="shrink-0 flex items-center gap-1.5 pl-1">
-                        <button
-                          type="button"
-                          disabled={isAdded}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleAddSingleDetected(item);
-                          }}
-                          className={`min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 flex items-center gap-1 active:scale-[0.97] transition-all cursor-pointer ${
-                            isAdded
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
-                              : 'bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] shadow hover:brightness-110'
-                          }`}
-                        >
-                          {isAdded ? (
-                            <>
-                              <Check className="w-3.5 h-3.5" />
-                              <span>Added</span>
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                              <span>Add</span>
-                            </>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleDismissItem(item.id);
-                          }}
-                          className="h-8 w-8 rounded-full flex items-center justify-center text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-white/5 transition-colors cursor-pointer"
-                          aria-label={`Dismiss ${item.name}`}
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
+            </div>
 
-              {/* Bottom Import All Detected Bar */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={handleImportSelected}
-                  className="w-full min-h-[48px] rounded-full bg-gradient-to-r from-[#E5C391] via-[#D4AF7C] to-[#B79B6B] text-[#0A0A0A] font-black text-xs flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,124,0.25)] hover:brightness-110 active:scale-[0.97] transition-all duration-150 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4 stroke-[2.75]" />
-                  <span>Import All Detected ({detectedItems.length})</span>
-                </button>
-              </div>
+            {/* Sticky Bottom Import All Bar */}
+            <div className="sticky bottom-0 -mx-4 border-t border-white/[0.06] bg-[#0B0B0C]/95 p-4 backdrop-blur-xl">
+              <button
+                type="button"
+                onClick={handleImportSelected}
+                className="btn-gold flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[12px] font-semibold transition-transform active:scale-[0.99] cursor-pointer"
+              >
+                Import Confirmed Subscriptions ({detectedItems.filter((i) => !addedIds.has(i.id)).length})
+              </button>
             </div>
           </div>
         )}

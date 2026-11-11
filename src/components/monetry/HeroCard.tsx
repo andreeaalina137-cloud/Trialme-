@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Sparkles, Users, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, Sparkles, ShieldCheck } from 'lucide-react';
 import type { UserPlan } from '../../types/subscription';
 import type { RenewalForecastMonth } from '../../utils/subscriptionCalculations';
 import { ForecastChart } from './ForecastChart';
@@ -38,10 +38,10 @@ export const HeroCard: FC<HeroCardProps> = ({
       {/* Soft top-right radial gold sheen */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full"
+        className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(212,175,124,0.16), transparent 65%)',
+            'radial-gradient(circle, rgba(213,184,134,0.16), transparent 68%)',
         }}
       />
 
@@ -49,26 +49,21 @@ export const HeroCard: FC<HeroCardProps> = ({
         <div>
           <p className="eyebrow">Total potential charges</p>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="font-mono text-[32px] font-bold leading-none tracking-[-0.03em] text-white tabular-nums">
+            <span className="font-heading text-[40px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-white">
               {formatPrice(monthlyTotal, currencySymbol)}
             </span>
-            <span className="text-[13px] font-medium text-white/45">/mo</span>
+            <span className="pb-1 text-xs text-white/40">/mo</span>
           </div>
-          <p className="mt-1.5 text-[12px] text-white/55 tabular-nums">
-            <span className="font-mono font-medium text-white/80">
-              {formatPrice(annualTotal, currencySymbol)}
-            </span>{' '}
-            projected over 12 months
+          <p className="mt-1.5 text-xs tabular-nums text-white/45">
+            {formatPrice(annualTotal, currencySymbol)} projected over 12 months
           </p>
         </div>
 
-        <span className="chip-gold inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF7C]" />
+        <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#D5B886]/25 bg-[#D5B886]/10 px-2.5 py-1 text-[10px] font-medium text-[#D5B886]">
+          <Sparkles className="h-3 w-3" />
           {trialCount} active {trialCount === 1 ? 'trial' : 'trials'}
         </span>
       </div>
-
-      <div className="hairline my-4" />
 
       <ForecastChart
         months={forecastMonths}
@@ -76,41 +71,39 @@ export const HeroCard: FC<HeroCardProps> = ({
         formatPrice={formatPrice}
       />
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2">
-        <div className="flex items-center gap-2 text-[11px] text-white/60">
+      <div className="mt-5 flex items-center justify-between gap-2 border-t border-white/[0.06] pt-3.5">
+        <div className="flex items-center gap-2 text-[10px] text-white/40">
           {isPro ? (
-            <span className="inline-flex items-center gap-1.5 font-medium text-[#D4AF7C]">
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#D5B886]">
               <ShieldCheck className="h-3.5 w-3.5" />
               Lifetime Pro • Unlimited slots
             </span>
           ) : (
-            <span className="font-mono text-white/85 tabular-nums">
-              Free slots: {freeSlotsUsed}/{freeSlotsLimit}
-            </span>
+            <>
+              <span className="tabular-nums">
+                Free slots: {freeSlotsUsed}/{freeSlotsLimit}
+              </span>
+              <span className="h-2.5 w-px bg-white/15" />
+              <button
+                type="button"
+                onClick={onOpenGiftSlot}
+                className="transition-colors hover:text-white/70 cursor-pointer"
+              >
+                Invite for +1 slot
+              </button>
+            </>
           )}
         </div>
-        <div className="flex items-center gap-1.5">
-          {!isPro && (
-            <button
-              type="button"
-              onClick={onOpenGiftSlot}
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-white/75 transition hover:border-white/20 hover:text-white"
-            >
-              <Users className="h-3 w-3 text-[#D4AF7C]" />
-              Invite for +1 slot
-            </button>
-          )}
-          {!isPro && (
-            <button
-              type="button"
-              onClick={onOpenPaywall}
-              className="btn-gold inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-            >
-              <Sparkles className="h-3 w-3" />
-              Unlock Lifetime
-            </button>
-          )}
-        </div>
+        {!isPro && (
+          <button
+            type="button"
+            onClick={onOpenPaywall}
+            className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[10px] font-medium text-[#D5B886] transition-opacity hover:opacity-80 cursor-pointer"
+          >
+            Unlock Lifetime
+            <ArrowUpRight className="h-3 w-3" />
+          </button>
+        )}
       </div>
     </section>
   );

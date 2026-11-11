@@ -1,5 +1,5 @@
-import type { FC } from 'react';
-import { ChevronRight } from 'lucide-react';
+import type { FC, ReactNode } from 'react';
+import { ArrowUpRight } from 'lucide-react';
 import type { Subscription, SubscriptionFrequency } from '../../types/subscription';
 import { getDaysUntilNextPayment } from '../../utils/subscriptionCalculations';
 import { BrandIcon } from '../BrandIcon';
@@ -28,6 +28,8 @@ export interface SubRowProps {
   currencySymbol: string;
   formatPrice: (amount: number, symbol?: string) => string;
   onSelect: (sub: Subscription) => void;
+  showStatus?: boolean;
+  action?: ReactNode;
 }
 
 export const SubRow: FC<SubRowProps> = ({
@@ -35,41 +37,36 @@ export const SubRow: FC<SubRowProps> = ({
   currencySymbol,
   formatPrice,
   onSelect,
+  showStatus = false,
+  action,
 }) => {
   const days = getDaysUntilNextPayment(
     sub.status === 'trial' && sub.trialEndDate ? sub.trialEndDate : sub.nextPaymentDate
   );
   const isTrial = sub.status === 'trial';
   const isCancelled = sub.status === 'cancelled';
+  const urgent = days !== null && days <= 3 && !isCancelled;
 
   let renewalCopy = '';
-  let renewalTone = 'text-white/45';
   if (isCancelled) {
-    renewalCopy = 'Cancelled';
-    renewalTone = 'text-white/35';
+    renewalCopy = `Saved ${formatPrice(sub.monthlySavingsAmount || sub.price, sub.currency || currencySymbol)}`;
   } else if (days < 0) {
     renewalCopy = 'Overdue';
-    renewalTone = 'text-rose-300';
   } else if (days === 0) {
     renewalCopy = isTrial ? 'Trial ends today' : 'Due today';
-    renewalTone = 'text-amber-300';
   } else if (days === 1) {
-    renewalCopy = isTrial ? '1 day left' : 'Tomorrow';
-    renewalTone = 'text-amber-300';
-  } else if (days <= 3) {
-    renewalCopy = isTrial ? `${days} days left` : `In ${days} days`;
-    renewalTone = 'text-amber-300';
+    renewalCopy = isTrial ? '1 day left' : 'Due tomorrow';
   } else {
-    renewalCopy = isTrial ? `${days} days left` : `In ${days} days`;
+    renewalCopy = isTrial ? `${days} days left` : `Due in ${days}d`;
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(sub)}
-      className="group flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-white/[0.03]"
-    >
-      <div className="flex min-w-0 items-center gap-3">
+    <div className="group flex items-center gap-3 px-1 py-2.5">
+      <button
+        type="button"
+        onClick={() => onSelect(sub)}
+        className="flex min-w-0 flex-1 items-center gap-3 text-left cursor-pointer"
+      >
         <BrandIcon
           name={sub.name}
           category={sub.category}
@@ -77,45 +74,42 @@ export const SubRow: FC<SubRowProps> = ({
           size="md"
           linkContext="active"
         />
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <p
-              className={`truncate text-[13.5px] font-semibold ${
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`truncate text-[13px] font-medium ${
                 isCancelled ? 'text-white/50 line-through' : 'text-white'
               }`}
             >
               {sub.name}
-            </p>
-            <StatusBadge status={sub.status} />
-          </div>
-          <p className="mt-0.5 truncate text-[11px] text-white/45">
-            {sub.category} • <span className={renewalTone}>{renewalCopy}</span>
-          </p>
-        </div>
-      </div>
+            </span>
+            {(showStatus || isCancelled || isTrial) && <StatusBadge status={sub.status} />}
+          </span>
+          <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/40">
+            <span className="truncate">{sub.category}</span>
+            <span className="shrink-0 text-white/20">·</span>
+            <span
+              className={`shrink-0 whitespace-nowrap tabular-nums ${
+                urgent ? 'text-rose-300/80 font-medium' : 'text-white/40'
+              }`}
+            >
+              {renewalCopy}
+            </span>
+          </span>
+        </span>
+        <span className="shrink-0 text-right">
+          <span className="block text-[13px] font-semibold tabular-nums text-white">
+            {formatPrice(sub.price, sub.currency || currencySymbol)}
+          </span>
+          <span className="block text-[10px] text-white/35">
+            {formatFrequencyShort(sub.frequency)}
+          </span>
+        </span>
+      </button>
 
-      <div className="flex shrink-0 items-center gap-2">
-        <div className="text-right">
-          {isCancelled ? (
-            <>
-              <p className="font-mono text-[13px] font-semibold text-emerald-400 tabular-nums">
-                Saved {formatPrice(sub.monthlySavingsAmount || sub.price, sub.currency || currencySymbol)}
-              </p>
-              <p className="text-[10px] text-white/35">per month</p>
-            </>
-          ) : (
-            <>
-              <p className="font-mono text-[13.5px] font-semibold text-white tabular-nums">
-                {formatPrice(sub.price, sub.currency || currencySymbol)}
-              </p>
-              <p className="text-[10px] text-white/40">
-                {formatFrequencyShort(sub.frequency)}
-              </p>
-            </>
-          )}
-        </div>
-        <ChevronRight className="h-4 w-4 text-white/25 transition group-hover:translate-x-0.5 group-hover:text-white/60" />
-      </div>
-    </button>
+      {action || (
+        <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-white/15 transition-colors group-hover:text-white/40" />
+      )}
+    </div>
   );
 };
